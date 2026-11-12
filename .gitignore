@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+# local, cohort-specific material: never commit
+local/
+config.local.yaml
+*.local.yaml
+out/
+broodlink_out/
