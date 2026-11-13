@@ -25,7 +25,8 @@ FOLDER = {"qc": "00_qc", "relatedness": "01_relatedness", "families": "02_famili
           "audit": "04_audit", "network": "05_network", "haplotypes": "06_structural_haplotypes", "barcode": "07_barcode",
           "family_effect": "08_family_effect", "concordance": "09_cross_marker_concordance"}
 ID_COLS = ("individual", "sample", "id1", "id2", "sample_1", "sample_2", "unit_a", "unit_b", "family", "unit", "interval",
-           "parent", "families", "supplied_interval", "scan_interval", "variant_id", "id", "chrom", "latent_parent")
+           "parent", "families", "supplied_interval", "scan_interval", "variant_id", "id", "chrom", "latent_parent",
+           "gene", "name", "call_id", "link", "strand", "biotype")
 POINT = ("SNP", "INDEL", "SNP_INDEL")
 WHAT = {"qc": "quality control of every input (flag, do not remove)",
         "relatedness": "pairwise relatedness (theta, k0, k1, k2) and relationship classes",
@@ -222,6 +223,11 @@ class Run:
         if a.haplotypes:
             self.hap_given = read_haplotypes(a.haplotypes, known)
         self.intervals = read_intervals_bed(a.inversions) if a.inversions else None
+        self.genes, self.genes_cds, self.genes_info = (None, None, None)
+        if getattr(a, "genes", None):                           # optional; no step depends on it
+            from .genes import read_genes
+            self.genes, self.genes_cds, self.genes_info = read_genes(a.genes, with_cds=True)
+            detail(f"--genes: {self.genes_info['format']}, {self.genes_info['n_genes']:,} genes ({self.genes_info['feature']} features) on {self.genes_info['n_chrom']} sequences, {self.genes_info['n_genes_with_cds']:,} with CDS")
         # ---- sample matching: the only place where QC stops a run
         if self.samples_meta is not None:
             universe = self.samples_meta.id.tolist()
@@ -545,6 +551,16 @@ class Run:
             self.put("network", "opposite_pairs", OP, "opposite_homozygotes_pairs.tsv", "Every pair of individuals (no identifiers): kinship, relationship class for the biSNP R0 comparison and for the deletion comparison, R0, opposite-homozygote rate of the deletions and the number of deletions genotyped in both.")
             self.put("network", "opposite_summary", OS, "opposite_homozygotes_by_class.tsv", "Median R0 of the biSNPs and median opposite-homozygote rate of the deletions per relationship class, and the ratio to the reference class (unrelated pairs / pairs without a link).")
             s["opposite_homozygotes"] = {**oinfo, "classes": {f"{r.quantity}: {r['class']}": {"n_pairs": int(r.n_pairs), "ratio": float(r.ratio_to_reference_class)} for _i, r in OS.iterrows()}}
+        if dls and len(kept):
+            # deletion genotypes along linked families: eligible deletions per chain / link, sharing per chromosome
+            from . import deletion_paths
+            _u2, _f2, mem = self.units()
+            DT, s["deletion_paths"] = deletion_paths.run(max(dls, key=lambda m: m.n), mem, list(sizes), sizes, E, net["edges"], s["junction_families"], self.cfg,
+                                                         max_chains=int(self.cfg["figures"].get("max_chain_figures", 4)))
+            self.put("network", "deletion_blocks", DT["blocks"], "deletion_path_blocks.tsv", "Deletion genotypes along linked families, one row per block and family. A block is a chain (a family on two or more links with its partners) or the two families of one kept link, on one chromosome (the chromosome with the most deletions). n_eligible = deletions that fit a Mendelian cross in every family of the block (best parental pair with genotype error, simulated P not below the threshold, call rate among the well-called individuals, allele frequency among the individuals assigned to a family, thinned); n_drawn = their even subsample; n_low_call = individuals with too many missing genotypes on the chromosome (not used for the fit); expected cross among the siblings at the drawn deletions (all alike, split 1:1, split 1:2:1).")
+            self.put("network", "deletion_block_links", DT["links"], "deletion_path_links.tsv", "Per block and link: deletions homozygous for the deletion allele (1/1) in at least one individual of both families, among the drawn and among the eligible deletions.")
+            self.put("network", "deletion_block_markers", DT["markers"], "deletion_path_markers.tsv", "Per block, family and eligible deletion: position, the cross expected among the siblings, and whether the deletion is in the drawn subsample.")
+            self.put("network", "deletion_sharing", DT["sharing"], "deletion_sharing_per_chromosome.tsv", "Per kept auditable link and chromosome: the Gate-2 sharing score of the deletions (carrier in both families / carrier in either, among deletions called in both; allele frequency filter among the individuals assigned to a family) and the median, 5th and 95th percentile and maximum of the same score in the matched non-nominated pairs (the k auditable pairs nearest in the genome-wide Gate-1 score).")
         aud = bool(self.s.get("audit", {}).get("ran"))
         self.status("network", "yes", self.ran["nomination"][1] if self.ran.get("nomination") else "", "benchmarked" if aud and not self.single_input else "provisional",
                     "links audited" if aud else "links are nominated, not audited")
@@ -711,11 +727,16 @@ class Run:
         junc = self.s["network"].get("junction_families", {})
         B = barcode.barcode(hap, members, links, junc, cfg, info)
         self.put("barcode", "barcode", B, "shared_parent_barcode.tsv", "Posterior genotype of the shared parent at every structural haplotype, per link and per junction family (same parent assumed on every supported link: candidate, not tested). call = genotype at posterior >= the configured threshold, else unresolved.")
+        from . import genes as genes_mod, tag_evidence      # tag-variant evidence, and (only with --genes) the genes of each interval
+        for key, df, fname, desc in tag_evidence.barcode_tables(self, links) + genes_mod.barcode_tables(self):
+            self.put("barcode", key, df, fname, desc)
+        from . import augmentation                              # sweep and permutation check of the tag evidence, vote of a junction's links, recurrence of a junction parent
+        extra = augmentation.add_to_run(self, B, members, junc)
         pc, ps = cfg["barcode"]["posterior_call"], cfg["barcode"]["posterior_strict"]
         per = {p: {"n_states": int(len(g)), "n_called": int((g.posterior >= pc).sum()), "n_called_strict": int((g.posterior >= ps).sum())} for p, g in B.groupby("parent")} if len(B) else {}
         summ = {"n_intervals": int(hap.n), "n_links": len(links), "n_junctions": len(junc), "n_states": int(len(B)),
                 "n_called": int((B.posterior >= pc).sum()) if len(B) else 0, "n_called_strict": int((B.posterior >= ps).sum()) if len(B) else 0,
-                "posterior_call": pc, "posterior_strict": ps, "per_parent": per}
+                "posterior_call": pc, "posterior_strict": ps, "per_parent": per, **extra}
         src = sorted({v["source"] for v in info.values()})
         scan_only = src == ["scan"]
         self.status("barcode", "yes", "; ".join(src), "provisional" if scan_only or self.single_input or not self.s.get("audit", {}).get("ran") else "benchmarked",

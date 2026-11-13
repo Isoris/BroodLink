@@ -16,6 +16,7 @@ import pandas as pd
 
 from ..io import detail, log, write_tsv
 from . import generic, kinship, shared_parent, style
+from . import deletion_paths                                       # noqa: E402  (deletion genotypes along linked families)
 
 # (name, function, step whose tables it needs, "house" = style set by the figure itself)
 FIGURES = [
@@ -31,7 +32,14 @@ FIGURES = [
     ("nomination_matrix_all_units", shared_parent.fig_matrix_all_units, "nomination"),
     ("sv_genotypes_and_kinship", kinship.fig_sv_kinship, "concordance"),
     ("cross_marker_concordance", kinship.fig_concordance, "concordance"),
+    ("deletion_genotypes_linked_families", deletion_paths.fig_chains, "network"),
+    ("deletion_genotypes_other_links", deletion_paths.fig_other_links, "network"),
 ]
+from . import barcode_genes                                        # noqa: E402  (barcode at gene level; needs --genes)
+FIGURES.append(("barcode_gene_level", barcode_genes.fig_barcode_gene_level, "barcode"))
+from . import parent_barcode                                       # noqa: E402  (barcode with tag-variant evidence; funnel to an unsampled parent)
+FIGURES.append(("barcode_deletion_augmentation", parent_barcode.fig_augmentation, "barcode"))
+FIGURES.append(("funnel_to_unsampled_parent", parent_barcode.fig_funnel, "nomination"))
 FIRST_NUMBER = 0
 
 

@@ -76,7 +76,9 @@ DEFAULTS = {
                         "diagnostic_delta": 1.0, "n_permutations": 200},
         "tags": {"min_called_per_class": 5, "min_delta": 0.6},
     },
-    "barcode": {"posterior_call": 0.90, "posterior_strict": 0.95, "genotype_error": 0.03},
+    "barcode": {"posterior_call": 0.90, "posterior_strict": 0.95, "genotype_error": 0.03,
+                # tag variants the shared parent must carry (compute_augmentation_relabelled_v1.py: called in >= 2 per family, k = 2, delta >= 0.8)
+                "tag_evidence": {"min_called_per_family": 2, "min_tags": 2, "min_delta": 0.8}},
     "family_effect": {"af_min": 0.05, "af_max": 0.95, "min_called": 20, "n_permutations": 1000,
                       "max_markers_per_class": 20000},
     "concordance": {
@@ -89,6 +91,8 @@ DEFAULTS = {
         "individual_noun": "individuals",          # word printed in figures for the individuals of the cohort (e.g. fish)
         "haplotype_label": "structural haplotypes",  # name of the large structural haplotypes in figure text (e.g. candidate polyINVs)
         "max_chain_figures": 4,                    # deletion-genotype figures: at most this many chains / link panels
+        "gene_level_max_intervals": 4,             # gene-level barcode figure (needs --genes): number of intervals opened
+        "gene_level_intervals": [],                # interval ids to open instead of the automatic choice (most called parent states)
     },
 }
 

@@ -124,6 +124,10 @@ barcode:
   posterior_call: 0.9
   posterior_strict: 0.95
   genotype_error: 0.03
+  tag_evidence:
+    min_called_per_family: 2
+    min_tags: 2
+    min_delta: 0.8
 family_effect:
   af_min: 0.05
   af_max: 0.95
@@ -139,3 +143,5 @@ figures:
   individual_noun: individuals
   haplotype_label: structural haplotypes
   max_chain_figures: 4
+  gene_level_max_intervals: 4
+  gene_level_intervals: []

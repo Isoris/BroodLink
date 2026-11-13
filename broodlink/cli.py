@@ -28,6 +28,7 @@ def add_inputs(p):
     g.add_argument("--depth", metavar="FILE_OR_DIR", help="per-sample depth table or a folder of mosdepth / samtools-depth summaries (QC only)")
     g.add_argument("--genome", metavar="FAI", help="FASTA index of the assembly (chromosome lengths)")
     g.add_argument("--families", metavar="FILE", help="import family labels (individual, family) instead of reconstructing them")
+    g.add_argument("--genes", metavar="FILE", help="gene models of the assembly, GFF3 (gene features, CDS when present) or BED (chrom, start, end, name, score, strand); optional: genes of each barcode interval and the gene-level barcode figure")
     o = p.add_argument_group("run")
     o.add_argument("--auto-exclude", action="store_true", help="remove low-coverage samples and one sample of each pair with identical genotypes (default: flag only)")
     o.add_argument("--out", default="broodlink_out", metavar="DIR")

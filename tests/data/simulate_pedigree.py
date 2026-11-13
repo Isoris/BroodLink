@@ -51,11 +51,56 @@ def gz_write(path, text):
         fh.write(text.encode())
 
 
+def write_genes(out, seed=7, genes_per_chrom=40):
+    """genes.gff3: simulated gene models (gene, mRNA, exon, CDS) over the simulated chromosomes,
+    for the optional input --genes. Uses its own random stream and only the constants of this
+    file, so it can be called alone (`--genes-only`) without changing any other file."""
+    rng = np.random.default_rng([seed, 20261114])
+    inv = {}
+    for c, s, e, _f in INVERSIONS:
+        inv.setdefault(c, []).append((s, e))
+    lines = ["##gff-version 3", "#!source BroodLink simulate_pedigree.py (synthetic gene models, no real annotation)"]
+    k = 0
+    for ci in range(N_CHROM):
+        c = f"chr{ci + 1}"; lines.append(f"##sequence-region {c} 1 {CHROM_LEN}")
+        pitch = CHROM_LEN // genes_per_chrom
+        for j in range(genes_per_chrom):
+            dense = any(s <= j * pitch < e for s, e in inv.get(c, []))      # one extra gene per slot inside the structural haplotypes
+            for sub in range(2 if dense else 1):
+                span = int(rng.integers(5_000, 40_000))
+                lo = j * pitch + sub * (pitch // 2) + int(rng.integers(2_000, pitch // 2 - span - 2_000))
+                hi = min(lo + span, CHROM_LEN - 1_000)
+                k += 1
+                strand = "+" if rng.random() < 0.5 else "-"
+                coding = rng.random() < 0.9
+                gid = f"gene-SIM{k:05d}"
+                name = f"sim{k}{'ab'[int(rng.integers(2))]}" if rng.random() < 0.35 else f"LOC{900000 + k}"
+                bt = "protein_coding" if coding else "lncRNA"
+                lines.append(f"{c}\tsimulated\tgene\t{lo + 1}\t{hi}\t.\t{strand}\t.\tID={gid};Name={name};gene_biotype={bt}")
+                tid = f"rna-SIM{k:05d}"
+                lines.append(f"{c}\tsimulated\t{'mRNA' if coding else 'lnc_RNA'}\t{lo + 1}\t{hi}\t.\t{strand}\t.\tID={tid};Parent={gid};Name={name}")
+                n_ex = int(rng.integers(2, 10))
+                cuts = np.sort(rng.choice(np.arange(lo + 200, hi - 200), size=2 * n_ex - 2, replace=False))
+                bounds = [lo] + [int(x) for x in cuts] + [hi]
+                exons = [(bounds[2 * i], bounds[2 * i + 1]) for i in range(n_ex)]
+                for i, (s, e) in enumerate(exons, 1):
+                    lines.append(f"{c}\tsimulated\texon\t{s + 1}\t{e}\t.\t{strand}\t.\tID=exon-SIM{k:05d}-{i};Parent={tid}")
+                if coding:
+                    for i, (s, e) in enumerate(exons, 1):
+                        lines.append(f"{c}\tsimulated\tCDS\t{s + 1}\t{e}\t.\t{strand}\t0\tID=cds-SIM{k:05d};Parent={tid}")
+    with open(os.path.join(out, "genes.gff3"), "w", newline="\n") as fo:
+        fo.write("\n".join(lines) + "\n")
+    return k
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", default=os.path.dirname(os.path.abspath(__file__)))
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--genes-only", action="store_true", help="write only genes.gff3 (simulated gene models); no other file is touched")
     a = ap.parse_args()
+    if a.genes_only:
+        print(f"wrote {write_genes(a.out, a.seed)} simulated genes to {os.path.join(a.out, 'genes.gff3')}"); return
     rng = np.random.default_rng(a.seed)
     out = a.out
     os.makedirs(os.path.join(out, "truth"), exist_ok=True)
@@ -270,7 +315,8 @@ def main():
     pd.DataFrame({"sample": [low, T.set_index("name").individual["twin"], src_id],
                   "what": ["low-coverage sample", "identical genotypes (pair)", "identical genotypes (pair)"]}
                  ).to_csv(os.path.join(tdir, "truth_qc.tsv"), sep="\t", index=False, lineterminator="\n")
-    print(f"wrote {N} individuals, {len(snp)} SNPs, {int(keep.sum())} SV calls, {len(INVERSIONS)} structural haplotypes to {out}")
+    n_genes = write_genes(out, a.seed)
+    print(f"wrote {N} individuals, {len(snp)} SNPs, {int(keep.sum())} SV calls, {len(INVERSIONS)} structural haplotypes, {n_genes} genes to {out}")
 
 
 if __name__ == "__main__":
