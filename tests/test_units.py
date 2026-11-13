@@ -30,7 +30,7 @@ def test_defaults_keep_the_original_rules():
 def test_cli_has_run_and_one_subcommand_per_step():
     ap = build_parser()
     sub = [a for a in ap._actions if a.dest == "cmd"][0].choices
-    assert {"run", "qc", "relatedness", "families", "nominate", "audit", "network", "haplotypes", "barcode", "family-effect", "concordance", "report", "sweep", "benchmark"} <= set(sub)
+    assert {"run", "qc", "relatedness", "families", "nominate", "audit", "network", "haplotypes", "barcode", "family-effect", "concordance", "pcr-markers", "report", "sweep", "benchmark"} <= set(sub)
     a = ap.parse_args(["run", "--bisnp", "x", "--gt", "a", "--gt", "b", "--mask", "m", "--mask-exclude", "e", "--auto-exclude"])
     assert a.gt == ["a", "b"] and a.auto_exclude and a.out == "broodlink_out"
 

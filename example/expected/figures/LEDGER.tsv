@@ -1,4 +1,4 @@
-# BroodLink 0.1.0 | config 6fdff7359a | seed 1
+# BroodLink 0.1.0 | config 64177d3d75 | seed 1
 # analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
 # marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
 # relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
@@ -443,3 +443,39 @@ fig15_deletion_genotypes_other_links	F	F4 x F6 chromosomes above null p95	5	05_n
 fig15_deletion_genotypes_other_links	F	cells above null median	38	05_network/deletion_sharing_per_chromosome.tsv
 fig15_deletion_genotypes_other_links	F	cells above null p95	28	05_network/deletion_sharing_per_chromosome.tsv
 fig15_deletion_genotypes_other_links	F	cells	40	05_network/deletion_sharing_per_chromosome.tsv
+fig16_pcr_assay	A	M01 forward, reverse primer	ACCTAGCAGTAGAGTGTGAT, AACCATGATCGTTTGCTGTT	10_pcr_markers/pcr_primers.tsv: forward_primer, reverse_primer
+fig16_pcr_assay	A	M01 DEL_chr1_2386926: deletion bp; on arrangement; products with / without the deletion	1767; class 2; 92/1859	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	A	M01 deletion frequency class 0, heterokaryotypes, class 2; difference	0, 0.5, 1; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	B	M01 DEL_chr1_2386926: deletion bp; on arrangement; products with / without the deletion	1767; class 2; 92/1859	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	B	M01 deletion frequency class 0, heterokaryotypes, class 2; difference	0, 0.5, 1; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	C	M02 DEL_chr2_4542004: deletion bp; on arrangement; products with / without the deletion	427; class 0; 88/515	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	C	M02 deletion frequency class 0, heterokaryotypes, class 2; difference	1, 0.474, 0; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	D	M03 DEL_chr3_1413242: deletion bp; on arrangement; products with / without the deletion	587; class 2; 144/731	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	D	M03 deletion frequency class 0, heterokaryotypes, class 2; difference	0, 0.5, 1; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	E	M04 DEL_chr5_5485597: deletion bp; on arrangement; products with / without the deletion	1689; class 0; 106/1795	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	E	M04 deletion frequency class 0, heterokaryotypes, class 2; difference	1, 0.5, 0; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	banner 2	primer pairs	4	10_pcr_markers/pcr_primers.tsv: rows
+fig16_pcr_assay	banner 2	intervals with a marker	4	10_pcr_markers/pcr_markers_per_interval.tsv: n_primer_pairs > 0
+fig16_pcr_assay	banner 2	intervals	4	10_pcr_markers/pcr_markers_per_interval.tsv: rows
+fig16_pcr_assay	F title	frequency difference range	1.00-1.00	10_pcr_markers/pcr_primers.tsv: frequency_difference
+fig16_pcr_assay	F-H	M01 DEL_chr1_2386926: deletion bp; on arrangement; products with / without the deletion	1767; class 2; 92/1859	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	F-H	M01 deletion frequency class 0, heterokaryotypes, class 2; difference	0, 0.5, 1; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	F-H	M02 DEL_chr2_4542004: deletion bp; on arrangement; products with / without the deletion	427; class 0; 88/515	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	F-H	M02 deletion frequency class 0, heterokaryotypes, class 2; difference	1, 0.474, 0; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	F-H	M03 DEL_chr3_1413242: deletion bp; on arrangement; products with / without the deletion	587; class 2; 144/731	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	F-H	M03 deletion frequency class 0, heterokaryotypes, class 2; difference	0, 0.5, 1; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	F-H	M04 DEL_chr5_5485597: deletion bp; on arrangement; products with / without the deletion	1689; class 0; 106/1795	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig16_pcr_assay	F-H	M04 deletion frequency class 0, heterokaryotypes, class 2; difference	1, 0.5, 0; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig16_pcr_assay	H	M01 Tm forward, reverse (degrees C)	55.0, 56.2	10_pcr_markers/pcr_primers.tsv: tm_forward, tm_reverse
+fig16_pcr_assay	H	M02 Tm forward, reverse (degrees C)	56.0, 55.9	10_pcr_markers/pcr_primers.tsv: tm_forward, tm_reverse
+fig16_pcr_assay	H	M03 Tm forward, reverse (degrees C)	56.1, 56.4	10_pcr_markers/pcr_primers.tsv: tm_forward, tm_reverse
+fig16_pcr_assay	H	M04 Tm forward, reverse (degrees C)	56.1, 55.7	10_pcr_markers/pcr_primers.tsv: tm_forward, tm_reverse
+fig17_pcr_simulated_gels	banner	page 1 primer pairs	4	10_pcr_markers/pcr_primers.tsv: rows
+fig17_pcr_simulated_gels	gel p1	M01 DEL_chr1_2386926: deletion bp; on arrangement; products with / without the deletion	1767; class 2; 92/1859	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig17_pcr_simulated_gels	gel p1	M01 deletion frequency class 0, heterokaryotypes, class 2; difference	0, 0.5, 1; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig17_pcr_simulated_gels	gel p1	M02 DEL_chr2_4542004: deletion bp; on arrangement; products with / without the deletion	427; class 0; 88/515	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig17_pcr_simulated_gels	gel p1	M02 deletion frequency class 0, heterokaryotypes, class 2; difference	1, 0.474, 0; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig17_pcr_simulated_gels	gel p1	M03 DEL_chr3_1413242: deletion bp; on arrangement; products with / without the deletion	587; class 2; 144/731	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig17_pcr_simulated_gels	gel p1	M03 deletion frequency class 0, heterokaryotypes, class 2; difference	0, 0.5, 1; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference
+fig17_pcr_simulated_gels	gel p1	M04 DEL_chr5_5485597: deletion bp; on arrangement; products with / without the deletion	1689; class 0; 106/1795	10_pcr_markers/pcr_primers.tsv: length_bp, arrangement_with_deletion, product_with_deletion_bp, product_without_deletion_bp
+fig17_pcr_simulated_gels	gel p1	M04 deletion frequency class 0, heterokaryotypes, class 2; difference	1, 0.5, 0; 1	10_pcr_markers/pcr_primers.tsv: deletion_frequency_class_0, deletion_frequency_heterokaryotypes, deletion_frequency_class_2, frequency_difference

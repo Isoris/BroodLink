@@ -117,6 +117,31 @@ rule) is covered by unit tests and by the synthetic run only.
 | Scan: published intervals overlapped by a deletion-scan candidate | not published | 8 of 41; 23 further candidates | weak recovery from deletions alone |
 | Scan from SNPs (reimplemented from Methods) | 41 intervals came from the original scan | | **not run** on this cohort (needs the genotype-likelihood files); tested on synthetic data only |
 
+## (f) PCR markers (step 10, after 0.1.0)
+
+Run on the original deletion catalogue (genotype matrix), the published karyotypes of the 41 intervals, and the
+catalogue VCF for the split-read consensus (`--consensus-vcf`); Primer3 through primer3-py 2.4.0. Two runs: one given
+the 35 published deletions (`--pcr-picks`), one with BroodLink's own choice. A third added the assembly
+(`--reference`; the in-silico search of 35 pairs in 964 Mb took 9 minutes). No threshold was changed to match.
+
+| Quantity | Published | BroodLink | Status |
+|---|---|---|---|
+| Deletions screened inside the 41 intervals | 4,771 | 4,771, the same deletions | reproduced |
+| Frequency difference, `diagnostic` and `gel_resolvable` of every screened deletion | 307 diagnostic, 3,526 gel-resolvable | equal in all 4,771 rows | reproduced (the two flags are rules read from this table: EXTRACTED_METHOD 18.2) |
+| Diagnostic and gel-resolvable | 239 in 35 intervals | 239 in 35 intervals; all 239 are also step-6 tag variants | reproduced |
+| Intervals without a marker | 6 | the same 6, reason "no diagnostic deletion" | reproduced |
+| **Given the published deletions:** primer pairs identical to the published table | 35 | **33 of 35**; for these Tm (both primers), GC and both band sizes equal the published primer table, the assay table and the validation ledger | **differs for 2 pairs**: one primer of each is a neighbouring one (shifted by 2 and by 15 bp; products 80 / 608 instead of 82 / 610 and 119 / 1,615 instead of 134 / 1,630). The design script was not found; the Primer3 settings were recovered by reproduction and one setting or the Primer3 version is still unknown |
+| Coordinates, arrangement, frequencies of the three classes and frequency difference of the 35 markers against the assay table and the validation ledger | | equal for 35 of 35 | reproduced |
+| Checks: primers exact in the consensus and flanking the breakpoint; products recomputed | 35, 35 | 35, 35 | reproduced |
+| In-silico PCR against the assembly: pairs with a product at the locus; off-target products; product within 5 bp of the designed long product | 31 of 35; 26 and 2 products for two pairs; 30 | the same counts for every pair, on the same markers | reproduced (for the two pairs above the product follows the other primer: 608 and 1,618 bp instead of 610 and 1,633) |
+| **BroodLink's own choice:** same deletion as published | 35 | **32 of 35**; identical primer pair for 30 | **differs in 3 intervals**: the published deletion is the next candidate of equal frequency difference (1.00, 1.00 and 0.957), after one for which Primer3 also returns a pair. How the original chose among equal candidates is not recorded |
+| The toolkit routine (`pick_flanking_primers`) on the published deletions | said to reproduce the table | 0 of 35 with or without primer3-py | the published primers were designed with Primer3 (EXTRACTED_METHOD 18.1) |
+
+Not rerun: the search in the second parental haplotype of the F1 and the look-up of cohort SNPs at primer
+mismatch positions (cohort-specific checks, not part of the step). The arrangement-private catalogue of 2,080
+deletions (against 1,621 step-6 tag variants, section (e)) plays no part here: the primers were picked from the
+screening table of 4,771 rows, which is reproduced.
+
 ## Visual check of the figures
 
 The figures of the published study are now drawn by the tool (after 0.1.0). For the full run

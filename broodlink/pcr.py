@@ -351,19 +351,21 @@ def _hits(arr, kcache, query, three_prime_last, max_mm):
     n = len(arr); L = len(query); k = L // (max_mm + 1)
     if k < 4 or n < L:
         return np.zeros(0, np.int64), np.zeros(0, np.int64)
-    cand = []
-    for i in range(max_mm + 1):
-        off = i * k; piece = query[off:off + k] if i < max_mm else query[off:]
-        kk = len(piece)
-        if kk not in kcache:
-            c = np.zeros(n - kk + 1, np.int32 if kk <= 15 else np.int64); bad = np.zeros(n - kk + 1, bool)
-            for j in range(kk):
-                seg = arr[j:n - kk + 1 + j]; c = c * 4 + seg; bad |= seg > 3
-            c[bad] = -1; kcache[kk] = c
-        code = 0
-        for v in piece:
+    cand = []; k = min(k, 15)
+    if k not in kcache:                                         # 2-bit code of every k-mer of the sequence (uint16 up to k = 8)
+        dt = np.uint16 if k <= 8 else np.uint32
+        c = np.zeros(n - k + 1, dt)
+        for j in range(k):                                      # a window holding another letter gets a wrong code: it is rejected below, where every candidate is compared base by base
+            np.left_shift(c, 2, out=c); np.bitwise_or(c, arr[j:n - k + 1 + j] & 3, out=c, casting="unsafe")
+        kcache[k] = c
+    for i in range(max_mm + 1):                                 # pieces of equal length k (the last piece of the original is longer; its first k bases are used)
+        off = i * k; code = 0
+        for v in query[off:off + k]:
             code = code * 4 + int(v)
-        p = np.flatnonzero(kcache[kk] == code) - off
+        if ("pos", k) in kcache:                                # positions of the seeds of all primers, found in one pass
+            pos, cod = kcache[("pos", k)]; p = np.sort(pos[np.searchsorted(cod, code, "left"):np.searchsorted(cod, code, "right")]) - off
+        else:
+            p = np.flatnonzero(kcache[k] == code) - off
         cand.append(p[(p >= 0) & (p <= n - L)])
     cp = np.unique(np.concatenate(cand)) if cand else np.zeros(0, np.int64)
     if not len(cp):
@@ -389,6 +391,15 @@ def in_silico_pcr(fa, pairs, c):
         if any(ch not in "ACGT" for ch in f + r):
             continue
         q.append((p["pair"], MAP[np.frombuffer(f.encode(), np.uint8)], MAP[np.frombuffer(r.encode(), np.uint8)]))
+    mm_max = int(c["max_mismatches"]); seeds = {}
+    for _name, fq, rq in q:
+        for x in (fq, rq):
+            k = min(len(x) // (mm_max + 1), 15)
+            for i in range(mm_max + 1):
+                code = 0
+                for v in x[i * k:i * k + k]:
+                    code = code * 4 + int(v)
+                seeds.setdefault(k, set()).add(code)
     prods = {p["pair"]: [] for p in pairs}; nsite = {p["pair"]: [0, 0] for p in pairs}
     mm_max, lo, hi = int(c["max_mismatches"]), int(c["product_min"]), int(c["product_max"])
     for chrom in fa.index:
@@ -397,6 +408,14 @@ def in_silico_pcr(fa, pairs, c):
             continue
         arr = MAP[np.frombuffer(seq.encode("ascii", "replace"), np.uint8)]; del seq    # codes 0-3, 4 = other letter
         kc = {}
+        detail(f"    in-silico PCR: {chrom} ({len(arr):,} bp)")
+        for k, codes in seeds.items():                          # one pass per seed length for all primers
+            if len(arr) < k:
+                continue
+            _hits(arr, kc, np.zeros(k * (mm_max + 1), np.uint8), True, mm_max)       # builds the k-mer codes
+            pos = np.flatnonzero(np.isin(kc[k], np.array(sorted(codes), kc[k].dtype)))
+            cod = kc[k][pos]; o = np.argsort(cod, kind="stable")
+            kc[("pos", k)] = (pos[o], cod[o])                    # sorted by code: each seed is a slice
         for name, fq, rq in q:
             fp, fm = _hits(arr, kc, fq, True, mm_max); rp, rm = _hits(arr, kc, rq, False, mm_max)
             nsite[name][0] += len(fp); nsite[name][1] += len(rp)
@@ -568,6 +587,7 @@ def run_step(run):
             return t, bp, f"reference flanks ({flank} bp on each side)"
         return None, None, ""
 
+    iv = iv.assign(_k=[(re.sub(r"\d+", lambda m: m.group(0).zfill(6), str(x)), int(y)) for x, y in zip(iv.chrom, iv.start)]).sort_values("_k").drop(columns="_k").reset_index(drop=True)   # markers numbered along the genome
     prim, per_interval = [], []
     by_iv = {k: g for k, g in S.groupby("interval", sort=False)} if len(S) else {}
     cls_n = {n: (int((geno[n] == 0).sum()), int((geno[n] == 1).sum()), int((geno[n] == 2).sum())) for n in iv.interval}
@@ -637,8 +657,13 @@ def run_step(run):
     ins_ran = False
     if fa is not None and len(P) and c["in_silico"]["run"]:
         log(f"  in-silico PCR of {len(P)} primer pairs against --reference ({len(fa.index)} sequences)")
-        res = in_silico_pcr(fa, [{"pair": q.marker, "chrom": q.chrom, "start": int(q.start), "end": int(q.end), "fwd": q.forward_primer, "rev": q.reverse_primer,
-                                  "expected": int(q.product_without_deletion_bp)} for q in P.itertuples()], c["in_silico"])
+        try:
+            res = in_silico_pcr(fa, [{"pair": q.marker, "chrom": q.chrom, "start": int(q.start), "end": int(q.end), "fwd": q.forward_primer, "rev": q.reverse_primer,
+                                      "expected": int(q.product_without_deletion_bp)} for q in P.itertuples()], c["in_silico"])
+        except (MemoryError, OSError) as exc:                   # the primers are designed: a failed search is reported, it does not stop the step
+            res = None
+            run.note(f"PCR markers: the in-silico PCR against --reference failed ({type(exc).__name__}: {str(exc)[:120]}); the primer tables are written without it")
+    if fa is not None and len(P) and c["in_silico"]["run"] and res is not None:
         R = pd.DataFrame(res).set_index("pair")
         P["in_silico_products_at_locus"] = P.marker.map(R.products_at_locus).astype(int)
         P["in_silico_product_at_locus_bp"] = P.marker.map(R.product_at_locus_bp)

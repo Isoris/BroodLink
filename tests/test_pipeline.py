@@ -242,13 +242,13 @@ def test_mask_reported_and_depth_in_two_columns(full_run):
 # ------------------------------------------------------------------ outputs
 def test_outputs_and_figures_exist(full_run):
     for d in ["00_qc", "01_relatedness", "02_families", "03_nomination", "04_audit", "05_network", "06_structural_haplotypes", "07_barcode",
-              "08_family_effect", "09_cross_marker_concordance"]:
+              "08_family_effect", "09_cross_marker_concordance", "10_pcr_markers"]:
         assert os.path.exists(os.path.join(full_run, d, "README.txt")) and os.path.exists(os.path.join(full_run, d, "summary.json")), d
     for f in ["run_report.md", "statistics.tsv", "methods_text.md", "config_used.yaml", "00_qc/qc_report.md", "tables/broodlink_tables.xlsx", "tables/README.txt",
               "tracks/README.txt", "figures/MANIFEST.tsv"]:
         assert os.path.getsize(os.path.join(full_run, f)) > 0, f
     M = read(full_run, "figures/MANIFEST.tsv")
-    assert len(M) >= 16 and M.status.str.startswith("drawn").all(), M[~M.status.str.startswith("drawn")]
+    assert len(M) >= 19 and M.status.str.startswith("drawn").all(), M[~M.status.str.startswith("drawn")]
     for stem in M.file:
         assert os.path.getsize(os.path.join(full_run, "figures", stem + ".png")) > 5000
         assert os.path.getsize(os.path.join(full_run, "figures", stem + ".pdf")) > 2000
@@ -277,7 +277,7 @@ def test_outputs_and_figures_exist(full_run):
     assert "relatedness-based groups, not pedigree records" in meth and "5,000 permutations" in meth
 
 
-PORTS = ["shared_parent_nomination_audit_network", "nomination_matrix_all_units", "sv_genotypes_and_kinship", "cross_marker_concordance", "relatedness_and_families",
+PORTS = ["pcr_assay", "pcr_simulated_gels", "pcr_primer_schematic", "shared_parent_nomination_audit_network", "nomination_matrix_all_units", "sv_genotypes_and_kinship", "cross_marker_concordance", "relatedness_and_families",
          "barcode_deletion_augmentation", "barcode_gene_level", "funnel_to_unsampled_parent", "deletion_genotypes_linked_families", "deletion_genotypes_other_links"]
 
 
@@ -402,7 +402,11 @@ def test_matches_expected_example_outputs(full_run):
     exp = os.path.join(ROOT, "example", "expected")
     E = read(exp, "statistics.tsv"); G = read(full_run, "statistics.tsv")
     assert list(E.statistic) == list(G.statistic)
+    import importlib.util
+    have_p3 = importlib.util.find_spec("primer3") is not None   # the expected PCR-marker numbers were made with Primer3 (optional package)
     for s, e, g in zip(E.statistic, E.value, G.value):
+        if str(s).startswith("pcr_") and not have_p3:
+            continue
         try:
             assert np.isclose(float(e), float(g), rtol=1e-6, atol=1e-9, equal_nan=True), (s, e, g)
         except (TypeError, ValueError):

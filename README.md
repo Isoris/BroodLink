@@ -117,7 +117,7 @@ intervals, and a simulated gene file). On this cohort the example run finds the 
 and no other, labels 5 of them "supported", and calls 17 of 28 shared-parent genotypes, all
 17 correct.
 
-Run the tests with `pip install pytest && pytest` (NTESTS tests, about ten minutes; the unit
+Run the tests with `pip install pytest && pytest` (55 tests, about ten minutes; the unit
 tests alone, `pytest tests/test_units.py`, take under a minute).
 
 ## Does it work?

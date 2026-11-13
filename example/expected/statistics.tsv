@@ -1,4 +1,4 @@
-# BroodLink 0.1.0 | config 6fdff7359a | seed 1
+# BroodLink 0.1.0 | config 64177d3d75 | seed 1
 # analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
 # marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
 # relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
@@ -69,3 +69,8 @@ step	statistic	value	definition
 09_cross_marker_concordance	auc_within_vs_between [DEL (gt:sv.vcf.gz)]	0.9987877929172472	605 markers; recovery 82.4% of within-family pairs above the 99.9th percentile of between-family pairs
 09_cross_marker_concordance	auc_within_vs_between [DUP (gt:sv.vcf.gz)]	0.9904466537049719	148 markers; recovery 33.3% of within-family pairs above the 99.9th percentile of between-family pairs
 09_cross_marker_concordance	auc_within_vs_between [HAPLOTYPE (structural haplotypes)]	0.8020507815062329	4 markers; recovery 2.5% of within-family pairs above the 99.9th percentile of between-family pairs
+10_pcr_markers	pcr_primer_engine	primer3	engine that designed the pairs (primer3 = the original procedure; builtin = fallback routine); Tm: nearest neighbour, SantaLucia (1998) parameters and salt correction, 50 mM monovalent, 1.5 mM divalent, 0.6 mM dNTP, 50 nM primer (primer3-py 2.4.0 calc_tm)
+10_pcr_markers	pcr_deletions_screened	105	deletions inside the intervals genotyped in enough individuals of both homokaryotype classes
+10_pcr_markers	pcr_diagnostic_gel_resolvable	33	screened deletions that are diagnostic and gel-resolvable
+10_pcr_markers	pcr_primer_pairs	4	primer pairs designed (in-silico design, not tested in a laboratory); sources: split-read consensus (SV VCF): 4
+10_pcr_markers	pcr_intervals_with_marker	4 of 4	intervals with at least one primer pair

@@ -1,0 +1,16 @@
+# BroodLink 0.1.0 | config 64177d3d75 | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# Primer list ready to order: name (marker_F / marker_R), sequence 5'-3'. Tm: nearest neighbour, SantaLucia (1998) parameters and salt correction, 50 mM monovalent, 1.5 mM divalent, 0.6 mM dNTP, 50 nM primer (primer3-py 2.4.0 calc_tm). Not tested in a laboratory.
+name	sequence	marker	interval	variant_id	length	tm
+M01_F	ACCTAGCAGTAGAGTGTGAT	M01	chr1:2000000-2800000	DEL_chr1_2386926	20	55
+M01_R	AACCATGATCGTTTGCTGTT	M01	chr1:2000000-2800000	DEL_chr1_2386926	20	56.2
+M02_F	ACAGGATAGCGTCTCTGAAA	M02	chr2:4500000-5400000	DEL_chr2_4542004	20	56
+M02_R	GTGGATCGACTCTCTGATCT	M02	chr2:4500000-5400000	DEL_chr2_4542004	20	55.9
+M03_F	GTCCGAAACCAAGCATTACT	M03	chr3:1000000-1900000	DEL_chr3_1413242	20	56.1
+M03_R	TTTTGCGATTCTCCAGTCAC	M03	chr3:1000000-1900000	DEL_chr3_1413242	20	56.4
+M04_F	ACGCGTGTGTTTCATCAATA	M04	chr5:5000000-5800000	DEL_chr5_5485597	20	56.1
+M04_R	GGACGTTAGCTAACTTCTCG	M04	chr5:5000000-5800000	DEL_chr5_5485597	20	55.7

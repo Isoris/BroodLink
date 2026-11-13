@@ -77,8 +77,10 @@ def _mark(r, ins):
 
 
 def _chrom(c):
-    c = str(c)
-    return c if len(c) <= 7 else c[-6:]
+    c = str(c)                                                   # long sequence names: the part after the last underscore
+    if len(c) > 7 and "_" in c and c.rsplit("_", 1)[1]:
+        c = c.rsplit("_", 1)[1]
+    return c if len(c) <= 7 else c[-7:]
 
 
 def _led_marker(panel, r):
@@ -257,7 +259,7 @@ def _assay_rows(run, cv, C, tx, P, D, ins, pg, npage, y2, ttl, t0, rp, n, n_all,
         gx.scatter([r.product_with_deletion_bp], [i + 0.5], s=4.5, c=NAVY, linewidths=0, zorder=3); gx.scatter([r.product_without_deletion_bp], [i + 0.5], s=4.5, c=SLATE, linewidths=0, zorder=3)
         if ins and _num(r.in_silico_products_at_locus) > 0:
             gx.scatter([_num(r.in_silico_product_at_locus_bp)], [i + 0.5], s=11, facecolors="none", edgecolors=NAVY, linewidths=0.35, zorder=4)
-    hc = dict(tf=127.5, tr=135.5, bd=147.0, bu=157.0, ins=160.0, dif=174.5, off=181.8)
+    hc = dict(tf=127.5, tr=135.0, bd=146.0, bu=155.5, ins=157.2, dif=176.0, off=181.8)
     heads = [("tf", "Tm F", "left"), ("tr", "Tm R", "left"), ("bd", "with", "right"), ("bu", "without", "right")] + ([("ins", "at locus", "left"), ("dif", "− design", "right"), ("off", "off", "right")] if ins else [])
     for k_, s_, ha in heads:
         tx(hc[k_], t0 - 1.6, s_, ha=ha, fontweight="bold")
