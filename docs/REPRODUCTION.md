@@ -119,12 +119,22 @@ rule) is covered by unit tests and by the synthetic run only.
 
 ## Visual check of the figures
 
-BroodLink's figures for the full run were rendered (14 of 14 drawn) and compared by eye with
-the published shared-parent figure and the matrix of all units for content: the same 12
-nominated pairs among the 253, the same rejected pair, six supported links in five
-components, and the same family on three latent parents at minimum size 3. Layout, family
-order and colours differ by design (`DISPLAY_ITEMS.md`). This was a reading of the figures,
-not a pixel or data comparison.
+The figures of the published study are now drawn by the tool (after 0.1.0). For the full run
+each ported figure was opened next to the original render and compared panel by panel;
+`DISPLAY_ITEMS.md` has the table (what is the same, what differs and why). This was a reading
+of the figures and of the numbers printed in them, not a pixel comparison.
+
+## Quantities added with the figure ports
+
+| Quantity | Published | BroodLink (after 0.1.0) | Status |
+|---|---|---|---|
+| Bootstrap intervals of the kinship benchmark (deletions; duplications; 41 intervals) | AUC [0.99961, 0.99997], [0.99516, 0.99856], [0.97395, 0.98590]; recovery [90.6, 99.7], [63.2, 84.0], [17.8, 48.4] | the same values | reproduced |
+| The same functions on the stored GRMs of the original study (five classes, including biSNPs and biSNPs outside SV regions) | summary table of the benchmark | AUC, recovery and both intervals equal to the last printed digit in all five rows | reproduced (library functions on stored matrices, not through the command line) |
+| Opposite homozygotes by relationship class: pairs per class; median R0 and deletion rate relative to unrelated / unlinked pairs | 363 / 1,012 / 552 / 909 / 20,384 and 363 / 509 / 503 / 21,845 pairs; 0.16, 0.54, 0.43, 0.67; 0.42, 0.65, 0.95 | the same counts and ratios | reproduced; the classes are reimplemented from the original tables (their script was not found) with the network of the figures |
+| Recurrence of the junction parent across its two links | statistic 0.320, null mean 0.094, null maximum 0.181, 190 pseudo-chains, P = 0.005 | the same values | reproduced |
+| Deletions that fit a Mendelian cross along the chain of three families; sharing per link and chromosome | 160 drawn of 645 eligible; 157 of 168 squares above the null median, 93 above its 95th percentile | the same values; all 168 observed and null values equal | reproduced |
+| Deletion evidence on the shared parent (tag strength >= 0.8, at least 2 tagging deletions) | 43 of 45 homozygous calls match, null 45%, P = 0.002 | the same when given the original tag catalogue and links; 38 of 40 with BroodLink's own tag variants and links | reproduced for the rule; differs in the run because the original tag catalogue could not be rebuilt (its script was not found) and one link entered by hand is not a link of the run |
+| Frequency-matched biSNPs of the family effect; biSNP kinship through the command line | medians 0.62 / 0.61 / 0.59; AUC 0.99996 (1,307,168 SNPs, every third) | BISNP_REPRO | BISNP_STATUS |
 
 ## What this page does not show
 

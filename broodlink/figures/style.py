@@ -149,6 +149,9 @@ class Canvas:
     def banner(self, top, num, text, fs=8):
         from matplotlib.lines import Line2D
         self.fig.add_artist(Line2D([0, 1], [1 - top / self.H] * 2, color=NAVY, lw=.5, transform=self.fig.transFigure))
+        w = self.text_width(text, fs, True)                       # a generated sentence can be longer than the page: shrink it to fit
+        if w > self.W - 6.0:
+            fs = max(5.5, fs * (self.W - 6.0) / w)
         self.fig.text(.5 / self.W, 1 - (top + 1.0) / self.H, num, fontsize=fs, fontweight="bold", color=NAVY, va="top")
         self.fig.text(5 / self.W, 1 - (top + 1.0) / self.H, text, fontsize=fs, fontweight="bold", color=NAVY, va="top")
 
