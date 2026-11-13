@@ -3,16 +3,18 @@
 **Full-sib families, candidate shared-parent links and structural-haplotype barcodes from one
 cohort of related individuals without a pedigree.**
 
-![Kinship matrix per marker class and the audited network of families, example cohort](docs/figures/overview.png)
+![Kinship matrix per marker class and the audited network of families, African catfish broodstock cohort](docs/figures/front_page.png)
 
-*Example (simulated) cohort, drawn by `broodlink run`. Top: kinship between all pairs of
-individuals from each marker class (biSNPs, deletions, duplications, structural haplotypes),
-individuals in family order, so every family is a block on the diagonal. Bottom: the network
-of families with a candidate shared parent, links coloured by the outcome of the audit. Against the
-simulated truth this run recovers 15 of 15 families, keeps 7 of 7 true links and 0 false ones
-(5 reach "supported"), and calls 17 of 28 shared-parent genotypes, 17 of them correctly; the AUC
-of within- against between-family kinship is 0.9999 for biSNPs, 0.9988 for deletions, 0.9904 for
-duplications and 0.8021 for the four structural haplotypes.*
+*The cohort BroodLink was developed on: 216 African catfish broodstock without a pedigree,
+drawn by `broodlink run`. Top: kinship between all pairs of fish from each marker class
+(biSNPs, deletions, duplications, candidate polymorphic inversions), fish in family order, so
+each of the 51 full-sib families is a block on the diagonal; under each matrix, the AUC of
+within- against between-family kinship. Bottom: the network of families with a candidate
+shared parent, links coloured by the outcome of the audit. The same figure for the simulated
+example cohort shipped with the code is in the [gallery](#figures-synthetic-data)
+([fig00](docs/figures/fig00_overview.png)); against the simulated truth that run recovers 15
+of 15 families, keeps 7 of 7 true links and 0 false ones (5 reach "supported"), and calls 17
+of 28 shared-parent genotypes, 17 of them correctly.*
 
 Author: Quentin Andres. Version 0.1.0. Licence: MIT.
 

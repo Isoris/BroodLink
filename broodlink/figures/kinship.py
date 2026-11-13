@@ -388,7 +388,7 @@ def fig_overview(run, plt):
     side = 40.0; pitch = 44.2
     hk = 62.0 if KC else 0.0
     nh = 62.0 if nd is not None else 0.0
-    cv = S.canvas(plt, W, hk + nh + 1.0, sz); letters = iter("ABCDEFGH")
+    cv = S.canvas(plt, W, hk + nh + 1.0, sz); letters = None        # front-page figure: titles without panel letters
     if KC:
         x0 = 1.0 + (4 - len(KC)) * pitch / 2
         n_asg = kinship_row(cv, run, KC, O, 5.0, letters, sz, x0=x0, pitch=pitch, side=side)
@@ -402,7 +402,7 @@ def fig_overview(run, plt):
             notes.append(f"no {S.class_label(k) if k != 'HAPLOTYPE' else 'structural-haplotype'} matrix: that input is absent")
     if nd is not None:
         aud = bool(run.s.get("audit", {}).get("ran"))
-        cv.title(next(letters), "Audited shared-parent family network" if aud else "Nominated family network (not audited)", hk + 5.0, 1.0, dx=4)
+        cv.title("", "Audited shared-parent family network" if aud else "Nominated family network (not audited)", hk + 5.0, 1.0)
         draw_network(cv, run, 1.0, hk + 8.5, W - 2.0, nh - 9.5, sz, nd=nd)
     else:
         notes.append("network omitted: no link between families")

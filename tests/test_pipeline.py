@@ -334,7 +334,7 @@ def test_readme_images_exist():
             continue
         p_ = os.path.join(ROOT, rel.replace("/", os.sep))
         assert os.path.exists(p_) and os.path.getsize(p_) > 2000, rel
-    assert "docs/figures/overview.png" in imgs
+    assert "docs/figures/front_page.png" in imgs
 
 
 def test_every_table_has_the_header(full_run):
