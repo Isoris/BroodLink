@@ -439,7 +439,8 @@ def _std_rel(df, src):
             df[c] = np.nan
     df["id1"] = df["id1"].astype(str); df["id2"] = df["id2"].astype(str)
     df["source"] = src
-    return df[["id1", "id2", "theta", "k0", "k1", "k2", "source"]]
+    # R0 (when the table has it, as NGSrelate output does) is kept for the opposite-homozygote panel
+    return df[["id1", "id2", "theta", "k0", "k1", "k2", "source"] + (["R0"] if "R0" in df else [])]
 
 
 def read_relatedness_file(path, sample_names=None):
@@ -456,6 +457,8 @@ def read_relatedness_file(path, sample_names=None):
         out = pd.DataFrame({"id1": id1, "id2": id2, "theta": d[cols["theta"]]})
         if "j7" in cols:
             out["k0"], out["k1"], out["k2"] = d[cols["j9"]], d[cols["j8"]], d[cols["j7"]]
+        if "r0" in cols:
+            out["R0"] = d[cols["r0"]]
         return _std_rel(out, "NGSrelate"), "NGSrelate .res"
     if "kinship" in cols and ("id1" in cols and "id2" in cols):
         out = pd.DataFrame({"id1": d[cols["id1"]], "id2": d[cols["id2"]], "theta": d[cols["kinship"]]})
@@ -469,6 +472,8 @@ def read_relatedness_file(path, sample_names=None):
         for k in ("k0", "k1", "k2"):
             if k in cols:
                 out[k] = d[cols[k]]
+        if "r0" in cols:
+            out["R0"] = d[cols["r0"]]
         return _std_rel(out, "table"), "plain TSV"
     raise InputError(f"relatedness file {base} not recognised (expected NGSrelate .res, KING .kin/.kin0 or a TSV with id1, id2, theta or kinship)")
 

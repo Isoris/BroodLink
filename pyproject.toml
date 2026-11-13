@@ -21,7 +21,7 @@ test = ["pytest>=7"]
 broodlink = "broodlink.cli:main"
 
 [tool.setuptools]
-packages = ["broodlink"]
+packages = ["broodlink", "broodlink.figures"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

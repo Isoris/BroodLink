@@ -15,7 +15,9 @@ import pandas as pd
 HEADER = "Families are relatedness-based groups, not pedigree records."
 
 
-def reconstruct(R, ids, cfg):
+def reconstruct(R, ids, cfg, given=None):
+    """given: {family name: members} imported with --families. The families are then taken as
+    given and only described (closure, status, membership class) with the same rules."""
     f = cfg["families"]
     has_k2 = bool(R.k2.notna().any())
     fd = R[R.theta >= cfg["relatedness"]["theta_first"]]
@@ -32,10 +34,12 @@ def reconstruct(R, ids, cfg):
     else:
         blocks = [sorted(c) for c in nx.connected_components(G) if len(c) > 1]
     blocks.sort(key=lambda b: (-len(b), b[0]))
+    names = [f"F{bi}" for bi in range(1, len(blocks) + 1)]
+    if given is not None:
+        names = list(given); blocks = [sorted(given[n]) for n in names]
     rows, fam_rows = [], []
     theta = {key(a, b): t for a, b, t in zip(R.id1, R.id2, R.theta)}
-    for bi, blk in enumerate(blocks, 1):
-        name = f"F{bi}"
+    for name, blk in zip(names, blocks):
         sub = G.subgraph(blk)
         core = set(max(nx.find_cliques(sub), key=lambda c: (len(c), sum(sub.degree(x) for x in c), sorted(c)[::-1])))
         inblk = set(blk)
@@ -51,7 +55,8 @@ def reconstruct(R, ids, cfg):
             rows.append({"individual": x, "unit": name, "family": name, "membership": m, "family_size": len(blk)})
         fam_rows.append({"family": name, "n": len(blk), "n_pairs": npairs, "n_pairs_full_sib": nfs, "closure": nfs / npairs,
                          "status": "closed" if nfs == npairs else "not closed", "n_core": len(core),
-                         "n_with_first_degree_link_outside": ext_fd, "min_theta": float(np.nanmin(th)), "median_theta": float(np.nanmedian(th))})
+                         "n_with_first_degree_link_outside": ext_fd, "min_theta": float(np.nanmin(th)) if np.isfinite(th).any() else np.nan,
+                         "median_theta": float(np.nanmedian(th)) if np.isfinite(th).any() else np.nan})
     infam = {r["individual"] for r in rows}
     for x in sorted(set(ids) - infam):
         rows.append({"individual": x, "unit": f"S_{x}", "family": "unassigned", "membership": "unassigned", "family_size": 1})

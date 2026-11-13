@@ -1,4 +1,5 @@
-"""Figures of a run (PNG + PDF), drawn from the tables of the step folders only.
+"""Generic views that have no published counterpart (QC panels, PC1 against heterozygosity per
+interval, the scan), drawn from the tables of the step folders only.
 
 Colours: Okabe-Ito palette (colour-blind safe); every colour used is keyed in a legend.
 Font: Arial when installed, DejaVu Sans otherwise.
@@ -9,7 +10,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from .io import detail, log, write_tsv
+from ..io import detail, log, write_tsv
 
 BLUE, ORANGE, GREEN, RED, PURPLE, SKY, YELLOW, GREY, INK = "#0072B2", "#E69F00", "#009E73", "#D55E00", "#CC79A7", "#56B4E9", "#F0E442", "#999999", "#222222"
 STATUS_COL = {"supported": BLUE, "Gate-1 only": SKY, "provisional": ORANGE, "rejected": RED, "nominated, not audited": GREY}
@@ -491,41 +492,3 @@ def f_overview(run, plt):
     for a, l in zip(ax, "ABCDEF"):
         _panel(a, l)
     return fig, "Shared-parent overview", "A nomination matrix (families only) with audit triangle; B network; C Gate 1; D Gate 2; E latent-parent incidence; F barcode. A compact composite in the spirit of the published shared-parent figure, not a panel-by-panel port."
-
-
-FIGURES = [("fig01_qc_panels", f_qc, "qc"), ("fig02_relatedness_theta_k2", f_rel, "relatedness"), ("fig03_family_sizes_closure", f_fam, "families"),
-           ("fig04_nomination_matrix_audit", f_matrix, "nomination"), ("fig05_audit_gates", f_gates, "audit"), ("fig06_latent_parent_incidence", f_incidence, "network"),
-           ("fig07_network", f_network, "network"), ("fig08_structural_haplotypes_pc1", f_hap, "haplotypes"), ("fig09_structural_haplotype_scan", f_scan, "haplotypes"),
-           ("fig10_arrangement_tag_variants", f_tags, "haplotypes"), ("fig11_barcode", f_barcode, "barcode"), ("fig12_family_effect", f_eta, "family_effect"),
-           ("fig13_cross_marker_concordance", f_conc, "concordance"), ("fig14_shared_parent_overview", f_overview, "network")]
-
-
-def make_figures(run):
-    plt = _plt()
-    d = os.path.join(run.out, "figures"); os.makedirs(d, exist_ok=True)
-    dpi = run.cfg["figures"]["dpi"]; rows = []
-    log(f"figures: drawing {len(FIGURES)} figures (PNG {dpi} dpi + PDF) into {d}")
-    for k, (stem, fn, step) in enumerate(FIGURES):
-        detail(f"[{k + 1}/{len(FIGURES)}] {stem}")
-        try:
-            if step not in run.t or (step == "nomination" and "pairs" not in run.t["nomination"]):
-                res = None
-            else:
-                res = fn(run, plt)
-        except Exception as exc:                                  # a figure never stops a run
-            log(f"WARNING: figure {stem} failed ({type(exc).__name__}: {exc})")
-            rows.append({"file": stem, "title": "", "status": f"failed: {type(exc).__name__}: {exc}", "description": ""}); plt.close("all"); continue
-        if res is None:
-            rows.append({"file": stem, "title": "", "status": "not drawn: the step did not run or produced nothing to draw", "description": ""}); continue
-        fig, title, desc = res
-        try:
-            fig.canvas.draw(); fig.set_layout_engine("none")          # lay out once, then save twice
-            fig.savefig(os.path.join(d, stem + ".png"), dpi=dpi); fig.savefig(os.path.join(d, stem + ".pdf"))
-        except Exception as exc:                                  # e.g. a write error: report it, keep the run
-            log(f"WARNING: figure {stem} could not be saved ({type(exc).__name__}: {exc})")
-            rows.append({"file": stem, "title": title, "status": f"failed: {type(exc).__name__}: {exc}", "description": desc}); plt.close("all"); continue
-        plt.close(fig)
-        rows.append({"file": stem, "title": title, "status": "drawn (PNG + PDF)", "description": desc})
-    M = pd.DataFrame(rows)
-    write_tsv(M, os.path.join(d, "MANIFEST.tsv"), run.header("Figures of the run: file stem, title, status, description."))
-    return M

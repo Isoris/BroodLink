@@ -63,3 +63,35 @@ def family_effect(ms, fam_of, cfg, seed, n_perm=None):
            "pct_above_all_permutations": 100 * float((d.eta2_obs > d.null_max).mean()),
            "n_BH_0.05": kmax, "n_permutations": n_perm, "note": note}
     return d, row
+
+
+def matched_snps(snp, fam_of, cfg, seed, targets, bin_width=0.02):
+    """Frequency-matched SNPs (compute_association_eta2_v1.py, "matched SNP pool"): for every tested
+    variant of an SV class one SNP is drawn from the same allele-frequency bin (width 0.02) of the
+    SNPs that pass the filters of the family effect; a bin is cycled when it is exhausted and the
+    nearest bin is used when one is empty. targets: {class label: allele frequencies of its tested
+    variants}. Returns {class label: MarkerSet of the drawn SNPs}. The families were usually built
+    from SNP relatedness, so the SNP value is a reference level, not an independent null."""
+    c = cfg["family_effect"]
+    cols = [i for i, s in enumerate(snp.samples) if fam_of.get(s, "unassigned") != "unassigned"]
+    if len(cols) < c["min_called"] or not snp.n:
+        return {}
+    G = snp.G[:, cols]
+    af = allele_freq(G)
+    pool = np.flatnonzero(((G >= 0).sum(1) >= c["min_called"]) & (af > c["af_min"]) & (af < c["af_max"]))
+    if not len(pool):
+        return {}
+    paf = af[pool]
+    rng = np.random.default_rng(seed + 7); bins = np.floor((paf - c["af_min"]) / bin_width).astype(int)
+    pidx = {b: rng.permutation(np.where(bins == b)[0]) for b in np.unique(bins)}; ptr = {b: 0 for b in pidx}
+    out = {}
+    for name, afs in targets.items():
+        sel = []
+        for a in afs:
+            b = int(np.floor((a - c["af_min"]) / bin_width)); b = min(max(b, min(pidx)), max(pidx)); b = b if b in pidx else min(pidx, key=lambda x: abs(x - b))
+            sel.append(pidx[b][ptr[b] % len(pidx[b])]); ptr[b] += 1
+        keep = pool[np.array(sel, int)]
+        m = snp.subset_markers(keep)
+        m.name = f"SNP matched to {name}"; m.klass = f"SNP_matched_{name}"
+        out[name] = m
+    return out

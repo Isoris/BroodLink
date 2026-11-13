@@ -79,7 +79,17 @@ DEFAULTS = {
     "barcode": {"posterior_call": 0.90, "posterior_strict": 0.95, "genotype_error": 0.03},
     "family_effect": {"af_min": 0.05, "af_max": 0.95, "min_called": 20, "n_permutations": 1000,
                       "max_markers_per_class": 20000},
-    "figures": {"dpi": 450},                    # raster resolution of the PNG files (author rule: at least 450)
+    "concordance": {
+        "n_bootstrap": 1000,                       # resamples of the families (build_extdata_SV_validation_v2.py, boot_ci)
+        "bootstrap_seed": 7,
+        "sv_mask_flank_bp": 100000,                # SNPs "outside SV regions": structural-haplotype intervals + this flank, and every DEL / DUP span
+    },
+    "figures": {
+        "dpi": 450,                                # raster resolution of the PNG files
+        "individual_noun": "individuals",          # word printed in figures for the individuals of the cohort (e.g. fish)
+        "haplotype_label": "structural haplotypes",  # name of the large structural haplotypes in figure text (e.g. candidate polyINVs)
+        "max_chain_figures": 4,                    # deletion-genotype figures: at most this many chains / link panels
+    },
 }
 
 

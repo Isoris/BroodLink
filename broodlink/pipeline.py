@@ -14,7 +14,7 @@ import time
 import numpy as np
 import pandas as pd
 
-from . import __version__, audit, barcode, families, family_effect, inversions, network, nomination, qc, relatedness
+from . import __version__, audit, barcode, concordance, families, family_effect, inversions, network, nomination, opposite, qc, relatedness
 from .io import (InputError, MarkerSet, detail, expand, log, read_beagle, read_depth, read_fai, read_haplotypes,
                  read_intervals_bed, read_relatedness, read_samples, read_variants, sniff, write_tsv)
 from .mask import apply_mask, build_mask
@@ -429,8 +429,14 @@ class Run:
         if getattr(self.a, "families", None):
             M = families.read_families(self.a.families, sorted(self.analysis))
             g = M[M.family != "unassigned"].groupby("family").size()
-            F = pd.DataFrame({"family": g.index, "n": g.values}); F["status"] = "imported"; F["closure"] = np.nan
-            info = {"edge_rule": "imported with --families", "group_rule": "imported", "has_k2": False}
+            if len(R) and len(g):
+                # imported labels are kept; closure, status and membership class are described with the rules of the reconstruction
+                given = {f: M.individual[M.family == f].astype(str).tolist() for f in sorted(g.index, key=lambda x: (len(x), x))}
+                M, F, info = families.reconstruct(R, sorted(self.analysis), cfg, given=given)
+                info = {**info, "edge_rule": "imported with --families; closure described with " + info["edge_rule"], "group_rule": "imported"}
+            else:
+                F = pd.DataFrame({"family": g.index, "n": g.values}); F["status"] = "imported"; F["closure"] = np.nan
+                info = {"edge_rule": "imported with --families", "group_rule": "imported", "has_k2": False}
         else:
             M, F, info = families.reconstruct(R, sorted(self.analysis), cfg)
         self.put("families", "membership", M, "family_membership.tsv", "One row per individual: unit (family, or S_<id> for an unassigned individual), family, membership class (core / attached / unresolved member / unassigned), family size.")
@@ -528,6 +534,17 @@ class Run:
         self.put("network", "latent_parents", net["latent_parents"], "latent_parents.tsv", "Latent parents (bookkeeping labels, not reconstructed parents): maximal sets of mutually linked families, once per minimum family size.")
         v = pd.DataFrame([{"min_family_size": t, "n_families_violating": len(x), "families": ",".join(x)} for t, x in s["slot_violations"].items()])
         self.put("network", "slot", v, "slot_limit_violations.tsv", "Families whose link partners cannot be split into two groups of mutually linked families (a family has two parents).")
+        # opposite homozygotes by relationship class (biSNP R0 and deletions)
+        _u, fam_of, _m = self.units()
+        kept = net["edges"][net["edges"].status != "rejected"]
+        comp_of = dict(zip(net["nodes"].family.astype(str), net["nodes"].component.astype(int)))
+        snps = [m for m in self.sets if m.klass == "SNP"]; dls = [m for m in self.sets if m.klass == "DEL"]
+        OP, OS, oinfo = opposite.opposite_homozygotes(self.t["relatedness"]["pairs"], fam_of, kept, comp_of, max(snps, key=lambda m: (m.flag == "bisnp", m.n)) if snps else None,
+                                                      max(dls, key=lambda m: m.n) if dls else None, self.cfg)
+        if len(OS):
+            self.put("network", "opposite_pairs", OP, "opposite_homozygotes_pairs.tsv", "Every pair of individuals (no identifiers): kinship, relationship class for the biSNP R0 comparison and for the deletion comparison, R0, opposite-homozygote rate of the deletions and the number of deletions genotyped in both.")
+            self.put("network", "opposite_summary", OS, "opposite_homozygotes_by_class.tsv", "Median R0 of the biSNPs and median opposite-homozygote rate of the deletions per relationship class, and the ratio to the reference class (unrelated pairs / pairs without a link).")
+            s["opposite_homozygotes"] = {**oinfo, "classes": {f"{r.quantity}: {r['class']}": {"n_pairs": int(r.n_pairs), "ratio": float(r.ratio_to_reference_class)} for _i, r in OS.iterrows()}}
         aud = bool(self.s.get("audit", {}).get("ran"))
         self.status("network", "yes", self.ran["nomination"][1] if self.ran.get("nomination") else "", "benchmarked" if aud and not self.single_input else "provisional",
                     "links audited" if aud else "links are nominated, not audited")
@@ -716,6 +733,21 @@ class Run:
             rows.append(row)
             if d is not None:
                 parts.append(d)
+        # frequency-matched SNPs as the reference level of every non-SNP class (when SNPs are given)
+        snps = [m for m in self.sets if m.klass == "SNP"]
+        if snps and parts:
+            snp = max(snps, key=lambda m: (m.flag == "bisnp", m.n))
+            targets = {}
+            for d in parts:
+                k = str(d.marker_class.iloc[0])
+                if k not in POINT and k not in targets:
+                    targets[k] = d.af.to_numpy()
+            for k, m in family_effect.matched_snps(snp, fam_of, self.cfg, self.seed, targets).items():
+                d, row = family_effect.family_effect(m, fam_of, self.cfg, self.seed + 1)
+                row["note"] = (row.get("note", "") + "; " if row.get("note") else "") + f"one SNP per tested {k} marker, drawn from the same allele-frequency bin (reference level, not an independent null)"
+                rows.append(row)
+                if d is not None:
+                    parts.append(d)
         T = pd.DataFrame(rows)
         self.put("family_effect", "summary", T, "family_effect_summary.tsv", "Per marker class: number of markers tested, median eta squared (variance explained by family), median of the per-marker null medians (family labels permuted), share above the null median / 95th percentile / every permutation, Benjamini-Hochberg count.")
         if parts:
@@ -731,49 +763,46 @@ class Run:
 
     # ------------------------------------------------------------------ step 9
     def step_concordance(self):
-        """Kinship of every marker class (VanRaden GRM / 2) within and between families (cross-marker
-        concordance, not pedigree truth: the families were built from one of the inputs)."""
+        """Kinship of every marker class (VanRaden GRM) within and between families: AUC, recovery
+        and their family-level bootstrap intervals (cross-marker concordance, not pedigree truth:
+        the families were built from one of the inputs). The GRM of every class is written out."""
         t0 = time.time()
         _u, fam_of, _m = self.units()
-        rows, pairs = [], []
         hap, _i = self.hap_set()
-        g = self.cfg["relatedness"]["grm"]
-        for ms in self.sets + ([hap] if hap is not None else []):
-            frac = g["min_called_fraction_snp"] if ms.klass in POINT else g["min_called_fraction_sv"]
-            K, used = relatedness.vanraden_grm(ms.G, g["af_min"], g["af_max"], frac)
-            if used == 0:
-                rows.append({"marker_set": ms.name, "marker_class": ms.klass, "n_markers": 0, "note": "no marker passes the GRM filters"}); continue
-            s = np.array(ms.samples); f = np.array([fam_of.get(x, "unassigned") for x in s])
-            ok = f != "unassigned"
-            iu, ju = np.triu_indices(len(s), 1)
-            sel = ok[iu] & ok[ju]
-            k = K[iu, ju][sel] / 2.0; same = (f[iu] == f[ju])[sel]
-            w, b = k[same], k[~same]
-            row = {"marker_set": ms.name, "marker_class": ms.klass, "n_markers": used, "n_pairs_within_family": int(len(w)), "n_pairs_between_families": int(len(b)),
-                   "is_source_of_families": bool(self.primary is not None and ms.name == self.primary.name), "note": ""}
-            if len(w) and len(b):
-                from scipy.stats import rankdata
-                r = rankdata(np.r_[w, b])
-                auc = (r[:len(w)].sum() - len(w) * (len(w) + 1) / 2) / (len(w) * len(b))
-                thr = np.quantile(b, 0.999)
-                row.update({"auc_within_vs_between": float(auc), "recovery_pct": 100 * float((w > thr).mean()),
-                            "median_kinship_within": float(np.median(w)), "median_kinship_between": float(np.median(b))})
-                if row["is_source_of_families"]:
-                    row["note"] = "the families were built from this input: this row is circular"
-                pairs.append(pd.DataFrame({"marker_set": ms.name, "marker_class": ms.klass, "same_family": same, "kinship": np.round(k, 5)}))
-            rows.append(row)
-        T = pd.DataFrame(rows)
-        self.put("concordance", "summary", T, "cross_marker_concordance.tsv", "Per marker class: rank AUC of within-family against between-family pairs of assigned individuals, and recovery_pct, the share of within-family pairs above the 99.9th percentile of the between-family pairs. Concordance between marker classes, not pedigree truth.")
-        if pairs:
-            self.put("concordance", "pairs", pd.concat(pairs, ignore_index=True), "cross_marker_kinship_pairs.tsv", "Kinship of every pair of assigned individuals per marker class, with the same-family flag (no identifiers).")
+        A = list(self.analysis)
+        sets, masked_note = concordance.marker_sets(self.sets, hap, self.intervals, self.cfg)
+        T, pairs, grm, order = concordance.run(sets, fam_of, A, self.cfg, self.primary.name if self.primary is not None else None)
+        if masked_note:
+            self.note("cross-marker concordance: " + masked_note)
+        self.grm = grm
+        self.put("concordance", "summary", T, "cross_marker_concordance.tsv", "Per marker class: markers used by the GRM, rank AUC of within-family against between-family pairs of assigned individuals, recovery_pct (share of within-family pairs above the 99.9th percentile of the between-family pairs), their 95% intervals from a bootstrap over families, median GRM value within and between, and the Pearson correlation of the GRM with the GRM of the SNPs outside SV regions (all pairs). Concordance between marker classes, not pedigree truth.")
+        if len(pairs):
+            self.put("concordance", "pairs", pairs, "cross_marker_kinship_pairs.tsv", "Kinship (GRM / 2) of every pair of assigned individuals per marker class, with the same-family flag (no identifiers).")
+        if grm:
+            d = os.path.join(self.out, FOLDER["concordance"]); os.makedirs(d, exist_ok=True)
+            np.savez_compressed(os.path.join(d, "kinship_grm.npz"), **{k: v.astype(np.float32) for k, v in grm.items()})
+            self.put("concordance", "grm_order", order, "kinship_grm_individuals.tsv", "Row / column order of the matrices in kinship_grm.npz (compressed NumPy archive, one array per marker class, named as in the column grm_key of cross_marker_concordance.tsv; VanRaden GRM, individuals x individuals, NaN for an individual absent from that input), with the family of each individual. Individuals are in family order (largest family first), unassigned individuals last.")
         ok = T[T.n_markers > 0] if len(T) else T
-        summ = {"classes": {r.marker_set: {"n_markers": int(r.n_markers), "auc": float(r.auc_within_vs_between), "recovery_pct": float(r.recovery_pct)}
-                            for r in ok.itertuples() if "auc_within_vs_between" in T and pd.notna(r.auc_within_vs_between)}}
+        summ = {"classes": {r.marker_set: {"n_markers": int(r.n_markers), "auc": float(r.auc_within_vs_between), "recovery_pct": float(r.recovery_pct),
+                                           "auc_ci95": [float(r.auc_ci95_low), float(r.auc_ci95_high)], "recovery_ci95": [float(r.recovery_ci95_low), float(r.recovery_ci95_high)]}
+                            for r in ok.itertuples() if "auc_within_vs_between" in T and pd.notna(r.auc_within_vs_between)},
+                "n_bootstrap": self.cfg["concordance"]["n_bootstrap"], "grm_file": "kinship_grm.npz" if grm else None}
         if summ["classes"]:
             self.status("concordance", "yes", "; ".join(summ["classes"]), "benchmarked", "cross-marker concordance against the reconstructed families, not pedigree truth")
         else:
             self.status("concordance", "no", "", "skipped", "no genotype input or no family")
         self.finish("concordance", summ, t0)
+
+    def get_grm(self):
+        """GRM per marker class of step 9 (from memory, or read back from kinship_grm.npz)."""
+        if getattr(self, "grm", None):
+            return self.grm
+        p = os.path.join(self.out, FOLDER["concordance"], "kinship_grm.npz")
+        if not os.path.exists(p):
+            return {}
+        with np.load(p) as z:
+            self.grm = {k: z[k].astype(float) for k in z.files}
+        return self.grm
 
     # ------------------------------------------------------------------ driver
     def execute(self, compute=None):

@@ -130,5 +130,12 @@ family_effect:
   min_called: 20
   n_permutations: 1000
   max_markers_per_class: 20000
+concordance:
+  n_bootstrap: 1000
+  bootstrap_seed: 7
+  sv_mask_flank_bp: 100000
 figures:
   dpi: 450
+  individual_noun: individuals
+  haplotype_label: structural haplotypes
+  max_chain_figures: 4
