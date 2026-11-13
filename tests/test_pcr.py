@@ -269,7 +269,7 @@ def test_reference_flanks_and_in_silico_pcr(full_run, reference, tmp_path, vcf_w
     cons = read_consensus(os.path.join(DATA, "sv.vcf.gz"))
     assert len(cons) > 500
     V = pd.read_csv(os.path.join(DATA, "sv.vcf.gz"), sep="\t", comment="#", header=None, usecols=[0, 1, 2, 7])
-    end = {(r[0], r[1], r[2]): int(r[7].split("END=")[1].split(";")[0]) for r in V.itertuples(index=False)}
+    end = {(r[0], r[1], r[2]): int(r[3].split("END=")[1].split(";")[0]) for r in V.itertuples(index=False)}
     for k in list(cons)[:40]:
         seq, bp = cons[k]
         t, b2 = pcr.junction_from_reference(fa, k[0], k[1], end[k], 150)
