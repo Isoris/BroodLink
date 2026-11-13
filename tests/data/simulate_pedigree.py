@@ -12,7 +12,11 @@ One generation of offspring from unrelated founders (the parents are not sampled
   * SNP genotype likelihoods at low coverage (Beagle format), DEL / DUP genotypes (VCF),
     large structural haplotypes (inversion-like intervals without recombination, with
     arrangement-associated SNPs and tag deletions), a callable mask, depth and sample tables,
-    and a relatedness table.
+    and a relatedness table;
+  * a random reference sequence for the simulated genome: most deletions of the VCF carry the
+    sequence across their junction as a split-read consensus (INFO CONSENSUS / CONSBP, as DELLY
+    writes them), which is what the PCR-marker step designs primers on. The reference itself
+    (61 MB) is not written by default: `--reference-only` writes reference.fa and reference.fa.fai.
 Everything is written with fixed names; the truth tables are in truth/.
 The relatedness table holds the realised identity-by-descent coefficients of the simulated
 pedigree plus Gaussian noise; it stands in for the output of a likelihood-based estimator such
@@ -49,6 +53,28 @@ SEQ_ERR = 0.01
 def gz_write(path, text):
     with gzip.GzipFile(path, "wb", mtime=0) as fh:           # mtime=0: byte-identical files for a fixed seed
         fh.write(text.encode())
+
+
+def reference_sequence(seed, ci):
+    """Random sequence of simulated chromosome number ci (0-based) as a bytes object (A, C, G, T; 40% GC).
+    Own random stream per chromosome, so it does not change any other simulated file."""
+    rng = np.random.default_rng([seed, 4242, ci])
+    return np.frombuffer(b"ACGT", np.uint8)[rng.choice(4, size=CHROM_LEN, p=[0.3, 0.2, 0.2, 0.3])].tobytes()
+
+
+def write_reference(out, seed=7, width=60):
+    """reference.fa (+ .fai) of the simulated genome, for the optional input --reference."""
+    fa = os.path.join(out, "reference.fa"); off = 0; fai = []
+    with open(fa, "wb") as fo:
+        for ci in range(N_CHROM):
+            seq = reference_sequence(seed, ci); head = f">chr{ci + 1}\n".encode()
+            fo.write(head); off += len(head)
+            fai.append(f"chr{ci + 1}\t{CHROM_LEN}\t{off}\t{width}\t{width + 1}")
+            body = b"\n".join(seq[i:i + width] for i in range(0, CHROM_LEN, width)) + b"\n"
+            fo.write(body); off += len(body)
+    with open(fa + ".fai", "w", newline="\n") as fo:
+        fo.write("\n".join(fai) + "\n")
+    return fa
 
 
 def write_genes(out, seed=7, genes_per_chrom=40):
@@ -98,7 +124,10 @@ def main():
     ap.add_argument("--out", default=os.path.dirname(os.path.abspath(__file__)))
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--genes-only", action="store_true", help="write only genes.gff3 (simulated gene models); no other file is touched")
+    ap.add_argument("--reference-only", action="store_true", help="write only reference.fa and reference.fa.fai (61 MB, the random sequence of the simulated genome); no other file is touched")
     a = ap.parse_args()
+    if a.reference_only:
+        print(f"wrote {write_reference(a.out, a.seed)}"); return
     if a.genes_only:
         print(f"wrote {write_genes(a.out, a.seed)} simulated genes to {os.path.join(a.out, 'genes.gff3')}"); return
     rng = np.random.default_rng(a.seed)
@@ -263,14 +292,28 @@ def main():
     v = ["##fileformat=VCFv4.2", "##source=BroodLink simulate_pedigree.py (synthetic data)",
          '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">',
          '##INFO=<ID=END,Number=1,Type=Integer,Description="End position">',
+         '##INFO=<ID=CONSENSUS,Number=1,Type=String,Description="Split-read consensus sequence">',
+         '##INFO=<ID=CONSBP,Number=1,Type=Integer,Description="Consensus SV breakpoint position">',
          '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">']
     v += [f"##contig=<ID={c},length={CHROM_LEN}>" for c in chroms]
     v.append("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join(ids))
+    # split-read consensus of the deletions: the sequence across the junction on the allele with the deletion
+    # (POS = last base before the deletion, END = last deleted base); own random streams
+    crng = np.random.default_rng([a.seed, 4243]); ref = {}
     for r, j in enumerate(sv):
         if not keep[r]:
             continue
         gt = np.where(miss[r], "./.", code[Gv[r]])
-        v.append(f"{L.chrom[j]}\t{L.pos[j]}\t{L.id[j]}\tN\t<{typ[j]}>\t.\tPASS\tSVTYPE={typ[j]};END={L.end[j]}\tGT\t" + "\t".join(gt))
+        extra = ""
+        if typ[j] == "DEL":
+            nl, nr, has = int(crng.integers(70, 101)), int(crng.integers(60, 101)), crng.random() >= 0.08
+            if has:                                             # 8% of the deletions carry no consensus (as imprecise calls do)
+                ci = chroms.index(L.chrom[j])
+                if ci not in ref:
+                    ref[ci] = reference_sequence(a.seed, ci)
+                p0, e0 = int(L.pos[j]), int(L.end[j])
+                extra = f";CONSENSUS={(ref[ci][p0 - nl:p0] + ref[ci][e0:e0 + nr]).decode()};CONSBP={nl}"
+        v.append(f"{L.chrom[j]}\t{L.pos[j]}\t{L.id[j]}\tN\t<{typ[j]}>\t.\tPASS\tSVTYPE={typ[j]};END={L.end[j]}{extra}\tGT\t" + "\t".join(gt))
     gz_write(os.path.join(out, "sv.vcf.gz"), "\n".join(v) + "\n")
 
     # ---------------------------------------------------------------- structural haplotypes

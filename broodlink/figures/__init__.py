@@ -15,7 +15,7 @@ import os
 import pandas as pd
 
 from ..io import detail, log, write_tsv
-from . import barcode_genes, deletion_paths, generic, kinship, parent_barcode, relatedness, shared_parent, style
+from . import barcode_genes, deletion_paths, generic, kinship, parent_barcode, pcr, relatedness, shared_parent, style
 
 # (name, function, step whose tables it needs, "house" = style set by the figure itself)
 FIGURES = [
@@ -37,6 +37,10 @@ FIGURES = [
     ("funnel_to_unsampled_parent", parent_barcode.fig_funnel, "nomination"),
     ("deletion_genotypes_linked_families", deletion_paths.fig_chains, "network"),
     ("deletion_genotypes_other_links", deletion_paths.fig_other_links, "network"),
+    # step 10: PCR markers (ports of the assay figure, the simulated gel sheets and the schematic)
+    ("pcr_assay", pcr.fig_assay, "pcr"),
+    ("pcr_simulated_gels", pcr.fig_gels, "pcr"),
+    ("pcr_primer_schematic", pcr.fig_schematic, "pcr"),
 ]
 FIRST_NUMBER = 0
 

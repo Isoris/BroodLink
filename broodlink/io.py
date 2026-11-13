@@ -99,6 +99,7 @@ class MarkerSet:
     D: np.ndarray | None = None   # uint8 expected dosage x 100 (255 missing), only from likelihoods
     filters: list = field(default_factory=list)   # (step, markers_before, markers_after)
     notes: list = field(default_factory=list)
+    cons: dict = field(default_factory=dict)      # (chrom, pos, id) -> (split-read consensus, breakpoint index); DELLY INFO CONSENSUS / CONSBP
 
     @property
     def n(self):
@@ -109,7 +110,7 @@ class MarkerSet:
         before = self.n
         out = MarkerSet(self.name, self.klass, self.flag, self.source, list(self.samples), self.chrom[keep],
                         self.pos[keep], self.end[keep], self.ids[keep], self.G[keep],
-                        None if self.D is None else self.D[keep], list(self.filters), list(self.notes))
+                        None if self.D is None else self.D[keep], list(self.filters), list(self.notes), self.cons)
         if step:
             out.filters.append((step, before, out.n))
         return out
@@ -120,7 +121,7 @@ class MarkerSet:
         kept = [s for s in samples if s in ix]
         return MarkerSet(self.name, self.klass, self.flag, self.source, kept, self.chrom, self.pos, self.end,
                          self.ids, self.G[:, cols], None if self.D is None else self.D[:, cols],
-                         list(self.filters), list(self.notes))
+                         list(self.filters), list(self.notes), self.cons)
 
     def dosage(self):
         """float32 dosage, NaN missing: expected dosage when likelihoods exist, else the genotype."""
@@ -216,6 +217,8 @@ def read_beagle(paths, sample_names=None, step=1, hard=0.90, flag="bisnp", max_m
 _INFO_END = re.compile(r"(?:^|;)END=(\d+)")
 _INFO_SVTYPE = re.compile(r"(?:^|;)SVTYPE=([^;]+)")
 _INFO_SVLEN = re.compile(r"(?:^|;)SVLEN=(-?\d+)")
+_INFO_CONS = re.compile(r"(?:^|;)CONSENSUS=([ACGTNacgtn]+)")
+_INFO_CONSBP = re.compile(r"(?:^|;)CONSBP=(\d+)")
 
 
 def _gt_code(s):
@@ -308,9 +311,13 @@ def read_vcf(path, flag, hard=0.90, want_lik=False):
                         continue
                 if li < 0 and gi >= 0 and gi < len(parts):
                     g[i] = _gt_code(parts[gi])
-            r = rows.setdefault(k, {"chrom": [], "pos": [], "end": [], "id": [], "G": [], "D": []})
+            r = rows.setdefault(k, {"chrom": [], "pos": [], "end": [], "id": [], "G": [], "D": [], "cons": {}})
             r["chrom"].append(f[0]); r["pos"].append(pos); r["end"].append(end)
             r["id"].append(f[2] if f[2] != "." else f"{f[0]}_{pos}_{k}"); r["G"].append(g)
+            if m and "CONSENSUS=" in info:                       # split-read consensus of the junction (DELLY): kept for primer design
+                cs, cb = _INFO_CONS.search(info), _INFO_CONSBP.search(info)
+                if cs and cb:
+                    r["cons"][(f[0], pos, r["id"][-1])] = (cs.group(1).upper(), int(cb.group(1)))
             if d is not None:
                 r["D"].append(d)
     if samples is None:
@@ -331,6 +338,9 @@ def read_vcf(path, flag, hard=0.90, want_lik=False):
         ms = MarkerSet(f"{k} ({flag}:{base})", k, flag, base, list(samples), np.array(r["chrom"])[o],
                        np.array(r["pos"], np.int64)[o], np.array(r["end"], np.int64)[o],
                        np.array(r["id"])[o], np.vstack(r["G"])[o], D)
+        ms.cons = r.get("cons", {})
+        if ms.cons:
+            ms.notes.append(f"{len(ms.cons):,} records carry a split-read consensus (INFO CONSENSUS / CONSBP)")
         if n_multi:
             ms.notes.append(f"{n_multi} multi-allelic records of the file skipped")
         if n_ref:
@@ -338,6 +348,21 @@ def read_vcf(path, flag, hard=0.90, want_lik=False):
         out.append(ms)
     if not out:
         raise InputError(f"no usable variant record with genotypes in {base}")
+    return out
+
+
+def read_consensus(path):
+    """Only the split-read consensus of a (large) SV VCF: {(chrom, pos, id): (sequence, breakpoint index)}.
+    Genotype columns are not parsed."""
+    out = {}
+    with _open(path) as fh:
+        for line in fh:
+            if line.startswith("#") or "CONSENSUS=" not in line:
+                continue
+            f = line.split("\t", 8)
+            cs, cb = _INFO_CONS.search(f[7]), _INFO_CONSBP.search(f[7])
+            if cs and cb:
+                out[(f[0], int(f[1]), f[2])] = (cs.group(1).upper(), int(cb.group(1)))
     return out
 
 

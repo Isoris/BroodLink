@@ -9,7 +9,7 @@ from .pipeline import FOLDER, STEPS, Run
 
 STEP_CMD = {"qc": "qc", "relatedness": "relatedness", "families": "families", "nominate": "nomination", "audit": "audit",
             "network": "network", "haplotypes": "haplotypes", "barcode": "barcode", "family-effect": "family_effect",
-            "concordance": "concordance"}
+            "concordance": "concordance", "pcr-markers": "pcr"}
 
 
 def add_inputs(p):
@@ -29,6 +29,10 @@ def add_inputs(p):
     g.add_argument("--genome", metavar="FAI", help="FASTA index of the assembly (chromosome lengths)")
     g.add_argument("--families", metavar="FILE", help="import family labels (individual, family) instead of reconstructing them")
     g.add_argument("--genes", metavar="FILE", help="gene models of the assembly, GFF3 (gene features, CDS when present) or BED (chrom, start, end, name, score, strand); optional: genes of each barcode interval and the gene-level barcode figure")
+    g.add_argument("--reference", metavar="FASTA", help="reference assembly (uncompressed FASTA, .fai used when present); optional: PCR-marker step only (design sequence for deletions without a split-read consensus, and in-silico PCR of every primer pair)")
+    g.add_argument("--consensus-vcf", metavar="VCF", help="SV VCF carrying the split-read consensus of the deletions (INFO CONSENSUS / CONSBP, DELLY) when the genotypes are given in another file; optional: PCR-marker step only")
+    g.add_argument("--pcr-picks", metavar="TSV", help="design primers on these deletions instead of the automatic choice (columns interval, variant_id); optional")
+    g.add_argument("--primer-engine", choices=["primer3", "builtin"], help="primer design engine (default: config pcr.engine = primer3, the original procedure; falls back to builtin when primer3-py is not installed)")
     o = p.add_argument_group("run")
     o.add_argument("--auto-exclude", action="store_true", help="remove low-coverage samples and one sample of each pair with identical genotypes (default: flag only)")
     o.add_argument("--out", default="broodlink_out", metavar="DIR")

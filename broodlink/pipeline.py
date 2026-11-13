@@ -20,13 +20,13 @@ from .io import (InputError, MarkerSet, detail, expand, log, read_beagle, read_d
 from .mask import apply_mask, build_mask
 
 STEPS = ["qc", "relatedness", "families", "nomination", "audit", "network", "haplotypes", "barcode",
-         "family_effect", "concordance"]
+         "family_effect", "concordance", "pcr"]
 FOLDER = {"qc": "00_qc", "relatedness": "01_relatedness", "families": "02_families", "nomination": "03_nomination",
           "audit": "04_audit", "network": "05_network", "haplotypes": "06_structural_haplotypes", "barcode": "07_barcode",
-          "family_effect": "08_family_effect", "concordance": "09_cross_marker_concordance"}
+          "family_effect": "08_family_effect", "concordance": "09_cross_marker_concordance", "pcr": "10_pcr_markers"}
 ID_COLS = ("individual", "sample", "id1", "id2", "sample_1", "sample_2", "unit_a", "unit_b", "family", "unit", "interval",
            "parent", "families", "supplied_interval", "scan_interval", "variant_id", "id", "chrom", "latent_parent",
-           "gene", "name", "call_id", "link", "strand", "biotype")
+           "gene", "name", "call_id", "link", "strand", "biotype", "marker", "forward_primer", "reverse_primer", "sequence", "design_sequence")
 POINT = ("SNP", "INDEL", "SNP_INDEL")
 WHAT = {"qc": "quality control of every input (flag, do not remove)",
         "relatedness": "pairwise relatedness (theta, k0, k1, k2) and relationship classes",
@@ -37,7 +37,8 @@ WHAT = {"qc": "quality control of every input (flag, do not remove)",
         "haplotypes": "large structural haplotypes: local PCA genotyping and scan",
         "barcode": "posterior genotype of each shared parent at the structural haplotypes",
         "family_effect": "variance explained by family (eta squared) per marker class",
-        "concordance": "kinship of every marker class within and between families"}
+        "concordance": "kinship of every marker class within and between families",
+        "pcr": "PCR markers: deletions that tag each structural haplotype, flanking primer pairs (in-silico design)"}
 
 
 def _result_line(step, s):
@@ -71,6 +72,14 @@ def _result_line(step, s):
             return "; ".join(f"{k}: median eta2 {v['eta2_median']:.3f} (null {v['null_median']:.3f}, {v['n_tested']:,} markers)" for k, v in (g("classes") or {}).items()) or "not run"
         if step == "concordance":
             return "; ".join(f"{k}: AUC {v['auc']:.3f}" for k, v in (g("classes") or {}).items()) or "not run"
+        if step == "pcr":
+            if not g("ran"):
+                return "not run"
+            r = (f"{g('n_primer_pairs')} primer pairs for {g('n_intervals_with_marker')} of {g('n_intervals')} intervals ({g('n_deletions_screened'):,} deletions screened, "
+                 f"{g('n_diagnostic_gel_resolvable')} diagnostic and gel-resolvable); engine: {g('engine')}")
+            if g("in_silico_ran"):
+                r += f"; in silico {g('n_in_silico_product_at_locus')} with a product at the locus, {g('n_in_silico_off_target')} with off-target products"
+            return r
     except Exception:                                           # a progress line never stops a run
         return ""
     return ""
@@ -223,6 +232,17 @@ class Run:
         if a.haplotypes:
             self.hap_given = read_haplotypes(a.haplotypes, known)
         self.intervals = read_intervals_bed(a.inversions) if a.inversions else None
+        self.reference = None                                   # optional; only the PCR-marker step uses it
+        if getattr(a, "reference", None):
+            from .pcr import Fasta
+            self.reference = Fasta(a.reference)
+            detail(f"--reference: {len(self.reference.index)} sequences, {sum(v[0] for v in self.reference.index.values()):,} bp (index: {self.reference.indexed_from})")
+        self.consensus_extra = {}
+        if getattr(a, "consensus_vcf", None):                   # split-read consensus from a VCF that is not the genotype input (e.g. genotypes given as a matrix)
+            from .io import read_consensus
+            for pth in expand(a.consensus_vcf):
+                self.consensus_extra.update(read_consensus(pth))
+            detail(f"--consensus-vcf: split-read consensus of {len(self.consensus_extra):,} records")
         self.genes, self.genes_cds, self.genes_info = (None, None, None)
         if getattr(a, "genes", None):                           # optional; no step depends on it
             from .genes import read_genes
@@ -816,6 +836,17 @@ class Run:
         else:
             self.status("concordance", "no", "", "skipped", "no genotype input or no family")
         self.finish("concordance", summ, t0)
+
+    # ------------------------------------------------------------------ step 10
+    def step_pcr(self):
+        """Deletions that tag each structural haplotype and one flanking primer pair per interval."""
+        from . import pcr
+        t0 = time.time()
+        tables, summ, status = pcr.run_step(self)
+        for key, (df, fname, desc) in tables.items():
+            self.put("pcr", key, df, fname, desc)
+        self.status("pcr", *status)
+        self.finish("pcr", summ, t0)
 
     def get_grm(self):
         """GRM per marker class of step 9 (from memory, or read back from kinship_grm.npz)."""

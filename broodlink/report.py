@@ -14,7 +14,8 @@ from .pipeline import FOLDER, STEPS
 STEP_TITLE = {"qc": "0. Quality control", "relatedness": "1. Pairwise relatedness", "families": "2. Full-sib families",
               "nomination": "3. Half-sib nomination", "audit": "4. Audit", "network": "5. Network, latent parents, slot limit",
               "haplotypes": "6a. Structural haplotypes (genotyping and scan)", "barcode": "6b. Barcode of the shared parent",
-              "family_effect": "7. Family effect (eta squared)", "concordance": "8. Cross-marker concordance"}
+              "family_effect": "7. Family effect (eta squared)", "concordance": "8. Cross-marker concordance",
+              "pcr": "9. PCR markers of the structural haplotypes (in-silico design)"}
 
 # (step, key, table name, sheet name)
 TABLES = [("qc", "flags", "T01_qc_exclusion_table", "T01 QC flags"), ("families", "families", "T02_families", "T02 families"),
@@ -22,7 +23,9 @@ TABLES = [("qc", "flags", "T01_qc_exclusion_table", "T01 QC flags"), ("families"
           ("audit", "gate2", "T05_audit_gate2", "T05 Gate 2"), ("network", "latent_parents", "T06_latent_parents", "T06 latent parents"),
           ("network", "slot", "T07_slot_limit", "T07 slot limit"), ("haplotypes", "summary", "T08_structural_haplotypes", "T08 haplotypes"),
           ("haplotypes", "tags", "T09_arrangement_tag_variants", "T09 tag variants"), ("barcode", "barcode", "T10_barcode", "T10 barcode"),
-          ("family_effect", "summary", "T11_family_effect", "T11 family effect"), ("concordance", "summary", "T12_cross_marker_concordance", "T12 concordance")]
+          ("family_effect", "summary", "T11_family_effect", "T11 family effect"), ("concordance", "summary", "T12_cross_marker_concordance", "T12 concordance"),
+          ("pcr", "candidates", "T13_pcr_candidate_deletions", "T13 PCR candidates"), ("pcr", "primers", "T14_pcr_primers", "T14 PCR primers"),
+          ("pcr", "per_interval", "T15_pcr_markers_per_interval", "T15 PCR per interval"), ("pcr", "order", "T16_pcr_primer_order_list", "T16 primer order list")]
 
 COLUMN_DEFS = {
     "theta": "kinship coefficient of the pair (0.25 full sibs, 0.125 half sibs in expectation)",
@@ -46,7 +49,44 @@ COLUMN_DEFS = {
     "auc_within_vs_between": "rank AUC of within-family against between-family kinship", "recovery_pct": "percentage of within-family pairs above the 99.9th percentile of between-family pairs",
     "sample": "sample identifier", "reason": "why the sample was flagged", "rule": "rule and threshold that fired", "action": "flagged, kept / removed",
     "difference": "absolute difference of carrier frequency between the two homokaryotype classes", "fully_private": "carried by every called individual of one class and by none of the other",
-    "marker_class": "marker class of the row (never mixed)", "n_markers": "number of markers behind the row"}
+    "marker_class": "marker class of the row (never mixed)", "n_markers": "number of markers behind the row",
+    # PCR markers (step 10)
+    "marker": "label of the primer pair (M01, M02, ... in interval order)", "variant_id": "identifier of the deletion in the input",
+    "length_bp": "length of the deletion (END - POS)", "arrangement_with_deletion": "homokaryotype class in which the deletion is the frequent allele (class 0 or class 2; labels carry no ancestral meaning)",
+    "deletion_frequency_class_0": "allele frequency of the deletion among the called class-0 homokaryotypes", "deletion_frequency_class_2": "allele frequency of the deletion among the called class-2 homokaryotypes",
+    "deletion_frequency_heterokaryotypes": "allele frequency of the deletion among the called heterokaryotypes (about 0.5 for a marker of the arrangement)",
+    "frequency_difference": "absolute difference of the deletion allele frequency between the two homokaryotype classes",
+    "carrier_frequency_class_0": "share of called class-0 homokaryotypes carrying the deletion", "carrier_frequency_class_2": "share of called class-2 homokaryotypes carrying the deletion",
+    "n_called_class_0": "class-0 homokaryotypes with a genotype at the deletion", "n_called_class_2": "class-2 homokaryotypes with a genotype at the deletion", "n_called_heterokaryotypes": "heterokaryotypes with a genotype at the deletion",
+    "screen_band_deleted_bp": "short band of the generic screening pair (two flanks)", "screen_band_undeleted_bp": "long band of the generic screening pair (two flanks + deletion length)",
+    "diagnostic": "frequency difference at or above the threshold and heterokaryotype frequency inside its window", "gel_resolvable": "deletion length inside the gel window of the screen",
+    "step06_tag": "the deletion is also in the tag-variant table of step 06 (carrier-frequency rule)", "sequence_source": "sequence the design was tried on", "rank_in_interval": "rank among the screened deletions of the interval, largest frequency difference first",
+    "design_status": "result of the primer design where it was tried (ok or the reason)", "selected": "a primer pair was designed on this deletion",
+    "forward_primer": "forward primer, 5'-3', + strand of the design sequence", "reverse_primer": "reverse primer, 5'-3', - strand of the design sequence",
+    "length_forward": "length of the forward primer (nt)", "length_reverse": "length of the reverse primer (nt)", "tm_forward": "melting temperature of the forward primer (model and conditions in the table header)",
+    "tm_reverse": "melting temperature of the reverse primer", "gc_forward_percent": "GC content of the forward primer", "gc_reverse_percent": "GC content of the reverse primer",
+    "product_with_deletion_bp": "designed product on the allele with the deletion (short band)", "product_without_deletion_bp": "designed product on the allele without the deletion (short band + deletion length)",
+    "product_difference_bp": "difference of the two products (the deletion length)", "design_source": "sequence the pair was designed on: split-read consensus of the SV VCF, or flanks cut from --reference",
+    "engine": "design engine that produced the pair", "design_sequence": "the sequence across the deletion junction the pair was designed on", "breakpoint_index": "0-based index of the first base after the junction in the design sequence",
+    "forward_start_index": "0-based index of the first base of the forward primer in the design sequence", "reverse_end_index": "0-based index of the last base of the reverse primer site in the design sequence",
+    "check_primers_exact_in_design_sequence": "both primers are exact substrings of the design sequence", "check_primers_flank_breakpoint": "forward primer ends before the breakpoint and the reverse site starts after it",
+    "check_products_recomputed": "product sizes recomputed from the primer positions and the deletion length equal the designed ones", "check_frequency_difference": "frequency difference at or above the threshold",
+    "check_gel_resolvable_design": "designed pair: products differ by >= 60 bp, short product 60-1,200 bp, long product <= 6,000 bp (rule of the deletion toolkit)",
+    "tm_difference_pair": "absolute Tm difference between the two primers", "min_gc_percent": "lower GC content of the two primers", "forward_3prime_gc": "the forward primer ends with G or C",
+    "reverse_3prime_gc": "the reverse primer ends with G or C", "longest_homopolymer": "longest run of one base in either primer",
+    "in_silico_products_at_locus": "products predicted in --reference that overlap the deletion locus (empty without --reference)", "in_silico_product_at_locus_bp": "size of the product at the locus (the reference carries the undeleted allele unless it has the deletion)",
+    "in_silico_product_minus_design_bp": "product at the locus minus the designed product without the deletion", "in_silico_products_off_target": "products predicted elsewhere in --reference",
+    "in_silico_off_target_products": "the first off-target products (sequence:start-end(size, mismatches))", "check_in_silico_product_within_5bp": "a product at the locus within 5 bp of the designed product without the deletion",
+    "hairpin_forward_tm": "new in BroodLink: Tm of the most stable hairpin of the forward primer (primer3-py; empty when none or without primer3-py)", "hairpin_forward_dg_kcal": "new in BroodLink: its free energy (kcal/mol)",
+    "hairpin_reverse_tm": "new in BroodLink: hairpin Tm of the reverse primer", "hairpin_reverse_dg_kcal": "new in BroodLink: its free energy (kcal/mol)",
+    "self_dimer_forward_tm": "new in BroodLink: Tm of the forward primer self-dimer", "self_dimer_forward_dg_kcal": "new in BroodLink: its free energy (kcal/mol)",
+    "self_dimer_reverse_tm": "new in BroodLink: Tm of the reverse primer self-dimer", "self_dimer_reverse_dg_kcal": "new in BroodLink: its free energy (kcal/mol)",
+    "cross_dimer_tm": "new in BroodLink: Tm of the forward-reverse dimer", "cross_dimer_dg_kcal": "new in BroodLink: its free energy (kcal/mol)",
+    "n_class_0": "individuals of homokaryotype class 0 at the interval", "n_class_2": "individuals of homokaryotype class 2", "n_heterokaryotypes": "heterokaryotypes at the interval",
+    "n_deletions_screened": "deletions inside the interval genotyped in enough individuals of both classes", "n_diagnostic": "of these, diagnostic", "n_diagnostic_gel_resolvable": "diagnostic and gel-resolvable",
+    "n_deletion_on_class_0": "diagnostic gel-resolvable deletions frequent on class 0", "n_deletion_on_class_2": "diagnostic gel-resolvable deletions frequent on class 2", "n_primer_pairs": "primer pairs designed for the interval",
+    "reason_no_marker": "why the interval has no primer pair", "deletion_start": "POS of the selected deletion", "deletion_end": "END of the selected deletion",
+    "name": "primer name for the order: marker_F or marker_R", "sequence": "primer sequence 5'-3'", "length": "primer length (nt)", "tm": "melting temperature (model and conditions in the table header)"}
 
 
 def statistics(run):
@@ -123,6 +163,16 @@ def statistics(run):
         add("family_effect", f"eta2_median [{k}]", v["eta2_median"], f"median variance explained by family over {v['n_tested']} markers; null median {v['null_median']:.4g}")
     for k, v in (s.get("concordance", {}).get("classes") or {}).items():
         add("concordance", f"auc_within_vs_between [{k}]", v["auc"], f"{v['n_markers']} markers; recovery {v['recovery_pct']:.1f}% of within-family pairs above the 99.9th percentile of between-family pairs")
+    p = s.get("pcr", {})
+    if p.get("ran"):
+        add("pcr", "pcr_primer_engine", p.get("engine"), "engine that designed the pairs (primer3 = the original procedure; builtin = fallback routine); " + str(p.get("tm_conditions")))
+        add("pcr", "pcr_deletions_screened", p.get("n_deletions_screened"), "deletions inside the intervals genotyped in enough individuals of both homokaryotype classes")
+        add("pcr", "pcr_diagnostic_gel_resolvable", p.get("n_diagnostic_gel_resolvable"), "screened deletions that are diagnostic and gel-resolvable")
+        add("pcr", "pcr_primer_pairs", p.get("n_primer_pairs"), "primer pairs designed (in-silico design, not tested in a laboratory); sources: " + ("; ".join(f"{k}: {v}" for k, v in (p.get("design_sources") or {}).items()) or "none"))
+        add("pcr", "pcr_intervals_with_marker", f"{p.get('n_intervals_with_marker')} of {p.get('n_intervals')}", "intervals with at least one primer pair")
+        if p.get("in_silico_ran"):
+            add("pcr", "pcr_in_silico_product_at_locus", p.get("n_in_silico_product_at_locus"), "pairs with a product predicted at the deletion locus in --reference")
+            add("pcr", "pcr_in_silico_off_target", p.get("n_in_silico_off_target"), "pairs with products predicted elsewhere in --reference")
     T = pd.DataFrame(rows)
     T["value"] = ["" if v is None else v for v in T["value"]]
     return T
@@ -195,6 +245,7 @@ def run_report(run, fig_manifest):
     L.append(f"- **Mask**: {run.mask.description}; {run.mask.label()}.")
     if run.notes:
         L += ["", "## Notes and warnings", ""] + [f"- {n}" for n in dict.fromkeys(run.notes)]
+    L += pcr_section(run)
     L += ["", "## Headline numbers", "", _md(statistics(run)[["step", "statistic", "value"]], maxrows=200), "",
           "Definitions of every number: `statistics.tsv`."]
     L += ["", "## Run time", ""]
@@ -206,6 +257,33 @@ def run_report(run, fig_manifest):
           "*provisional* = it ran in a mode that was not benchmarked (single input, too few markers, intervals from the scan, links not audited); "
           "*reimplemented from Methods* = no original code existed; *skipped* = not run.", "", _md(capability(run)), ""]
     return "\n".join(L) + "\n"
+
+
+def pcr_section(run):
+    """Run-report section of step 10: engine, Tm model, the sequence each pair was designed on, intervals without a marker."""
+    p = run.s.get("pcr", {})
+    if not p.get("ran"):
+        return []
+    P = run.t.get("pcr", {}).get("primers")
+    L = ["", "## PCR markers (in-silico design; no laboratory test)", "",
+         f"- Engine: **{'Primer3 (' + 'primer3-py ' + str(p.get('primer3_version')) + '), the procedure of the original study' if p.get('engine') == 'primer3' else 'built-in routine (fallback; it does not return the primers Primer3 returns)'}**"
+         + ("" if p.get("engine") == p.get("engine_requested") else f"; requested: {p.get('engine_requested')}, not available because primer3-py is not installed") + ".",
+         f"- {p.get('tm_conditions')}.",
+         f"- {p.get('n_deletions_screened')} deletions screened in {p.get('n_intervals')} intervals; {p.get('n_diagnostic')} diagnostic; {p.get('n_diagnostic_gel_resolvable')} diagnostic and gel-resolvable; "
+         f"{p.get('n_primer_pairs')} primer pairs for {p.get('n_intervals_with_marker')} intervals" + (" (deletions taken from --pcr-picks)" if p.get("picks_supplied") else "") + ".",
+         "- Design sequence per pair: " + ("; ".join(f"{k}: {v} pairs" for k, v in (p.get("design_sources") or {}).items()) or "none") + " (column `design_source` of `pcr_primers.tsv`)."]
+    if p.get("in_silico_ran"):
+        L.append(f"- In-silico PCR against --reference: {p.get('n_in_silico_product_at_locus')} pairs with a product at the locus ({p.get('n_in_silico_within_5bp')} within 5 bp of the designed long product), {p.get('n_in_silico_off_target')} with off-target products.")
+    else:
+        L.append("- In-silico PCR: not run (no --reference).")
+    if P is not None and len(P):
+        L.append(f"- Checks: primers exact substrings of the design sequence {p.get('n_checks_exact')} of {len(P)}; flanking the breakpoint {p.get('n_checks_flank')}; product sizes recomputed {p.get('n_checks_products')}.")
+        L += ["", _md(P, ["marker", "interval", "variant_id", "arrangement_with_deletion", "forward_primer", "reverse_primer", "tm_forward", "tm_reverse", "product_with_deletion_bp", "product_without_deletion_bp", "design_source"], maxrows=100)]
+    wo = p.get("intervals_without_marker") or {}
+    if wo:
+        L += ["", "Intervals without a marker:", ""] + [f"- {k}: {v}" for k, v in wo.items()]
+    L += ["", "Simulated gels in `figures/` are drawn from the designed product sizes; they are not photographs."]
+    return L
 
 
 def methods_text(run):
@@ -274,6 +352,23 @@ def methods_text(run):
                  "and the share of within-family pairs above the 99.9th percentile of the between-family pairs (recovery) were computed, with 95% intervals from a bootstrap over families "
                  f"({cfg['concordance']['n_bootstrap']:,} resamples): " + "; ".join(f"{k}: AUC {v['auc']:.4f} [{v['auc_ci95'][0]:.4f}, {v['auc_ci95'][1]:.4f}], recovery {v['recovery_pct']:.1f}%" for k, v in c.items())
                  + ". The families were built from one of the inputs, so this is concordance between marker classes, not pedigree truth.")
+    p = s.get("pcr", {})
+    if p.get("ran"):
+        c = cfg["pcr"]; sel = c["selection"]; p3 = c["primer3"]; bi = c["builtin"]
+        eng = (f"with Primer3 (primer3-py {p.get('primer3_version')}; optimum Tm {p3['opt_tm']} C, range {p3['min_tm']}-{p3['max_tm']} C, primer length {p3['min_size']}-{p3['max_size']} nt with optimum {p3['opt_size']}, "
+               f"GC at least {p3['min_gc']}%, product {p3['product_min']}-{p3['product_max']} bp, the breakpoint as target)" if p.get("engine") == "primer3" else
+               f"with the built-in routine of BroodLink (the window of {bi['len_min']}-{bi['len_max']} nt nearest to a Tm of {bi['tm_target']} C within {bi['tm_lo']}-{bi['tm_hi']} C on each side, 3' end {bi['gap_min']}-{bi['gap_max']} nt from the breakpoint, "
+               f"GC {bi['gc_lo']}-{bi['gc_hi']}%, no run above {bi['max_homopolymer']})")
+        P.append(f"PCR markers of the structural haplotypes were designed in silico. Deletions inside each interval, genotyped in at least {sel['min_called_per_class']} individuals of each homokaryotype class, were screened: a deletion was "
+                 f"diagnostic when its allele frequency differed by at least {sel['min_frequency_difference']} between the two homokaryotype classes with the heterokaryotypes at {sel['het_frequency_min']}-{sel['het_frequency_max']}, "
+                 f"and gel-resolvable when {sel['min_deletion_bp']}-{sel['max_deletion_bp']} bp long. For each interval the diagnostic gel-resolvable deletions were tried in order of decreasing frequency difference until "
+                 f"{c['markers_per_interval']} flanking primer pair(s) could be designed {eng} on the sequence across the deletion junction ({'; '.join(f'{k}: {v} pairs' for k, v in (p.get('design_sources') or {}).items()) or 'none'}). "
+                 f"{p.get('tm_conditions')}. The allele with the deletion gives the short product and the allele without it the short product plus the deletion length. "
+                 f"{p.get('n_deletions_screened')} deletions were screened, {p.get('n_diagnostic_gel_resolvable')} were diagnostic and gel-resolvable, and {p.get('n_primer_pairs')} primer pairs were designed for "
+                 f"{p.get('n_intervals_with_marker')} of {p.get('n_intervals')} intervals."
+                 + (f" Each pair was searched in the reference assembly (at most {c['in_silico']['max_mismatches']} mismatches per primer, matching 3' base, products of {c['in_silico']['product_min']}-{c['in_silico']['product_max']} bp): "
+                    f"{p.get('n_in_silico_product_at_locus')} pairs gave a product at the deletion locus and {p.get('n_in_silico_off_target')} gave off-target products." if p.get("in_silico_ran") else "")
+                 + " No primer was tested in the laboratory; the gels shown are simulated from the designed product sizes.")
     return "# Methods text generated by BroodLink\n\nGenerated from the configuration and the steps that ran. Edit before use.\n\n" + "\n\n".join(P) + "\n"
 
 

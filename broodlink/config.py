@@ -101,6 +101,30 @@ DEFAULTS = {
         "bootstrap_seed": 7,
         "sv_mask_flank_bp": 100000,                # SNPs "outside SV regions": structural-haplotype intervals + this flank, and every DEL / DUP span
     },
+    # step 10, PCR markers of the structural haplotypes (docs/EXTRACTED_METHOD.md, section "PCR markers")
+    "pcr": {
+        "engine": "primer3",                       # primer3 = the original procedure (optional package primer3-py; falls back to builtin with a note) | builtin
+        "markers_per_interval": 1,                 # the original designed one pair per interval
+        "reference_flank_bp": 150,                 # new in BroodLink: flank cut on each side of a deletion when the design sequence comes from --reference
+        "selection": {                             # the rules of the published screening table
+            "min_called_per_class": 5,             # called individuals in each homokaryotype class (smallest value in the published table)
+            "min_frequency_difference": 0.90,      # deletion allele frequency, class 2 against class 0
+            "het_frequency_min": 0.30, "het_frequency_max": 0.70,   # heterokaryotypes near one half
+            "screen_flank_bp": 100,                # generic pair of the screen: 2 x 100 bp of flank (bands 200 and 200 + length)
+            "min_deletion_bp": 60, "max_deletion_bp": 1800,         # gel-resolvable: long band of the screen <= 2 kb; band difference >= 60 bp
+        },
+        "tm": {"mv_mM": 50.0, "dv_mM": 1.5, "dntp_mM": 0.6, "dna_nM": 50.0},   # conditions of primer3-py calc_tm (its defaults)
+        "primer3": {"opt_tm": 56.0, "min_tm": 54.0, "max_tm": 57.0, "opt_size": 20, "min_size": 18, "max_size": 27,
+                    "min_gc": 30.0, "max_gc": 80.0, "max_poly_x": 5, "product_min": 60, "product_max": 300,
+                    "target_left": 1, "target_length": 2,   # target: the base before and the base after the breakpoint
+                    "extra": {}},                  # any other Primer3 global argument, e.g. {PRIMER_GC_CLAMP: 1}
+        # fallback routine (deltools.pick_flanking_primers of the deletion toolkit, its defaults)
+        "builtin": {"tm_lo": 54.5, "tm_hi": 56.6, "tm_target": 55.5, "len_min": 18, "len_max": 26, "gc_lo": 30.0, "gc_hi": 60.0,
+                    "gap_min": 40, "gap_max": 160, "max_homopolymer": 4},
+        "in_silico": {"run": True, "max_mismatches": 2, "product_min": 60, "product_max": 6000, "locus_window_bp": 2500},
+        "gels_per_page": 9,                        # simulated gels per page (the published sheets held 18 and 17; half of that)
+        "ladder_bp": [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1500, 2000, 3000, 4000],
+    },
     "figures": {
         "dpi": 450,                                # raster resolution of the PNG files
         "individual_noun": "individuals",          # word printed in figures for the individuals of the cohort (e.g. fish)
