@@ -1,0 +1,12 @@
+# BroodLink 0.1.0 | config f360934f27 | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# Every flagged sample: reason, rule, value and the action taken. Default: flag, do not remove.
+sample	reason	rule	value	action
+IND004	low coverage	call rate below 0.5 x cohort median (0.396) in SNP (bisnp)	0.098	flagged, kept
+IND004	possible contamination	heterozygosity above cohort median + 5.0 MAD in SNP (bisnp) (new in BroodLink; the original fixed no number)	0.8115	flagged, kept
+IND035	pair of samples with identical genotypes	theta >= 0.354; with --auto-exclude the sample of the pair with the lower call rate is removed	pair with IND036	flagged, kept
+IND036	pair of samples with identical genotypes	theta >= 0.354; with --auto-exclude the sample of the pair with the lower call rate is removed	pair with IND035	flagged, kept

@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use BroodLink, please cite it as below."
+title: "BroodLink: adaptive reconstruction of full-sib families, shared-parent links and structural-haplotype barcodes from low-coverage cohorts"
+type: software
+version: 0.1.0
+date-released: "2026-11-13"
+license: MIT
+authors:
+  - family-names: Andres
+    given-names: Quentin
+    # orcid: "https://orcid.org/<to be added by the author>"
+repository-code: "<GitHub URL, to be added>"
+doi: "<Zenodo DOI, to be assigned>"
+keywords:
+  - relatedness
+  - full-sib families
+  - half-sib links
+  - structural variants
+  - inversions
+  - low-coverage sequencing

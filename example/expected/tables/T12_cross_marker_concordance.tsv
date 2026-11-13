@@ -1,0 +1,12 @@
+# BroodLink 0.1.0 | config f360934f27 | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# Per marker class: rank AUC of within-family against between-family pairs of assigned individuals, and recovery_pct, the share of within-family pairs above the 99.9th percentile of the between-family pairs. Concordance between marker classes, not pedigree truth.
+marker_set	marker_class	n_markers	n_pairs_within_family	n_pairs_between_families	is_source_of_families	note	auc_within_vs_between	recovery_pct	median_kinship_within	median_kinship_between
+SNP (bisnp)	SNP	5451	159	2397	False		0.999864	98.7421	0.216747	-0.0310048
+DEL (gt:sv.vcf.gz)	DEL	605	159	2397	False		0.998788	82.3899	0.218172	-0.0265998
+DUP (gt:sv.vcf.gz)	DUP	148	159	2397	False		0.990447	33.3333	0.207563	-0.0262462
+HAPLOTYPE (structural haplotypes)	HAPLOTYPE	4	159	2397	False		0.802051	2.51572	0.197822	-0.0249404

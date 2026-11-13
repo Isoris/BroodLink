@@ -1,0 +1,15 @@
+# BroodLink 0.1.0 | config f360934f27 | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# Nominated links between families with their status (supported / Gate-1 only / provisional / rejected / nominated, not audited) and component.
+unit_a	unit_b	n_a	n_b	n_cross_pairs	n_pairs_second_degree_or_closer	fraction	p_perm	unassigned_sides	q_value	min_n	nominated	marker_class	n_markers	n_permutations	auditable	LLR_one	LLR_both	gate1	share_DEL	pairP_DEL	above_median_DEL	above_null_p99_DEL	share_DUP	pairP_DUP	above_median_DUP	above_null_p99_DUP	evidence	link_class	status	component
+F1	F5	8	6	48	46	0.958333	0.00019996	0	0.00722713	6	True	relatedness table		5000	True	0.110258	-0.772085	1	0.722117	0.0243902	False	True	0.752212	0.0243902	True	True	DUP	supported	supported	2
+F10	F12	4	4	16	15	0.9375	0.00019996	0	0.00722713	4	True	relatedness table		5000	True	0.0813225	-0.1504	1	0.754	0.0243902	True	True	0.727273	0.0243902	True	True	DEL + DUP	supported	supported	3
+F10	F7	4	5	20	20	1	0.00019996	0	0.00722713	4	True	relatedness table		5000	True	0.0920229	-0.179208	1	0.750996	0.0243902	True	True	0.681034	0.0243902	False	True	DEL	supported	supported	3
+F12	F7	4	5	20	20	1	0.00019996	0	0.00722713	4	True	relatedness table		5000	True	0.104771	-0.18577	1	0.755102	0.0243902	True	True	0.686441	0.0243902	False	True	DEL	supported	supported	3
+F2	F8	7	5	35	34	0.971429	0.00019996	0	0.00722713	5	True	relatedness table		5000	True	0.057909	-0.505249	1	0.726908	0.0243902	False	True	0.642857	0.0487805	False	False		Gate-1 only	Gate-1 only	4
+F4	F6	6	5	30	29	0.966667	0.00019996	0	0.00722713	5	True	relatedness table		5000	True	0.147709	-0.274158	1	0.721154	0.0243902	False	True	0.688525	0.0243902	False	True		Gate-1 only	Gate-1 only	1
+F4	F9	6	4	24	23	0.958333	0.00019996	0	0.00722713	4	True	relatedness table		5000	True	0.0641038	-0.418621	1	0.705078	0.0243902	False	True	0.7	0.0243902	True	True	DUP	supported	supported	1

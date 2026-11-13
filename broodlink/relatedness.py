@@ -108,7 +108,7 @@ def classify_pairs(R, cfg):
     cls[fd & has & (k2 >= f["k2_min"])] = "full-sib"
     cls[fd & has & (k2 < f["k2_min"])] = "first degree, not full-sib (k2 below gate)"
     cls[fd & ~has] = "first degree (no k2)"
-    cls[th >= r["theta_duplicate"]] = "identical genotypes (theta >= duplicate threshold)"
+    cls[th >= r["theta_duplicate"]] = "identical genotypes (theta at or above the identity threshold)"
     return cls
 
 

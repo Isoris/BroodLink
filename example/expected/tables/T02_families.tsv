@@ -1,0 +1,23 @@
+# BroodLink 0.1.0 | config f360934f27 | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# One row per family: size, number of within-family pairs, pairs passing the full-sib thresholds, closure (their ratio), status, core size.
+family	n	n_pairs	n_pairs_full_sib	closure	status	n_core	n_with_first_degree_link_outside	min_theta	median_theta
+F1	8	28	25	0.892857	not closed	5	0	0.15397	0.234245
+F2	7	21	19	0.904762	not closed	6	1	0.18311	0.2582
+F3	7	21	21	1	closed	7	0	0.22106	0.26244
+F4	6	15	15	1	closed	6	0	0.23689	0.27142
+F5	6	15	13	0.866667	not closed	5	0	0.17371	0.25274
+F6	5	10	9	0.9	not closed	4	0	0.17613	0.248815
+F7	5	10	7	0.7	not closed	3	0	0.19656	0.232535
+F8	5	10	10	1	closed	5	1	0.20589	0.2574
+F9	4	6	4	0.666667	not closed	3	0	0.18142	0.21721
+F10	4	6	5	0.833333	not closed	3	0	0.1767	0.24867
+F11	4	6	5	0.833333	not closed	3	0	0.21765	0.234035
+F12	4	6	6	1	closed	4	0	0.23379	0.27368
+F13	3	3	3	1	closed	3	0	0.24556	0.24599
+F14	2	1	1	1	closed	2	0	0.29791	0.29791
+F15	2	1	1	1	closed	2	0	0.26038	0.26038

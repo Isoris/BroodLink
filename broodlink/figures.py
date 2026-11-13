@@ -100,7 +100,7 @@ def p_perchrom(run, plt, ax):
 def p_theta_k2(run, plt, ax):
     R = run.t["relatedness"]["pairs"]; cfg = run.cfg; r = cfg["relatedness"]
     order = [("unrelated", "#CCCCCC"), ("third degree", YELLOW), ("second degree", ORANGE), ("first degree, not full-sib (k2 below gate)", PURPLE),
-             ("first degree (no k2)", BLUE), ("full-sib", BLUE), ("identical genotypes (theta >= duplicate threshold)", RED)]
+             ("first degree (no k2)", BLUE), ("full-sib", BLUE), ("identical genotypes (theta at or above the identity threshold)", RED)]
     if R.k2.notna().any():
         for name, col in order:
             g = R[R["class"] == name]

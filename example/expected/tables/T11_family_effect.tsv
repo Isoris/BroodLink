@@ -1,0 +1,12 @@
+# BroodLink 0.1.0 | config f360934f27 | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# Per marker class: number of markers tested, median eta squared (variance explained by family), median of the per-marker null medians (family labels permuted), share above the null median / 95th percentile / every permutation, Benjamini-Hochberg count.
+marker_class	marker_set	n_individuals_in_families	n_tested	eta2_obs_median	null_median_of_medians	pct_above_null_median	pct_above_null_p95	pct_above_all_permutations	n_BH_0.05	n_permutations	note
+SNP	SNP (bisnp)	72	5707	0.590278	0.244656	99.3342	91.2213	68.9154	5133	200	
+DEL	DEL (gt:sv.vcf.gz)	72	601	0.561029	0.193908	97.6705	93.178	80.0333	556	200	
+DUP	DUP (gt:sv.vcf.gz)	72	145	0.582104	0.193161	100	95.8621	84.8276	138	200	
+HAPLOTYPE	HAPLOTYPE (structural haplotypes)	72	4	0.606657	0.190605	75	75	75	3	200	

@@ -1,0 +1,10 @@
+# BroodLink 0.1.0 | config f360934f27 | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# Gate 2 per SV class: threshold (median of the Gate-1-compatible nominated pairs), matched-null median, one-sided P.
+class	marker_set	n_markers	n_gate1_pass	n_null_pool	threshold_median_of_gate1_pass	null_median	n_null_values	p_one_sided	null_p99
+DEL	DEL (gt:sv.vcf.gz)	699	7	59	0.726908	0.618613	280	0.00355872	0.640684
+DUP	DUP (gt:sv.vcf.gz)	173	7	59	0.688525	0.57072	280	0.00355872	0.644628

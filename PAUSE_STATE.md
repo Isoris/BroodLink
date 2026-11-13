@@ -40,7 +40,7 @@ path); the package is NOT pip-installed on this machine.
 2. `docs/REPRODUCTION.md` (tables a-e), `docs/DISPLAY_ITEMS.md`; add display-item and track
    sections to `docs/EXTRACTED_METHOD.md`.
 3. README (author: git config name), CITATION.cff, CHANGELOG, gallery PNGs in `docs/figures/`.
-4. Zenodo folder `F:\dataroodlink_zenodo_v0.1.0\` (nothing there yet) and THESIS_INSERT.md.
+4. Zenodo folder `F:\data\broodlink_zenodo_v0.1.0\` (nothing there yet) and THESIS_INSERT.md.
 5. Privacy grep, delete this file, tag v0.1.0, `git archive` tarball + SHA-256.
 Not implemented so far (say so in the capability table and the final report unless done):
 panel-by-panel ports of the published nomination figure (A-J), families figure and Extended

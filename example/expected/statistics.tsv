@@ -1,0 +1,67 @@
+# BroodLink 0.1.0 | config f360934f27 | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# Every headline number of the run with its definition.
+step	statistic	value	definition
+00_qc	individuals_input	80	individuals found in the inputs (or in --samples)
+00_qc	individuals_analysis_set	80	individuals every later step works on
+00_qc	individuals_removed	0	removed by QC (confirmed in the config or --auto-exclude)
+00_qc	individuals_flagged_kept	3	flagged by QC and kept
+00_qc	pairs_identical_genotypes	1	pairs of samples with identical genotypes
+00_qc	callable_span_bp	47620925	span of the callable mask, the denominator of per-base quantities
+00_qc	assembly_bp	60000000	assembly length from --genome
+00_qc	median_depth_over_mask	5.985	cohort median of the per-sample depth over the callable mask
+00_qc	median_depth_over_assembly	10.09	cohort median of the per-sample depth over the assembly
+01_relatedness	relatedness_source	--relatedness, used as is (plain TSV, 80 samples, 3160 pairs)	where theta comes from
+01_relatedness	relatedness_markers		markers in the GRM (empty when --relatedness is used as is)
+01_relatedness	pairs	3160	pairs of individuals of the analysis set
+01_relatedness	parent_offspring_pairs	0	k1 >= 0.8 and k2 <= 0.05
+01_relatedness	unrelated_subset	27	greedy set without first-degree pairs
+02_families	families	15	relatedness-based groups: connected blocks of full-sib edges; edge: theta >= 0.177 and k2 >= 0.15
+02_families	individuals_in_families	72	individuals assigned to a family
+02_families	individuals_unassigned	8	individuals without a full-sib pair
+02_families	units	23	families plus unassigned individuals
+02_families	families_closed	7	families in which every pair passes the full-sib thresholds
+02_families	families_not_closed	8	families with at least one pair failing a threshold (connected blocks, not complete cliques)
+02_families	within_family_pairs_passing	144 of 159	closure over all families
+03_nomination	unit_pairs	253	pairs of units tested
+03_nomination	nominated	7	unit pairs with q < 0.05; fraction of cross-unit pairs with theta >= 0.0884 (no upper bound, as in the original code); 5000 permutations
+03_nomination	nominated_family_pairs	7	nominated pairs with a family on both sides
+04_audit	auditable_pairs	66	pairs of families with at least 4 individuals each
+04_audit	nominated_auditable	7	nominated pairs among them
+04_audit	gate1_pass	7	nominated auditable pairs with LLR_one > 0 and LLR_both < 0
+04_audit	rejected	0	nominated auditable pairs failing Gate 1
+04_audit	supported_links	5	Gate-1-compatible pairs whose SV sharing exceeds the Gate-2 bar in at least one class
+04_audit	gate2_DEL_median_sharing	0.7269076305220884	median sharing of the Gate-1-compatible nominated pairs, DEL (gt:sv.vcf.gz)
+04_audit	gate2_DEL_null_median	0.6186131386861314	median sharing of the matched non-nominated pairs
+04_audit	gate2_DEL_p	0.0035587188612099642	one-sided P of the observed median against the matched null
+04_audit	gate2_DUP_median_sharing	0.6885245901639344	median sharing of the Gate-1-compatible nominated pairs, DUP (gt:sv.vcf.gz)
+04_audit	gate2_DUP_null_median	0.5707196029776676	median sharing of the matched non-nominated pairs
+04_audit	gate2_DUP_p	0.0035587188612099642	one-sided P of the observed median against the matched null
+05_network	links_kept	7	nominated links between families that were not rejected
+05_network	families_on_supported_links	7	families joined by supported links
+05_network	components_supported	3	connected components of the supported links
+05_network	latent_parents	5	maximal sets of mutually linked families of at least 3 individuals
+05_network	slot_limit_violations_min4	0	families of at least 4 individuals whose partners cannot be split into two groups of mutually linked families
+05_network	slot_limit_violations_min3	0	families of at least 3 individuals whose partners cannot be split into two groups of mutually linked families
+05_network	slot_limit_violations_min2	0	families of at least 2 individuals whose partners cannot be split into two groups of mutually linked families
+06_structural_haplotypes	intervals_supplied	4	intervals given with --inversions
+06_structural_haplotypes	intervals_genotyped	7	intervals genotyped by local PCA (supplied and scanned)
+06_structural_haplotypes	intervals_high_confidence	5	intervals passing all five criteria
+06_structural_haplotypes	scan_candidates	3	candidate intervals found by the scan (detected automatically, not validated)
+06_structural_haplotypes	supplied_recovered_by_scan	3	supplied intervals overlapped by a scan candidate
+06_structural_haplotypes	arrangement_tag_variants	138	DEL / DUP with a carrier-frequency difference between homokaryotype classes at or above the threshold
+07_barcode	barcode_states	40	shared parent x interval states evaluated (links and junctions)
+07_barcode	barcode_called	23	states at posterior >= 0.9
+07_barcode	barcode_called_strict	20	states at posterior >= 0.95
+08_family_effect	eta2_median [SNP (bisnp)]	0.5902777777777779	median variance explained by family over 5707 markers; null median 0.2447
+08_family_effect	eta2_median [DEL (gt:sv.vcf.gz)]	0.5610292433381696	median variance explained by family over 601 markers; null median 0.1939
+08_family_effect	eta2_median [DUP (gt:sv.vcf.gz)]	0.5821042281219272	median variance explained by family over 145 markers; null median 0.1932
+08_family_effect	eta2_median [HAPLOTYPE (structural haplotypes)]	0.6066565653946936	median variance explained by family over 4 markers; null median 0.1906
+09_cross_marker_concordance	auc_within_vs_between [SNP (bisnp)]	0.9998635611075689	5451 markers; recovery 98.7% of within-family pairs above the 99.9th percentile of between-family pairs
+09_cross_marker_concordance	auc_within_vs_between [DEL (gt:sv.vcf.gz)]	0.9987877929172472	605 markers; recovery 82.4% of within-family pairs above the 99.9th percentile of between-family pairs
+09_cross_marker_concordance	auc_within_vs_between [DUP (gt:sv.vcf.gz)]	0.9904466537049719	148 markers; recovery 33.3% of within-family pairs above the 99.9th percentile of between-family pairs
+09_cross_marker_concordance	auc_within_vs_between [HAPLOTYPE (structural haplotypes)]	0.8020507815062329	4 markers; recovery 2.5% of within-family pairs above the 99.9th percentile of between-family pairs

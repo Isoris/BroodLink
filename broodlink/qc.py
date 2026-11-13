@@ -69,7 +69,7 @@ def sample_checks(sets, R, PS, samples_meta, all_samples, cfg):
     for ms in sets:                                              # samples missing from an input
         for s in sorted(set(all_samples) - set(ms.samples)):
             flags.append({"sample": s, "reason": "missing from an input", "rule": "sample absent from the input's sample list", "value": ms.name, "auto_exclude": False})
-    for name, g in PS.groupby("input", sort=False):              # low coverage
+    for name, g in (PS.groupby("input", sort=False) if len(PS) else []):     # low coverage
         med = g.call_rate.median(); thr = q["low_coverage_factor"] * med
         for r in g[g.call_rate < thr].itertuples():
             flags.append({"sample": r.sample, "reason": "low coverage", "rule": f"call rate below {q['low_coverage_factor']} x cohort median ({thr:.3f}) in {name}",
