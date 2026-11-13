@@ -135,7 +135,7 @@ caveats in [docs/BENCHMARK.md](docs/BENCHMARK.md).
 | synthetic | `--bisnp` only (GRM) | 15 / 15 | 7 / 7 nominated, none can be "supported" without an SV class | 18 s |
 | synthetic | `--gt` only (605 deletions, GRM) | 12 / 15 | 3 / 7 | 7 s |
 | original cohort (reference = full run) | `--relatedness` only | 51 / 51 | same 90 nominated pairs; no audit | 3 min |
-| original cohort | `--gt` only (17,000 deletions, GRM) | 42 / 51 | 4 of the 6 supported links, plus 2 others | 18 min |
+| original cohort | `--gt` only (17,000 deletions, GRM) | 42 / 51 | 4 of the 6 supported links, plus 2 others | 16 min |
 
 Without k2 (any GRM mode) families that share a parent tend to merge; that is the main
 weakness of the single-input modes.

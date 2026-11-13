@@ -51,7 +51,7 @@ Runs were made through a local, git-ignored configuration; no sample identifier 
 |---|---|---|---|---|---|
 | full run (relatedness + DEL + DUP + 41 intervals) | `broodlink run`, 20,000 permutations | 51 / 51 | 1.00 / 1.00 | 6 / 0 | not timed as one run (interrupted and resumed step by step) |
 | `--relatedness` only | `broodlink run`, 20,000 permutations | 51 / 51 | 1.00 / 1.00 | not audited; all 6 among the 54 nominated family pairs | 183 |
-| `--gt` only (DEL and DUP matrices) | `broodlink run`, 20,000 permutations; GRM of 17,266 deletions, audit on duplications | 42 / 51 (49 called) | 0.80 / 0.99 | 4 / 2 | 1,069 |
+| `--gt` only (DEL and DUP matrices) | `broodlink run`, 20,000 permutations; GRM of 17,276 deletions, audit on duplications | 42 / 51 (49 called) | 0.80 / 0.99 | 4 / 2 | 985 |
 | SNPs (stand-in for `--bisnp` with a second input) | stored SNP GRM of the original benchmark (every third SNP, 1,307,168 SNPs), nomination and audit by the library functions, 5,000 permutations; **not** through the command line | 46 / 51 (49 called) | 0.98 / 0.99 | 6 / 1 | not timed |
 | `--bisnp` only through the command line | **not run** (see below) | | | | |
 | `--snp_indel` only | **not run**: the small-variant cohort VCF was not among the located inputs | | | | |
