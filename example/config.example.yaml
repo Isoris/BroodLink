@@ -1,0 +1,13 @@
+# Example configuration for the synthetic cohort in tests/data (80 individuals, 60 Mb, 6,000 SNPs).
+# Only the keys that differ from the defaults (config.yaml) are listed. They differ because the
+# synthetic genome is small, not because the defaults were tuned.
+seed: 1
+nomination:
+  n_permutations: 5000        # default 20000; 5000 keeps the example under a minute
+family_effect:
+  n_permutations: 200         # default 1000
+inversions:
+  min_unrelated: 20           # default 30; the synthetic cohort has 23 individuals without a first-degree pair
+  snp_scan:
+    window_snps: 25           # default 100; 750 SNPs per chromosome would give only 7 windows
+    z_outlier: 2.5            # default 3.0; an interval spans about a tenth of a 7.5-Mb chromosome

@@ -294,7 +294,7 @@ def scan_snps(ms, cfg):
                         runs.append([w, w])
                 for a, b in runs:
                     nhit = int(((hit >= a) & (hit <= b)).sum())
-                    s, e = int(pos[a * W]), int(pos[(b + 1) * W - 1])
+                    s, e = int(pos[a * W]) - 1, int(pos[(b + 1) * W - 1])
                     if nhit >= c["min_windows"] and e - s >= c["min_size_bp"]:
                         cands.append({"chrom": ch, "start": s, "end": e, "n_outlier_windows": nhit, "mds_coordinate": co + 1,
                                       "max_abs_z": float(np.abs(z[a:b + 1, co]).max()), "mean_pc1_variance_share": float(p1[a:b + 1].mean()),
@@ -340,7 +340,7 @@ def scan_dels(ms, cfg):
             if seg.LD_mean_abs_r.max() < core:
                 continue
             m = (ms.chrom == ch) & (ms.pos >= seg.start.min()) & (ms.pos < seg.end.max()) & poly
-            cands.append({"chrom": ch, "start": int(ms.pos[m].min()), "end": int(ms.pos[m].max()), "n_outlier_windows": int(seg.outlier.sum()),
+            cands.append({"chrom": ch, "start": int(ms.pos[m].min()) - 1, "end": int(ms.pos[m].max()), "n_outlier_windows": int(seg.outlier.sum()),
                           "max_LD": float(seg.LD_mean_abs_r.max()), "n_deletions": int(seg.n_deletions.sum()), "scan": "deletion LD"})
     return _merge_candidates(pd.DataFrame(cands), "DEL"), T, notes, time.time() - t0
 
@@ -363,6 +363,31 @@ def _merge_candidates(C, tag):
     C.insert(0, "interval", [f"scan{tag}_{c}:{s}-{e}" for c, s, e in zip(C.chrom, C.start, C.end)])
     C["source"] = "scan"; C["label"] = SCAN_LABEL
     return C
+
+
+def combine_scans(parts):
+    """Union of the SNP-scan and deletion-scan candidates; overlapping candidates become one interval."""
+    cols = ["interval", "chrom", "start", "end", "source", "scan", "n_outlier_windows", "label"]
+    parts = [p for p in parts if len(p)]
+    if not parts:
+        return pd.DataFrame(columns=cols)
+    C = pd.concat(parts, ignore_index=True).sort_values(["chrom", "start"])
+    out = []
+    for ch, g in C.groupby("chrom", sort=False):
+        cur = None
+        for r in g.to_dict("records"):
+            if cur is not None and r["start"] <= cur["end"]:
+                cur["end"] = max(cur["end"], r["end"]); cur["scan"] = " + ".join(sorted(set(cur["scan"].split(" + ")) | {r["scan"]}))
+                cur["n_outlier_windows"] = max(cur["n_outlier_windows"], r["n_outlier_windows"])
+            else:
+                if cur is not None:
+                    out.append(cur)
+                cur = {"chrom": ch, "start": int(r["start"]), "end": int(r["end"]), "scan": r["scan"], "n_outlier_windows": int(r["n_outlier_windows"])}
+        out.append(cur)
+    C = pd.DataFrame(out)
+    C.insert(0, "interval", [f"scan_{c}:{s}-{e}" for c, s, e in zip(C.chrom, C.start, C.end)])
+    C["source"] = "scan"; C["label"] = SCAN_LABEL
+    return C[cols]
 
 
 def overlap_table(supplied, scanned):
@@ -432,18 +457,18 @@ def _gmm_fit(X, k, rng, restarts):
         mu = np.array(c); lab = np.argmin(((X[:, None] - mu[None]) ** 2).sum(2), 1)
         pi = np.array([max((lab == j).mean(), 1e-3) for j in range(k)]); pi /= pi.sum()
         cov = np.array([np.cov(X[lab == j].T) + floor * np.eye(d) if (lab == j).sum() > 2 else np.cov(X.T) + floor * np.eye(d) for j in range(k)])
-        ll_old = -np.inf
+        ll_old = -np.inf; I = floor * np.eye(d); c0 = d * np.log(2 * np.pi)
         for _ in range(200):
-            logp = np.zeros((n, k))
-            for j in range(k):
-                dif = X - mu[j]; inv = np.linalg.inv(cov[j]); _, ld = np.linalg.slogdet(cov[j])
-                logp[:, j] = np.log(pi[j]) - .5 * (np.einsum("ij,jk,ik->i", dif, inv, dif) + ld + d * np.log(2 * np.pi))
-            m = logp.max(1, keepdims=True); ll = float((m[:, 0] + np.log(np.exp(logp - m).sum(1))).sum())
-            r = np.exp(logp - m); r /= r.sum(1, keepdims=True)
+            inv = np.linalg.inv(cov); ld = np.linalg.slogdet(cov)[1]
+            dif = X[:, None, :] - mu[None]
+            logp = np.log(pi)[None] - .5 * (np.einsum("nkd,kde,nke->nk", dif, inv, dif) + ld[None] + c0)
+            m = logp.max(1, keepdims=True); r = np.exp(logp - m); sr = r.sum(1, keepdims=True)
+            ll = float((m[:, 0] + np.log(sr[:, 0])).sum()); r /= sr
             if abs(ll - ll_old) < 1e-7:
                 break
             ll_old = ll; nk = r.sum(0) + 1e-9; pi = nk / n; mu = (r.T @ X) / nk[:, None]
-            cov = np.array([((r[:, j, None] * (X - mu[j])).T @ (X - mu[j])) / nk[j] + floor * np.eye(d) for j in range(k)])
+            dif = X[:, None, :] - mu[None]
+            cov = np.einsum("nk,nkd,nke->kde", r, dif, dif) / nk[:, None, None] + I[None]
         if best is None or ll > best[0]:
             best = (ll, r.argmax(1), mu)
     ll, lab, mu = best; p = k * (d + d * (d + 1) / 2) + (k - 1)
