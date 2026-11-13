@@ -405,8 +405,6 @@ def tag_variants(intervals, geno, samples, sv_sets, cfg):
             if not len(m) or (g == 0).sum() < c["min_called_per_class"] or (g == 2).sum() < c["min_called_per_class"]:
                 continue
             G = mm.G[m]
-            for cls, name in ((0, "0"), (2, "2")):
-                pass
             c0 = G[:, g == 0]; c2 = G[:, g == 2]
             n0 = (c0 >= 0).sum(1); n2 = (c2 >= 0).sum(1)
             f0 = (c0 > 0).sum(1) / np.maximum(n0, 1); f2 = (c2 > 0).sum(1) / np.maximum(n2, 1)

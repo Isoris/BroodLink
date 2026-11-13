@@ -46,7 +46,7 @@ DEFAULTS = {
         "k_match": 40, "support_rule": "median_of_gate1_pass",
         "gate1_max_markers": 50000,                # new in BroodLink: seeded subsample above this
     },
-    "network": {"slot_tiers": [4, 3, 2]},
+    "network": {"slot_tiers": [4, 3, 2], "figure_min_family_size": 3},   # original post-audit network: families >= 3
     "inversions": {
         "scan": True,                              # default on; --no-inversion-scan turns it off
         "min_unrelated": 30,                       # new in BroodLink (original subset: 78)

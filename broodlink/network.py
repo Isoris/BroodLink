@@ -58,10 +58,21 @@ def build(E, cfg, sizes):
                    key=lambda c: (-sum(sizes.get(f, 0) for f in c), _fkey(c[0])))
     comp_of = {f: i + 1 for i, c in enumerate(comps) for f in c}
     fam["component"] = [comp_of.get(a, 0) for a in fam.unit_a]
-    cl = sorted((tuple(sorted(c, key=_fkey)) for c in nx.find_cliques(G)),
-                key=lambda c: (comp_of[c[0]], [_fkey(x) for x in c])) if G.number_of_nodes() else []
-    LP = pd.DataFrame([{"latent_parent": f"H{i + 1}", "component": comp_of[c[0]], "n_families": len(c), "families": ",".join(c)}
-                       for i, c in enumerate(cl)], columns=["latent_parent", "component", "n_families", "families"])
+    # latent parents = maximal cliques of the kept links, once per minimum-family-size tier
+    lp_rows, tier_summary = [], {}
+    for t in cfg["network"]["slot_tiers"]:
+        kt = kept[kept.min_n >= t]
+        Gt = nx.Graph(); Gt.add_edges_from(zip(kt.unit_a, kt.unit_b))
+        clt = sorted((tuple(sorted(c, key=_fkey)) for c in nx.find_cliques(Gt)),
+                     key=lambda c: (comp_of[c[0]], [_fkey(x) for x in c])) if Gt.number_of_nodes() else []
+        for i, c in enumerate(clt):
+            lp_rows.append({"min_family_size": t, "latent_parent": f"H{i + 1}", "component": comp_of[c[0]],
+                            "n_families": len(c), "families": ",".join(c)})
+        tier_summary[t] = {"n_links": int(len(kt)), "n_families": Gt.number_of_nodes(), "n_latent_parents": len(clt),
+                           "n_components": nx.number_connected_components(Gt) if Gt.number_of_nodes() else 0}
+    LP = pd.DataFrame(lp_rows, columns=["min_family_size", "latent_parent", "component", "n_families", "families"])
+    ft = cfg["network"]["figure_min_family_size"]
+    cl = [tuple(x.split(",")) for x in LP[LP.min_family_size == ft].families] if ft in cfg["network"]["slot_tiers"] else []
     inc = {}
     for c in cl:
         for f in c:
@@ -78,6 +89,6 @@ def build(E, cfg, sizes):
     summary = {"n_links_nominated_family_pairs": len(fam), "n_links_kept": len(kept), "n_links_supported": len(sup),
                "n_families_in_network": G.number_of_nodes(), "n_components": len(comps),
                "n_families_on_supported_links": Gs.number_of_nodes(), "n_components_supported": len(scomps),
-               "n_latent_parents": len(cl), "slot_violations": viol, "junction_families": junction}
+               "n_latent_parents": len(cl), "latent_parent_tier": ft, "tiers": tier_summary, "slot_violations": viol, "junction_families": junction}
     return {"edges": fam, "nodes": nodes, "latent_parents": LP, "summary": summary, "graph": G,
             "supported_graph": Gs, "components": comps}
