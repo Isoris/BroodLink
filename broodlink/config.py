@@ -26,6 +26,14 @@ DEFAULTS = {
     "relatedness": {
         "theta_duplicate": 0.354, "theta_first": 0.177, "theta_second": 0.0884, "theta_third": 0.0442,
         "ngsrelate_binary": "ngsRelate",
+        "method": "auto",                          # auto | ml | grm (auto: ml, the likelihood estimator; new in BroodLink)
+        "ml": {
+            "max_sites": 50000,                    # evenly spaced sites kept for the estimator (run time grows with it)
+            "maf_min": 0.05,
+            "min_informative_fraction": 0.5,       # share of individuals with an informative likelihood at the site
+            "genotype_error": 0.01,                # for inputs with hard genotypes only
+            "em_iterations": 200, "em_tolerance": 1e-5,
+        },
         "grm": {
             "af_min": 0.05, "af_max": 0.95,
             "min_called_fraction_snp": 0.6944,     # 150 of 216 in the original
@@ -71,7 +79,7 @@ DEFAULTS = {
     "barcode": {"posterior_call": 0.90, "posterior_strict": 0.95, "genotype_error": 0.03},
     "family_effect": {"af_min": 0.05, "af_max": 0.95, "min_called": 20, "n_permutations": 1000,
                       "max_markers_per_class": 20000},
-    "figures": {"dpi": 300},
+    "figures": {"dpi": 450},                    # raster resolution of the PNG files (author rule: at least 450)
 }
 
 

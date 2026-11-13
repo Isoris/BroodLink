@@ -19,7 +19,7 @@ import pandas as pd
 from scipy.stats import mannwhitneyu, norm
 
 from .family_effect import eta_vec
-from .io import allele_freq, log
+from .io import Progress, allele_freq, detail, log
 
 SCAN_LABEL = "candidate, detected automatically, not validated"
 
@@ -185,7 +185,9 @@ def genotype_intervals(intervals, snp, dels, samples, unrel, fam_of, cfg, seed):
     genotype matrix dict interval -> array aligned to `samples`)."""
     c = cfg["inversions"]
     rows, inds, geno = [], [], {}
+    pr = Progress(f"local PCA genotyping of {len(intervals)} intervals", len(intervals), min_total=5)
     for k, r in enumerate(intervals.itertuples()):
+        pr.update(k)
         base = {"interval": r.interval, "chrom": r.chrom, "start": int(r.start), "end": int(r.end), "span_bp": int(r.end - r.start),
                 "source": getattr(r, "source", "supplied"), "tier_supplied": getattr(r, "tier_supplied", "")}
         res = {}

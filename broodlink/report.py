@@ -8,7 +8,7 @@ import os
 import pandas as pd
 
 from . import __version__, families
-from .io import log, write_tsv
+from .io import detail, log, write_tsv
 from .pipeline import FOLDER, STEPS
 
 STEP_TITLE = {"qc": "0. Quality control", "relatedness": "1. Pairwise relatedness", "families": "2. Full-sib families",
@@ -303,12 +303,17 @@ def write_tables(run):
 
 def write_all(run, figures=True):
     out = run.out
+    log("outputs: writing reports, tables, tracks" + (" and figures" if figures else ""))
     with open(os.path.join(out, FOLDER["qc"], "qc_report.md"), "w", encoding="utf-8", newline="\n") as fh:
         fh.write(qc_report(run))
+    detail("00_qc/qc_report.md")
     write_tsv(statistics(run), os.path.join(out, "statistics.tsv"), run.header("Every headline number of the run with its definition."))
+    detail("statistics.tsv")
     write_tables(run)
+    detail("tables/ (TSV + XLSX with a definitions sheet)")
     from .tracks import write_tracks
     write_tracks(run)
+    detail("tracks/ (GFF3 + BED)")
     man = None
     if figures:
         from .figures import make_figures
@@ -320,3 +325,4 @@ def write_all(run, figures=True):
     from .config import dump_config
     dump_config(run.cfg, os.path.join(out, "config_used.yaml"))
     log(f"done: {out} (run_report.md, statistics.tsv, methods_text.md, tables/, figures/, tracks/)")
+    log(f"start with {os.path.join(out, 'run_report.md')}")

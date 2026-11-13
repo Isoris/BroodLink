@@ -25,8 +25,57 @@ class InputError(SystemExit):
         super().__init__(f"ERROR: {msg}")
 
 
-def log(msg):
-    print(f"[broodlink] {msg}", flush=True)
+import time as _time
+
+# 0 = errors and the final line only, 1 = step headers and results (--quiet),
+# 2 = also details and progress of long loops (default)
+VERBOSE = 2
+_T0 = _time.time()
+
+
+def set_verbosity(level):
+    global VERBOSE, _T0
+    VERBOSE = int(level); _T0 = _time.time()
+
+
+def _clock():
+    s = int(_time.time() - _T0)
+    return f"{s // 60:d}:{s % 60:02d}"
+
+
+def log(msg, level=1):
+    """Print one line with the time since the start of the run. level 1 = always (unless
+    silenced), level 2 = detail, hidden with --quiet."""
+    if level <= VERBOSE or str(msg).startswith(("WARNING", "ERROR")):
+        print(f"[broodlink {_clock()}] {msg}", flush=True)
+
+
+def detail(msg):
+    log("    " + str(msg), level=2)
+
+
+class Progress:
+    """Progress of a long loop, printed about every 10% (detail level), with the time left.
+    Nothing is printed until the loop has run for `quiet_s` seconds, so loops that finish
+    quickly stay silent."""
+
+    def __init__(self, label, total, min_total=20, quiet_s=2.0):
+        self.label, self.total, self.quiet_s = label, int(total), float(quiet_s)
+        self.on = VERBOSE >= 2 and self.total >= min_total
+        self.t0 = _time.time(); self.next = 0.1
+
+    def update(self, i):
+        if not self.on:
+            return
+        f = (i + 1) / self.total
+        if f >= self.next - 1e-9 or i + 1 == self.total:
+            el = _time.time() - self.t0
+            while self.next <= f + 1e-9:
+                self.next += 0.1
+            if el < self.quiet_s:                 # short loops print nothing at all
+                return
+            left = el / f * (1 - f)
+            log(f"    {self.label}: {i + 1:,}/{self.total:,} ({100 * f:.0f}%)" + (f", about {left:.0f} s left" if f < 1 else f", {el:.1f} s"), level=2)
 
 
 def _open(path):

@@ -127,3 +127,93 @@ def unrelated_subset(R, ids, cfg):
         s = min(left, key=lambda x: (len(adj[x] & left), x))
         keep.append(s); left -= adj[s] | {s}
     return sorted(keep)
+
+
+# --------------------------------------------------------------------------- likelihood estimator
+def gl_from_genotypes(G, error=0.01):
+    """Genotype likelihoods from hard genotypes: 1 - error on the call, error / 2 elsewhere; flat when missing."""
+    m, n = G.shape
+    L = np.full((m, n, 3), error / 2, np.float32)
+    for g in (0, 1, 2):
+        L[:, :, g][G == g] = 1 - error
+    L[G < 0] = 1 / 3
+    return L
+
+
+def gl_allele_freq(L, iters=30):
+    """Frequency of the counted allele per site, by EM on the genotype likelihoods under Hardy-Weinberg."""
+    L = L.astype(np.float64)
+    p = np.clip((L[:, :, 1] + 2 * L[:, :, 2]).sum(1) / np.maximum(2 * L.sum(2).sum(1), 1e-12), 0.01, 0.99)
+    for _ in range(iters):
+        pr = np.stack([(1 - p) ** 2, 2 * p * (1 - p), p ** 2], 1)[:, None, :]
+        w = L * pr
+        w /= np.maximum(w.sum(2, keepdims=True), 1e-300)
+        p = np.clip((w[:, :, 1] + 2 * w[:, :, 2]).mean(1) / 2, 1e-4, 1 - 1e-4)
+    return p
+
+
+def _ibd_tables(p):
+    """P(g1, g2 | z shared alleles identical by descent) for z = 0, 1, 2: three (sites, 3, 3) arrays."""
+    q = 1 - p
+    h = np.stack([q ** 2, 2 * p * q, p ** 2], 1)
+    T0 = h[:, :, None] * h[:, None, :]
+    T1 = np.zeros((len(p), 3, 3))
+    T1[:, 0, 0] = q ** 3; T1[:, 0, 1] = p * q ** 2; T1[:, 1, 0] = p * q ** 2
+    T1[:, 1, 1] = p * q; T1[:, 1, 2] = p ** 2 * q; T1[:, 2, 1] = p ** 2 * q; T1[:, 2, 2] = p ** 3
+    T2 = np.zeros((len(p), 3, 3))
+    for g in range(3):
+        T2[:, g, g] = h[:, g]
+    return T0, T1, T2
+
+
+def ml_relatedness(L, samples, cfg, source, progress=None):
+    """Maximum-likelihood k0, k1, k2 for every pair from genotype likelihoods (sites x samples x 3).
+
+    The model is the one of NGSrelate for non-inbred individuals (Korneliussen and Moltke 2015):
+    at each site the pair shares 0, 1 or 2 alleles identical by descent with probabilities
+    k0, k1, k2; genotypes are summed over with their likelihoods; allele frequencies come from
+    the same likelihoods; sites are treated as independent. k is fitted by EM from several
+    starting points. theta = k1 / 4 + k2 / 2. Reimplemented here; not the NGSrelate code.
+    Returns (pair table, number of sites used).
+    """
+    c = cfg["relatedness"]["ml"]
+    L = np.asarray(L, np.float32)
+    p = gl_allele_freq(L)
+    info = (np.abs(L.max(2) - L.min(2)) > 1e-6).mean(1)
+    ok = (p >= c["maf_min"]) & (p <= 1 - c["maf_min"]) & (info >= c["min_informative_fraction"])
+    L, p = L[ok], p[ok]
+    m, n = L.shape[0], L.shape[1]
+    if m == 0:
+        return None, 0
+    T = [t.astype(np.float32) for t in _ibd_tables(p)]
+    starts = np.array([[1 / 3, 1 / 3, 1 / 3], [0.98, 0.01, 0.01], [0.25, 0.5, 0.25], [0.5, 0.5, 0.0], [0.02, 0.02, 0.96]])
+    rows = []
+    for i in range(n - 1):
+        J = np.arange(i + 1, n)
+        # likelihood of each site under z = 0, 1, 2 for i against every later individual: (pairs, sites, 3)
+        S = np.stack([np.einsum("sjb,sb->js", L[:, J, :], np.einsum("sa,sab->sb", L[:, i, :], Tz)) for Tz in T], 2).astype(np.float64)
+        S = np.maximum(S, 1e-300)
+        best_ll = np.full(len(J), -np.inf); best_k = np.zeros((len(J), 3))
+        for k0 in starts:
+            k = np.tile(k0, (len(J), 1))
+            for _ in range(c["em_iterations"]):
+                w = S * k[:, None, :]
+                tot = w.sum(2)
+                kn = (w / tot[:, :, None]).mean(1)
+                done = np.abs(kn - k).max() < c["em_tolerance"]
+                k = kn
+                if done:
+                    break
+            ll = np.log((S * k[:, None, :]).sum(2)).sum(1)
+            better = ll > best_ll
+            best_ll[better] = ll[better]; best_k[better] = k[better]
+        for jj, j in enumerate(J):
+            rows.append((samples[i], samples[j], best_k[jj, 0], best_k[jj, 1], best_k[jj, 2]))
+        if progress is not None:
+            progress.update(i)
+    R = pd.DataFrame(rows, columns=["id1", "id2", "k0", "k1", "k2"])
+    a = np.where(R.id1 < R.id2, R.id1, R.id2); b = np.where(R.id1 < R.id2, R.id2, R.id1)
+    R["id1"], R["id2"] = a, b
+    R.insert(2, "theta", R.k1 / 4 + R.k2 / 2)
+    R["source"] = source
+    return R, int(m)

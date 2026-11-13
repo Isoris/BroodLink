@@ -35,6 +35,7 @@ def add_inputs(p):
     o.add_argument("--seed", type=int, help="overrides the seed of the config")
     o.add_argument("--permutations", type=int, metavar="N", help="overrides nomination.n_permutations (for quick tests)")
     o.add_argument("--no-figures", action="store_true", help="skip the figures")
+    o.add_argument("-q", "--quiet", action="store_true", help="print only the step headers and their results (no details, no progress of long loops)")
 
 
 def build_parser():
@@ -71,6 +72,9 @@ def make_cfg(a):
 
 def main(argv=None):
     a = build_parser().parse_args(argv)
+    from .io import set_verbosity
+    # sweeps and the benchmark run the pipeline many times: keep their output to one line per run
+    set_verbosity(1 if getattr(a, "quiet", False) or a.cmd in ("sweep", "benchmark") else 2)
     cfg = make_cfg(a)
     if a.cmd == "sweep":
         from .sweep import run_sweeps

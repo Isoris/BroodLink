@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from .io import allele_freq
+from .io import Progress, allele_freq, detail
 
 
 def eta_vec(G, lab, min_called):
@@ -45,8 +45,11 @@ def family_effect(ms, fam_of, cfg, seed, n_perm=None):
     Gk = G[ok]; o = obs[ok]
     rng = np.random.default_rng(seed)
     null = np.empty((n_perm, len(o)))
+    detail(f"{ms.name}: {len(o):,} markers tested in {len(set(lab))} families")
+    pr = Progress(f"{ms.name}: family-label permutations", n_perm, min_total=100)
     for i in range(n_perm):
         null[i] = eta_vec(Gk, rng.permutation(lab), c["min_called"])
+        pr.update(i)
     pe = (1 + (null >= o[None, :]).sum(0)) / (n_perm + 1)
     d = pd.DataFrame({"marker_class": ms.klass, "marker_set": ms.name, "id": ms.ids[keep][ok], "chrom": ms.chrom[keep][ok],
                       "pos": ms.pos[keep][ok], "af": allele_freq(Gk), "eta2_obs": o, "null_median": np.nanmedian(null, 0),

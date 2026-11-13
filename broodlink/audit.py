@@ -13,7 +13,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from .io import allele_freq
+from .io import allele_freq, detail
 
 SV_LIKE = ("DEL", "DUP", "INS", "INV", "SV")
 
@@ -122,8 +122,10 @@ def run_audit(nom, unit_of, audit_sets, cfg, seed, single_input=False):
     g1set = pref[0]
     scored = E[isfam & (E.min_n >= 2)]
     pairs = list(zip(scored.unit_a, scored.unit_b))
+    detail(f"Gate 1 (one shared parent vs none or both): scoring {len(pairs):,} family pairs on {g1set.name}")
     st, n1 = gate1_scores(g1set, fam_members, pairs, cfg, seed)
     summ["gate1_class"] = g1set.name; summ["gate1_markers"] = n1
+    detail(f"Gate 1 used {n1:,} markers")
     E = E.merge(st, on=["unit_a", "unit_b"], how="left")
     E["gate1"] = np.where(E.LLR_one.notna(), (E.LLR_one > 0) & (E.LLR_both < 0), np.nan)
     g2sets = [m for m in audit_sets if m.klass in SV_LIKE]
@@ -131,6 +133,7 @@ def run_audit(nom, unit_of, audit_sets, cfg, seed, single_input=False):
     for gi, m in enumerate(g2sets):
         k = m.klass if sum(x.klass == m.klass for x in g2sets) == 1 else f"{m.klass}_{gi + 1}"
         col = f"share_{k}"
+        detail(f"Gate 2 (sharing of inherited {m.klass}): {m.name}, against matched non-nominated pairs")
         sh, n2 = sharing(m, fam_members, pairs, cfg)
         E = E.merge(pd.DataFrame({"unit_a": [p[0] for p in pairs], "unit_b": [p[1] for p in pairs], col: sh}), on=["unit_a", "unit_b"], how="left")
         pool = E[E.auditable & E.LLR_one.notna()]
@@ -172,3 +175,16 @@ def run_audit(nom, unit_of, audit_sets, cfg, seed, single_input=False):
     if not g2sets:
         summ["gate2_note"] = "no structural-variant class in the audit set: Gate 2 not run, links can reach 'Gate-1 only' at most"
     return E, summ
+
+
+def matched_null(E, col, k_match):
+    """Observed sharing of the Gate-1-compatible nominated auditable pairs and the pooled matched
+    null (for each of them, the k_match non-nominated auditable pairs nearest in LLR_one), as
+    computed inside run_audit. Used by the figures; returns (observed, null) arrays."""
+    pool = E[E.auditable & E.LLR_one.notna() & E[col].notna()]
+    g1 = pool[pool.nominated & (pool.gate1 == 1)]; npool = pool[~pool.nominated]
+    matched = []
+    for r in g1.itertuples():
+        d = (npool.LLR_one - r.LLR_one).abs().sort_values(kind="stable").index[:k_match]
+        matched.extend(npool.loc[d, col].tolist())
+    return g1[col].to_numpy(float), np.array(matched, float)

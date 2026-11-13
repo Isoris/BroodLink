@@ -9,6 +9,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from .io import Progress
+
 
 def bh(p):
     p = np.asarray(p, float); n = len(p); o = np.argsort(p)
@@ -45,9 +47,11 @@ def nominate(R, unit_of, cfg, seed, n_perm=None, marker_class="", n_markers=np.n
     iu, ju = np.triu_indices(U, 1)
     rng = np.random.default_rng(seed)
     ge = np.zeros(len(iu), int); o = obs[iu, ju]
-    for _ in range(n_perm):
+    pr = Progress(f"nomination permutations ({U} units, {len(iu):,} unit pairs)", n_perm, min_total=1000)
+    for i in range(n_perm):
         f, _s = frac(rng.permutation(lab))
         ge += (f[iu, ju] >= o - 1e-12)
+        pr.update(i)
     p = (ge + 1) / (n_perm + 1)
     un = np.array(units)
     g = pd.DataFrame({"unit_a": un[iu], "unit_b": un[ju], "n_a": n[iu], "n_b": n[ju], "n_cross_pairs": n[iu] * n[ju],

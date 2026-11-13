@@ -100,7 +100,7 @@ def run_benchmark(data, out, cfg):
     for k, (name, args) in enumerate(modes):
         o = os.path.join(out, f"mode_{k + 1}")
         t0 = time.time()
-        main(["run", *args, *common, "--config", cfgp, "--out", o, "--no-figures"])
+        main(["run", *args, *common, "--config", cfgp, "--out", o, "--no-figures", "--quiet"])
         sec = time.time() - t0
         with open(os.path.join(o, "01_relatedness", "summary.json"), encoding="utf-8") as fh:
             rel = json.load(fh)

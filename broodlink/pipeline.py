@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from . import __version__, audit, barcode, families, family_effect, inversions, network, nomination, qc, relatedness
-from .io import (InputError, MarkerSet, expand, log, read_beagle, read_depth, read_fai, read_haplotypes,
+from .io import (InputError, MarkerSet, detail, expand, log, read_beagle, read_depth, read_fai, read_haplotypes,
                  read_intervals_bed, read_relatedness, read_samples, read_variants, sniff, write_tsv)
 from .mask import apply_mask, build_mask
 
@@ -27,6 +27,52 @@ FOLDER = {"qc": "00_qc", "relatedness": "01_relatedness", "families": "02_famili
 ID_COLS = ("individual", "sample", "id1", "id2", "sample_1", "sample_2", "unit_a", "unit_b", "family", "unit", "interval",
            "parent", "families", "supplied_interval", "scan_interval", "variant_id", "id", "chrom", "latent_parent")
 POINT = ("SNP", "INDEL", "SNP_INDEL")
+WHAT = {"qc": "quality control of every input (flag, do not remove)",
+        "relatedness": "pairwise relatedness (theta, k0, k1, k2) and relationship classes",
+        "families": "full-sib families from theta and k2 (relatedness-based groups)",
+        "nomination": "candidate half-sib links between units (size-matched permutation test, BH q)",
+        "audit": "audit of nominated family pairs on markers not used for nomination (Gate 1, Gate 2)",
+        "network": "network of families, components, latent parents, slot limit",
+        "haplotypes": "large structural haplotypes: local PCA genotyping and scan",
+        "barcode": "posterior genotype of each shared parent at the structural haplotypes",
+        "family_effect": "variance explained by family (eta squared) per marker class",
+        "concordance": "kinship of every marker class within and between families"}
+
+
+def _result_line(step, s):
+    """One line of headline numbers printed when a step finishes."""
+    g = s.get
+    try:
+        if step == "qc":
+            return f"{g('n_analysis_set')} of {g('n_samples_input')} individuals in the analysis set; {g('n_flagged_kept')} flagged and kept, {g('n_removed')} removed; {g('n_pairs_identical_genotypes')} pairs with identical genotypes"
+        if step == "relatedness":
+            m = f"; {g('n_markers'):,} markers" if g("n_markers") else ""
+            return f"source: {g('mode')}{m}; {g('n_unrelated_subset')} individuals in the unrelated subset"
+        if step == "families":
+            return f"{g('n_families')} families holding {g('n_individuals_in_families')} individuals; {g('n_unassigned')} unassigned; {g('n_units')} units; {g('n_not_closed')} families not fully closed"
+        if step == "nomination":
+            return f"{g('n_unit_pairs', 0):,} unit pairs tested, {g('n_nominated', 0)} nominated ({g('n_nominated_family_pairs', 0)} between families)"
+        if step == "audit":
+            if not g("ran"):
+                return "not run: links stay 'nominated, not audited'"
+            return f"{g('n_auditable_pairs')} auditable pairs, {g('n_nominated_auditable')} nominated, {g('n_gate1_pass')} pass Gate 1, {g('n_rejected')} rejected; {g('n_supported')} supported, {g('n_gate1_only')} Gate-1 only"
+        if step == "network":
+            ks = [k for k in s if "component" in k or "latent" in k or "kept" in k]
+            return "; ".join(f"{k.replace('_', ' ')}: {s[k]}" for k in ks if not isinstance(s[k], (dict, list)))[:300] or "built"
+        if step == "haplotypes":
+            r = f"{g('n_intervals_genotyped', 0)} intervals genotyped ({g('n_high_confidence', 0)} high confidence, {g('n_candidate', 0)} candidate); {g('n_barcode_intervals', 0)} used for the barcode"
+            if g("scan_ran"):
+                r += f"; scan: {g('n_scan_candidates', 0)} candidate intervals"
+            return r
+        if step == "barcode":
+            return f"{g('n_states', 0)} parent x interval states; {g('n_called', 0)} called at posterior >= {g('posterior_call')}, {g('n_called_strict', 0)} at >= {g('posterior_strict')}" if g("n_states") else "not run"
+        if step == "family_effect":
+            return "; ".join(f"{k}: median eta2 {v['eta2_median']:.3f} (null {v['null_median']:.3f}, {v['n_tested']:,} markers)" for k, v in (g("classes") or {}).items()) or "not run"
+        if step == "concordance":
+            return "; ".join(f"{k}: AUC {v['auc']:.3f}" for k, v in (g("classes") or {}).items()) or "not run"
+    except Exception:                                           # a progress line never stops a run
+        return ""
+    return ""
 
 
 def _json(o):
@@ -77,6 +123,12 @@ class Run:
     def finish(self, step, summary, t0):
         self.s[step] = summary
         self.timing[step] = time.time() - t0
+        st = self.ran.get(step) or ("", "", "", "")
+        res = _result_line(step, summary)
+        if st[0] == "no":
+            log(f"  -> skipped ({self.timing[step]:.1f} s): {st[3]}")
+        else:
+            log(f"  -> done in {self.timing[step]:.1f} s" + (f" [{st[2]}]" if st[2] else "") + (f": {res}" if res else ""))
         d = os.path.join(self.out, FOLDER[step]); os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, "summary.json"), "w", encoding="utf-8", newline="\n") as fh:
             json.dump({"summary": summary, "files": self.files.get(step, {}), "status": self.ran.get(step)}, fh, indent=1, default=_json, sort_keys=True)
@@ -114,14 +166,22 @@ class Run:
         t0 = time.time()
         if not any([a.bisnp, a.gt, a.snp_indel, a.vcf, a.relatedness]):
             raise InputError("at least one of --bisnp, --gt, --snp_indel, --vcf, --relatedness is required")
+        log("reading inputs")
         self.genome = read_fai(a.genome) if a.genome else {}
+        if a.genome:
+            detail(f"--genome: {len(self.genome)} sequences, {sum(self.genome.values()):,} bp")
         self.samples_meta = read_samples(a.samples) if a.samples else None
+        if self.samples_meta is not None:
+            detail(f"--samples: {len(self.samples_meta)} individuals")
         self.depth = read_depth(a.depth) if a.depth else None
+        if self.depth is not None:
+            detail(f"--depth: {len(self.depth)} samples")
         sets, bg = [], []
         if a.bisnp:
             files = expand(a.bisnp)
             bg = [f for f in files if sniff(f) == "beagle"]
             if bg:
+                detail(f"--bisnp: reading {len(bg)} Beagle file(s) of genotype likelihoods (every {cfg['genotypes']['bisnp_step']} SNP kept)")
                 ms = read_beagle(bg, None, cfg["genotypes"]["bisnp_step"], cfg["genotypes"]["gl_hard_call"], "bisnp", cfg["genotypes"]["max_markers_snp"])[0]
                 if all(re.fullmatch(r"Ind\d+", s) for s in ms.samples):
                     if self.samples_meta is not None and len(self.samples_meta) == len(ms.samples):
@@ -135,11 +195,16 @@ class Run:
                     sets += [m for m in read_variants(f, "bisnp", cfg)]
         for flag, paths in (("gt", a.gt), ("snp_indel", [a.snp_indel] if a.snp_indel else []), ("vcf", a.vcf)):
             for p in expand(paths or []):
-                sets += read_variants(p, flag, cfg)
+                detail(f"--{flag}: reading {os.path.basename(p)}")
+                new = read_variants(p, flag, cfg)
+                for m in new:
+                    detail(f"  {m.name}: {m.n:,} markers x {len(m.samples)} samples")
+                sets += new
         self.R_given, self.rel_info = (None, None)
         if a.relatedness:
             names = self.samples_meta.id.tolist() if self.samples_meta is not None else None
             self.R_given, self.rel_info = read_relatedness(a.relatedness, names)
+            detail(f"--relatedness: {self.rel_info['format']}, {self.rel_info['n_samples']} samples, {self.rel_info['n_pairs']:,} pairs")
         elif a.bisnp and bg:
             # the original analysis used the external tool NGSrelate; this branch needs the binary
             # and was never exercised on the development machine (tool not installed)
@@ -719,7 +784,7 @@ class Run:
         self.load_inputs()
         for i, step in enumerate(STEPS):
             if step in compute:
-                log(f"step {FOLDER[step]}")
+                log(f"[{i + 1}/{len(STEPS)}] {FOLDER[step]}: {WHAT[step]}")
                 getattr(self, "step_" + step)()
             else:
                 try:

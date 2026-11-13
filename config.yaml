@@ -30,6 +30,14 @@ relatedness:
   theta_second: 0.0884
   theta_third: 0.0442
   ngsrelate_binary: ngsRelate
+  method: auto
+  ml:
+    max_sites: 50000
+    maf_min: 0.05
+    min_informative_fraction: 0.5
+    genotype_error: 0.01
+    em_iterations: 200
+    em_tolerance: 1.0e-05
   grm:
     af_min: 0.05
     af_max: 0.95
@@ -123,4 +131,4 @@ family_effect:
   n_permutations: 1000
   max_markers_per_class: 20000
 figures:
-  dpi: 300
+  dpi: 450

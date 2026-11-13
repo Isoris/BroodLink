@@ -18,10 +18,51 @@ African catfish broodstock) and generalised. The refactored code returns that st
 from its intermediate tables ([docs/REPRODUCTION.md](docs/REPRODUCTION.md)). It has been run on
 two data sets: that cohort and a simulated one. Please read [Limits](#limits) before using it.
 
-## Quick start (synthetic data, one to two minutes)
+## How to run
 
+You need Python 3.10 or later and git. Everything below takes a few minutes.
+
+**1. Get the code**
+
+```bash
+git clone https://github.com/<github-user>/broodlink.git
+cd broodlink
 ```
+
+**2. Make a clean environment and install BroodLink**
+
+With conda / mamba:
+
+```bash
+mamba create -y -n broodlink python=3.12
+mamba activate broodlink
 pip install .
+```
+
+Or with plain Python: `python -m venv venv`, then `source venv/bin/activate`
+(Windows: `venv\Scripts\activate`), then `pip install .`
+
+**3. Run it on the example data** (simulated, included in the repository)
+
+The basic run needs only two files from whole-genome resequencing: SNP genotype likelihoods
+(Beagle, from ANGSD) and deletion / duplication genotype calls (VCF, such as those obtained
+from Manta or DELLY2):
+
+```bash
+broodlink run --bisnp tests/data/snps.beagle.gz --gt tests/data/sv.vcf.gz --out broodlink_out
+```
+
+From these two files BroodLink works out relatedness and the full-sib families, nominates
+and audits the shared-parent links (the deletions are the audit markers), scans the genome
+for candidate polymorphic inversions (polyINVs) by local PCA, genotypes them, and infers the
+genotype of each shared parent at them (the barcode).
+
+Every other input is optional and adds something: a relatedness table computed from the
+likelihoods (`--relatedness`, e.g. NGSrelate, gives k2 and is more accurate at low
+coverage), known polyINV intervals (`--inversions`), a callable mask, the assembly index,
+sample metadata and depth for QC. The full example with all of them:
+
+```bash
 broodlink run --relatedness tests/data/relatedness.tsv --bisnp tests/data/snps.beagle.gz \
     --gt tests/data/sv.vcf.gz --inversions tests/data/inversions.bed \
     --mask tests/data/callable.bed --genome tests/data/genome.fai \
@@ -29,16 +70,30 @@ broodlink run --relatedness tests/data/relatedness.tsv --bisnp tests/data/snps.b
     --config example/config.example.yaml --out broodlink_out
 ```
 
-Requires Python 3.10 or later; `pip install .` installs numpy, pandas, scipy, networkx,
-matplotlib, pyyaml and openpyxl. Without installing, `python -m broodlink.cli run ...` from
-the repository root does the same. Open `broodlink_out/run_report.md` first. The expected
-results of this command are in [example/expected/](example/expected/), and a test compares
-against them.
+The run prints each step as it goes (`[3/10] 03_nomination: ...`), a progress line for the
+long loops, and the headline result of each step. Add `--quiet` for one line per step.
 
-The data in `tests/data` are simulated by `tests/data/simulate_pedigree.py` (80 individuals,
+**4. Look at the results**, all in `broodlink_out/`:
+
+- `run_report.md`: start here (what ran, what was found, how far to trust it)
+- `figures/`: every plot, PNG and PDF, drawn automatically
+- `tables/`: every result table, TSV and one Excel file
+- `statistics.tsv`: the headline numbers
+
+**5. Run it on your own data**: give whichever inputs you have (see [Inputs](#inputs));
+at least one of `--relatedness`, `--bisnp`, `--gt`, `--snp_indel` or `--vcf`. For example:
+
+```bash
+broodlink run --relatedness my_ngsrelate.res --gt my_delly.vcf.gz --out my_run
+```
+
+`broodlink run --help` lists every option. The expected results of the example are in
+[example/expected/](example/expected/), and a test compares against them.
+
+The example data are simulated by `tests/data/simulate_pedigree.py` (80 individuals,
 15 full-sib families of 2 to 8, seven pairs of families sharing one parent, 8 unrelated
 individuals, one sample genotyped twice, one low-coverage sample, four inversion-like
-intervals). On this cohort the quick start finds the 15 families, nominates the 7 true links
+intervals). On this cohort the example run finds the 15 families, nominates the 7 true links
 and no other, labels 5 of them "supported", and calls 17 of 28 shared-parent genotypes, all
 17 correct.
 
@@ -55,7 +110,7 @@ with what each will be used for.
 |---|---|---|
 | `--relatedness FILE_OR_DIR` | pairwise relatedness: NGSrelate `.res` (or a folder of them), KING `.kin` / `.kin0`, or a TSV with `id1, id2, theta` (or `kinship`) and optionally `k0, k1, k2` | families and nomination, used as is |
 | `--bisnp FILE ...` | biallelic SNPs: ANGSD Beagle genotype likelihoods, or VCF with GL / PL | structural-haplotype genotyping and scan; relatedness only when no table is given (see Limits) |
-| `--gt FILE` (repeatable) | genotype VCF (DELLY, Manta, ...; class from `SVTYPE`) or a genotype matrix TSV | audit, family effect; relatedness by GRM when it is the densest input |
+| `--gt FILE` (repeatable) | deletion / duplication genotype calls from whole-genome resequencing (VCF with GT, such as those obtained from Manta or DELLY2; class read from `SVTYPE`), or a genotype matrix TSV | audit, family effect; relatedness by GRM when it is the densest input |
 | `--snp_indel FILE` | small-variant VCF / gVCF with GT | as `--gt`, one class |
 | `--vcf FILE` (repeatable) | any other VCF with GT | as `--gt` |
 | `--haplotypes FILE` | genotypes 0/1/2 of large structural haplotypes per individual | barcode (overrides pipeline calls) |
@@ -77,7 +132,7 @@ broodlink_out/
   run_report.md  statistics.tsv  methods_text.md  config_used.yaml
   00_qc/  01_relatedness/  02_families/  03_nomination/  04_audit/  05_network/
   06_structural_haplotypes/  07_barcode/  08_family_effect/  09_cross_marker_concordance/
-  tables/ (TSV + one XLSX with a definitions sheet)   figures/ (PNG 300 dpi + PDF)   tracks/ (GFF3, BED)
+  tables/ (TSV + one XLSX with a definitions sheet)   figures/ (PNG 450 dpi + PDF)   tracks/ (GFF3, BED)
 ```
 
 Every folder has a `README.txt` describing its files and columns. Every table starts with
@@ -112,7 +167,7 @@ What changes with the inputs (the run report states it for every run):
 
 ## Figures (synthetic data)
 
-Rendered by the quick-start command; small copies are committed in `docs/figures/`.
+Rendered by the example run (step 3 of [How to run](#how-to-run)); small copies are committed in `docs/figures/`.
 
 | | |
 |---|---|

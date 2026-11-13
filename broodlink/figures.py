@@ -9,7 +9,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from .io import log, write_tsv
+from .io import detail, log, write_tsv
 
 BLUE, ORANGE, GREEN, RED, PURPLE, SKY, YELLOW, GREY, INK = "#0072B2", "#E69F00", "#009E73", "#D55E00", "#CC79A7", "#56B4E9", "#F0E442", "#999999", "#222222"
 STATUS_COL = {"supported": BLUE, "Gate-1 only": SKY, "provisional": ORANGE, "rejected": RED, "nominated, not audited": GREY}
@@ -504,7 +504,9 @@ def make_figures(run):
     plt = _plt()
     d = os.path.join(run.out, "figures"); os.makedirs(d, exist_ok=True)
     dpi = run.cfg["figures"]["dpi"]; rows = []
-    for stem, fn, step in FIGURES:
+    log(f"figures: drawing {len(FIGURES)} figures (PNG {dpi} dpi + PDF) into {d}")
+    for k, (stem, fn, step) in enumerate(FIGURES):
+        detail(f"[{k + 1}/{len(FIGURES)}] {stem}")
         try:
             if step not in run.t or (step == "nomination" and "pairs" not in run.t["nomination"]):
                 res = None
