@@ -1,6 +1,6 @@
 # BroodLink run report
 
-BroodLink 0.1.0, 2026-11-13, config hash f360934f27, seed 1.
+BroodLink 0.1.0, 2026-11-13, config hash afaa86ec32, seed 1.
 
 **Analysis set: 80 individuals** (0 removed by QC, 3 flagged and kept). Families are relatedness-based groups, not pedigree records. callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly).
 
@@ -87,20 +87,20 @@ Definitions of every number: `statistics.tsv`.
 
 ## Run time
 
-- read inputs: 1.0 s
-- 00_qc: 0.5 s
+- read inputs: 1.3 s
+- 00_qc: 0.8 s
 - 01_relatedness: 0.3 s
-- 02_families: 0.3 s
-- 03_nomination: 2.0 s
-- 04_audit: 0.9 s
+- 02_families: 0.2 s
+- 03_nomination: 1.6 s
+- 04_audit: 0.4 s
 - 05_network: 0.2 s
-- haplotypes: SNP scan: 4.4 s
-- haplotypes: deletion scan: 0.1 s
-- 06_structural_haplotypes: 28.1 s
+- haplotypes: SNP scan: 3.2 s
+- haplotypes: deletion scan: 0.2 s
+- 06_structural_haplotypes: 20.6 s
 - 07_barcode: 0.2 s
-- 08_family_effect: 13.3 s
-- 09_cross_marker_concordance: 0.6 s
-- total: 47.9 s
+- 08_family_effect: 24.0 s
+- 09_cross_marker_concordance: 0.8 s
+- total: 50.6 s
 
 ## Figures
 

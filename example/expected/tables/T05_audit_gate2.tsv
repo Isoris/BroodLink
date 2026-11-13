@@ -1,4 +1,4 @@
-# BroodLink 0.1.0 | config f360934f27 | seed 1
+# BroodLink 0.1.0 | config afaa86ec32 | seed 1
 # analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
 # marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
 # relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
