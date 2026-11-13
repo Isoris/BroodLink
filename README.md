@@ -21,8 +21,9 @@ hundred individuals, many of them siblings, sequenced at low coverage, with no p
 records. From the inputs you have, one command runs quality control, relatedness, family
 reconstruction, half-sib screening, an independent audit of the candidate links, the network
 of families, and (when large structural haplotypes such as inversions are present) the
-genotype of each shared parent at them. It writes tables, statistics, figures, browser
-tracks, a run report and a Methods paragraph.
+genotype of each shared parent at them, and PCR primer pairs on deletions that tag each
+structural haplotype. It writes tables, statistics, figures, browser tracks, a run report and
+a Methods paragraph.
 
 The analysis logic was extracted from the scripts of one study (a doctoral thesis chapter on
 African catfish broodstock) and generalised. The refactored code returns that study's numbers
@@ -42,16 +43,17 @@ cd broodlink
 
 **2. Make a clean environment and install BroodLink**
 
-With conda / mamba:
+With conda / mamba (recommended; it includes Primer3 for the PCR-marker step):
 
 ```bash
-mamba create -y -n broodlink python=3.12
+mamba env create -f environment.yml
 mamba activate broodlink
-pip install .
 ```
 
 Or with plain Python: `python -m venv venv`, then `source venv/bin/activate`
-(Windows: `venv\Scripts\activate`), then `pip install .`
+(Windows: `venv\Scripts\activate`), then `pip install .` Add Primer3 with
+`pip install ".[primers]"` (the package primer3-py); without it the PCR-marker step still
+runs, with its built-in routine, and says so.
 
 **3. Run it on the example data** (simulated, included in the repository)
 
@@ -66,7 +68,9 @@ broodlink run --bisnp tests/data/snps.beagle.gz --gt tests/data/sv.vcf.gz --out 
 From these two files BroodLink works out relatedness and the full-sib families, nominates
 and audits the shared-parent links (the deletions are the audit markers), scans the genome
 for candidate polymorphic inversions (polyINVs) by local PCA, genotypes them, and infers the
-genotype of each shared parent at them (the barcode).
+genotype of each shared parent at them (the barcode). Because the example deletion file
+carries the sequence across each deletion junction (the `CONSENSUS` field DELLY writes), the
+run also designs one PCR primer pair per polyINV ([PCR markers](#pcr-markers)).
 
 Every other input is optional and adds something: a relatedness table computed from the
 likelihoods (`--relatedness`, e.g. NGSrelate, gives k2 and is more accurate at low
@@ -83,10 +87,10 @@ broodlink run --relatedness tests/data/relatedness.tsv --bisnp tests/data/snps.b
     --config example/config.example.yaml --out broodlink_out
 ```
 
-The run prints each step as it goes (`[3/10] 03_nomination: ...`), a progress line for the
+The run prints each step as it goes (`[3/11] 03_nomination: ...`), a progress line for the
 long loops, and the headline result of each step. Add `--quiet` for one line per step.
-On the example the ten steps take about half a minute and the sixteen figures (450 dpi)
-about two minutes more; `--no-figures` skips them and `broodlink report` draws them later.
+On the example the eleven steps take about half a minute and the nineteen figures (450 dpi)
+about three minutes more; `--no-figures` skips them and `broodlink report` draws them later.
 
 **4. Look at the results**, all in `broodlink_out/`:
 
@@ -113,7 +117,7 @@ intervals, and a simulated gene file). On this cohort the example run finds the 
 and no other, labels 5 of them "supported", and calls 17 of 28 shared-parent genotypes, all
 17 correct.
 
-Run the tests with `pip install pytest && pytest` (41 tests, about five minutes; the unit
+Run the tests with `pip install pytest && pytest` (NTESTS tests, about ten minutes; the unit
 tests alone, `pytest tests/test_units.py`, take under a minute).
 
 ## Does it work?
@@ -148,12 +152,14 @@ with what each will be used for.
 | `--mask FILE` (repeatable), `--mask-exclude BED` | callable regions (BED, or soft-masked FASTA) | restricts every marker class; denominator of per-base numbers |
 | `--samples FILE`, `--depth FILE_OR_DIR`, `--genome FAI` | sample list / metadata, depth, chromosome lengths | QC, sample order |
 | `--families FILE` | family labels from elsewhere | skips reconstruction (closure and membership class are still described) |
+| `--reference FASTA` | reference assembly, uncompressed FASTA (`.fai` used when present) | optional, PCR-marker step only: design sequence for deletions without a split-read consensus, and in-silico PCR of every primer pair |
+| `--consensus-vcf VCF`, `--pcr-picks TSV`, `--primer-engine` | SV VCF holding the split-read consensus when the genotypes come from another file; deletions to design on instead of the automatic choice (`interval`, `variant_id`); `primer3` or `builtin` | optional, PCR-marker step only |
 | `--genes FILE` | gene models of the assembly: GFF3 (gene features; CDS used when present) or BED (chrom, start, end, name, score, strand) | optional: genes of every barcode interval and the figure "barcode at gene level"; no step depends on it |
 | `--config FILE` | thresholds and permutation counts ([config.yaml](config.yaml) lists every default) | |
 
 `broodlink run` runs everything. Each step can be re-run alone (`broodlink qc`,
 `relatedness`, `families`, `nominate`, `audit`, `network`, `haplotypes`, `barcode`,
-`family-effect`, `concordance`); `broodlink report` rebuilds tables, figures and reports;
+`family-effect`, `concordance`, `pcr-markers`); `broodlink report` rebuilds tables, figures and reports;
 `broodlink sweep` and `broodlink benchmark` produce the results summarised below.
 
 ## What you get
@@ -163,6 +169,7 @@ broodlink_out/
   run_report.md  statistics.tsv  methods_text.md  config_used.yaml
   00_qc/  01_relatedness/  02_families/  03_nomination/  04_audit/  05_network/
   06_structural_haplotypes/  07_barcode/  08_family_effect/  09_cross_marker_concordance/
+  10_pcr_markers/ (screened deletions, primer pairs, one table per interval, primer order list)
   tables/ (TSV + one XLSX with a definitions sheet)   tracks/ (GFF3, BED)
   figures/ (PNG 450 dpi + PDF, MANIFEST.tsv, LEDGER.tsv = every number printed in a panel and its source table)
 ```
@@ -189,7 +196,8 @@ The kinship matrix (GRM) of every marker class is written to
 | 6b Barcode | posterior genotype of the shared parent at each structural haplotype; evidence of tag variants on that parent with a sweep and a permutation check; recurrence of a junction parent across two links; genes per interval with `--genes` | step 6a or `--haplotypes`, and links | extracted | reproduced (25 of 41 states at 0.90; recurrence statistic and null as published); the tag-variant evidence differs in part because the original tag catalogue could not be rebuilt |
 | 7 Family effect | eta squared per marker class against permuted family labels; frequency-matched SNPs as the reference level | genotypes, families | extracted | reproduced (0.585 / 0.528 / 0.602) |
 | 8 Concordance | kinship (GRM, written out) per marker class within and between families: AUC, recovery, bootstrap intervals over families; SNPs outside SV regions as a separate class | genotypes, families | extracted | reproduced, intervals included |
-| Reports | statistics with definitions, run report with capability table, Methods text, tables, 16 figures (10 are ports of the published figures), tracks | | new; figures ported from the original scripts | runs |
+| 9 PCR markers | per structural haplotype: deletions inside it screened (allele-frequency difference between the homokaryotype classes >= 0.90, heterokaryotypes at 0.30-0.70, length <= 1.8 kb), one flanking primer pair on the first designable candidate, checks, in-silico PCR with `--reference`, simulated gels | step 6a genotypes, deletion genotypes, and sequence: split-read consensus in the SV VCF (DELLY) and / or `--reference` | screening rules reimplemented from the published screening table; design = Primer3 with settings recovered by reproducing the published primers (the design script was not found); fallback routine extracted from the later deletion toolkit | screening table reproduced row for row (4,771 deletions, 239 diagnostic and gel-resolvable); 33 of 35 published primer pairs returned exactly when given the published deletions, 30 of 35 from BroodLink's own choice (32 same deletions); in-silico design only |
+| Reports | statistics with definitions, run report with capability table, Methods text, tables, 19 figures (13 are ports of the published figures), tracks | | new; figures ported from the original scripts | runs |
 
 What changes with the inputs (the run report states it for every run):
 
@@ -199,6 +207,33 @@ What changes with the inputs (the run report states it for every run):
   into a nomination set and an audit set; links are labelled "single-input, provisional".
 - Barcode only with structural-haplotype genotypes (supplied, genotyped from `--inversions`, or
   from scan candidates passing two criteria, labelled as unvalidated).
+
+## PCR markers
+
+![PCR markers: the assay, expected bands and every primer pair, example cohort](docs/figures/fig16_pcr_assay.png)
+
+*Example (simulated) cohort. A: one primer pair flanks a deletion carried by one arrangement;
+the allele without the deletion gives the long product and the allele with it the short one.
+B-E: bands expected in the three karyotype classes. F-H: every primer pair. Computed from the
+designed product sizes; not gel images, and nothing was tested in a laboratory.*
+
+A structural-haplotype genotype is an inference from many markers. A deletion that sits on one
+arrangement and not on the other turns it into a single PCR: step 10 screens the deletions
+inside each interval, keeps those whose allele frequency differs by at least 0.90 between the
+two homokaryotype classes (heterokaryotypes near one half) and that are short enough to read
+on a gel, and designs one flanking primer pair per interval on the sequence across the deletion
+junction: the split-read consensus that DELLY writes into its VCF (`CONSENSUS`, `CONSBP`), or
+flanks cut from `--reference`. The default engine is Primer3 through the optional package
+primer3-py, with the settings that return the published primers of the original study; without
+that package a built-in routine is used and the run report says so. Outputs (in
+`10_pcr_markers/` and `tables/`): the screened deletions, the primer pairs with Tm, GC, both
+product sizes, the sequence each pair was designed on and its checks, **one table per interval
+that joins the marker counts with the primers** (`pcr_markers_per_interval.tsv`), a primer
+list ready to order, the assay figure above, simulated gels (nine per page) and a schematic.
+With `--reference` every pair is also searched in the assembly (products at the locus and
+elsewhere). Melting temperatures are those of Primer3's `calc_tm` (SantaLucia 1998, 50 mM
+monovalent, 1.5 mM divalent, 0.6 mM dNTP, 50 nM primer); the conditions are in every table
+header.
 
 ## Figures (synthetic data)
 
@@ -215,7 +250,7 @@ A panel whose input is absent is left out (for example the biSNP panels without 
 | ![augmentation](docs/figures/fig11_barcode_deletion_augmentation.png) Barcode of a shared parent with deletion evidence | ![funnel](docs/figures/fig13_funnel_to_unsampled_parent.png) Funnel from offspring relationships to an unsampled parent |
 | ![genes](docs/figures/fig12_barcode_gene_level.png) Barcode at gene level (needs `--genes`) | ![deletions](docs/figures/fig14_deletion_genotypes_linked_families_chain1_F7.png) Deletion genotypes along linked families |
 
-All 16: [docs/figures/](docs/figures/). `fig01` to `fig05` (QC panels, PC1 against
+All 19: [docs/figures/](docs/figures/) (`fig16` to `fig18` are the PCR-marker figures). `fig01` to `fig05` (QC panels, PC1 against
 heterozygosity per interval, the scan, tag variants, the barcode of every parent) have no
 published counterpart.
 
@@ -289,7 +324,18 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
   says otherwise (mainly the tag-variant evidence, whose original catalogue could not be
   rebuilt). Not drawn: the held-out prediction panel, the read-support quality bar, gene-family
   colours, the ideogram.
-- **Not implemented:** a tested likelihood-based k0 / k1 / k2 estimator (one is in the code,
+- **PCR markers are in-silico designs.** No primer was tested in a laboratory, and the gels in
+  the figures are simulated from the designed product sizes. Check a pair against your own
+  assembly (`--reference`) and for repeats before ordering. The Primer3 settings were recovered
+  by reproducing the published primer table (33 of its 35 pairs are returned exactly; the
+  original design script was not found), and the choice among deletions of equal rank is not
+  recorded (3 of 35 intervals get the neighbouring deletion). Imprecise deletions have no
+  consensus: with `--reference` their flanks are cut at the called coordinates, which may be
+  off by a few bases. primer3-py is licensed GPL-2; BroodLink (MIT) therefore keeps it an
+  optional dependency and never imports it unless it is installed.
+- **Not implemented:** for the PCR markers, a search of the primers in a second assembly
+  within one run (run again with that assembly as `--reference`), read-level checks of the
+  deletion call behind a marker, and multiplexing of pairs; a tested likelihood-based k0 / k1 / k2 estimator (one is in the code,
   not wired and not tested); the parental-slot topology test (a junction barcode assumes the
   same parent on every link and is labelled a candidate; the recurrence test of a junction
   parent across two links is reported); held-out validation of links; the unresolved /

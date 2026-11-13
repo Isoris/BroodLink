@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+PCR markers (step `10_pcr_markers`, `broodlink pcr-markers`): for every structural haplotype
+the deletions inside it are screened, and one flanking primer pair is designed on the sequence
+across the junction of the first suitable deletion.
+
+- New module `broodlink/pcr.py`: screening rules of the published screening table (allele
+  frequency difference >= 0.90 between the homokaryotype classes, heterokaryotypes at 0.30-0.70,
+  deletion <= 1.8 kb), two design engines (Primer3 through the optional package primer3-py, the
+  default and the procedure of the original study; the routine of the original deletion toolkit
+  as the fallback), Tm as `primer3.calc_tm` (a pure-Python formula equal to it when primer3-py
+  is absent), checks per pair, in-silico PCR against `--reference`, hairpin and dimer values
+  (new in BroodLink).
+- New inputs: `--reference FASTA` (small indexed reader, `.fai` used when present),
+  `--consensus-vcf`, `--pcr-picks`, `--primer-engine`. The VCF reader keeps the split-read
+  consensus of SV records (DELLY `CONSENSUS`, `CONSBP`).
+- New tables `pcr_candidate_deletions.tsv`, `pcr_primers.tsv`, `pcr_markers_per_interval.tsv`
+  (marker counts joined with the primers, one row per interval), `pcr_primer_order_list.tsv`;
+  also `T13` to `T16` in `tables/` and the XLSX. Run report section and Methods paragraph.
+- New figures `fig16_pcr_assay` (port of the assay figure, panels A-H), `fig17_pcr_simulated_gels`
+  (paged, `pcr.gels_per_page` = 9) and `fig18_pcr_primer_schematic`.
+- Example data: the simulated deletions carry a consensus; `simulate_pedigree.py --reference-only`
+  writes the simulated reference (61 MB, not committed).
+- `environment.yml` (conda / mamba, with primer3-py) and the extra `broodlink[primers]`.
+- Finding recorded in `docs/EXTRACTED_METHOD.md`, section 18: the published primers were
+  designed with Primer3, not with the toolkit routine (which returns none of them).
+
 Figures: the published figures of the original study are now drawn by `broodlink run` from
 the tables of the run (`docs/DISPLAY_ITEMS.md` has the panel-by-panel status and the
 comparison with the original renders).

@@ -112,14 +112,37 @@ def _noun(run):
 
 
 # =============================================================================== assay figure
+def assay_pages(n_pairs, rp=2.75):
+    """Rows of the per-pair panels on each page: the first page also holds panels A-E, the
+    following pages only the rows; every page stays within A4."""
+    first = int((style.A4_H - 18.0 - 53.6) // rp); later = int((style.A4_H - 18.0 - 12.9) // rp)
+    out = [min(n_pairs, first)]
+    while sum(out) < n_pairs:
+        out.append(min(n_pairs - sum(out), later))
+    return out
+
+
 def fig_assay(run, plt):
+    """Port of the assay figure of the original study (its Extended Data figure of the deletion
+    markers): A schema for one marker, B-E expected lane strips, F-H one row per primer pair.
+    One page when the pairs fit; otherwise the rows continue on following pages."""
     P = _primers(run)
     if P is None:
         return "no primer pair was designed"
+    pages = assay_pages(len(P)); out = []; k = 0
+    for pg, n in enumerate(pages):
+        fig, title, desc, note = _assay_page(run, plt, P, P.iloc[k:k + n], pg, len(pages)); k += n
+        if len(pages) == 1:
+            return fig, title, desc, note
+        out.append((f"page{pg + 1}of{len(pages)}", fig, title + f", page {pg + 1} of {len(pages)}", desc, (f"page {pg + 1} of {len(pages)}" + ("; " + note if note else ""))))
+    return out
+
+
+def _assay_page(run, plt, P, D, pg, npage):
     from matplotlib.patches import Rectangle
-    ins = _ins(P); noun = _noun(run)
-    W = 183.0; rp = 2.75; y2 = 41.0; ttl = y2 + 6.0; t0 = ttl + 6.6
-    nmax = int((style.A4_H - 18.0 - t0) // rp); n_all = len(P); D = P.iloc[:nmax]; n = len(D)
+    ins = _ins(P); noun = _noun(run); first = pg == 0
+    W = 183.0; rp = 2.75; y2 = 41.0 if first else 0.3; ttl = y2 + 6.0; t0 = ttl + 6.6
+    n_all = len(P); n = len(D)
     bot = t0 + n * rp; H = bot + 18.0
     cv = style.canvas(plt, W, H, style.SZ_ED, thin=True); C = cv.overlay
 
@@ -131,6 +154,13 @@ def fig_assay(run, plt):
         C.annotate("", xy=(x1, y), xytext=(x0, y), arrowprops=dict(arrowstyle=st, color=c, lw=lw, shrinkA=0, shrinkB=0, mutation_scale=ms))
 
     ex = _examples(P); r8 = ex[0]
+    if first:
+        _assay_top(run, cv, C, tx, arr, ex, r8, noun)
+    return _assay_rows(run, cv, C, tx, P, D, ins, pg, npage, y2, ttl, t0, rp, n, n_all, bot)
+
+
+def _assay_top(run, cv, C, tx, arr, ex, r8, noun):
+    from matplotlib.patches import Rectangle
     cv.banner(0.3, "1", f"Expected, not run: one primer pair and one reaction per {noun.rstrip('s') if noun.endswith('s') else noun} should read the arrangement as long band, short band, or both", fs=7.5)
     # ---- A schema
     on2 = r8.arrangement_with_deletion == "class 2"
@@ -178,6 +208,10 @@ def fig_assay(run, plt):
     for (lab, x0, y0), r in zip((("B", 91.5, 11.0), ("C", 137.5, 11.0), ("D", 91.5, 24.3), ("E", 137.5, 24.3)), ex):
         strip(lab, r, x0, y0)
     tx(FX0 + 1.3, 37.6, "Tick: expected band, size beside it. Right column: deletion frequency of the karyotype class in the cohort.")
+
+
+def _assay_rows(run, cv, C, tx, P, D, ins, pg, npage, y2, ttl, t0, rp, n, n_all, bot):
+    from matplotlib.patches import Rectangle
     # ---- row 2
     dmin, dmax = float(P.frequency_difference.min()), float(P.frequency_difference.max())
     S = run.s.get("pcr", {})
@@ -187,7 +221,7 @@ def fig_assay(run, plt):
     else:
         B2 = (f"{LED('banner 2', 'primer pairs', n_all, SRC_P + ': rows')} primer pairs for {LED('banner 2', 'intervals with a marker', S.get('n_intervals_with_marker', n_all), SRC_I + ': n_primer_pairs > 0')} of "
               f"{LED('banner 2', 'intervals', S.get('n_intervals', n_all), SRC_I + ': rows')} {run.cfg['figures'].get('haplotype_label', 'structural haplotypes')}; no reference given, so no in-silico search")
-    cv.banner(y2, "2", B2, fs=7.5)
+    cv.banner(y2, "2", B2 + (f" (rows {D.marker.iloc[0]} to {D.marker.iloc[-1]})" if npage > 1 else ""), fs=7.5)
     C.text(0.5, ttl, "F", fontsize=8, fontweight="bold", va="center", color=NAVY)
     C.text(4.7, ttl, f"Deletion frequency by karyotype, difference {dmin:.2f}–{dmax:.2f}", fontsize=TITLE, fontweight="bold", va="center", color=NAVY)
     LED("F title", "frequency difference range", f"{dmin:.2f}-{dmax:.2f}", f"{SRC_P}: frequency_difference")
@@ -249,8 +283,6 @@ def fig_assay(run, plt):
     C.add_patch(Rectangle((1.5, yk + 1.5), 2.0, 1.4, fc=C0, ec="none")); C.add_patch(Rectangle((4.0, yk + 1.5), 2.0, 1.4, fc=C2, ec="none")); tx(6.7, yk + 2.2, "column on: deletion carried by class 0, class 2")
     if ins:
         tx(1.5, yk + 4.4, "† no product predicted at the locus in the reference."); tx(1.5, yk + 6.6, "‡ off-target products predicted.")
-    if n_all > n:
-        tx(1.5, yk + 8.4, f"First {n} of {n_all} pairs shown; all are in the primer table.")
     x2 = 70.0; tx(x2, yk, "G:", fontweight="bold")
     C.scatter([x2 + 3.8], [yk], s=5, c=NAVY, linewidths=0); tx(x2 + 5, yk, "designed, with deletion"); C.scatter([x2 + 28.8], [yk], s=5, c=SLATE, linewidths=0); tx(x2 + 30, yk, "without")
     if ins:
@@ -262,8 +294,6 @@ def fig_assay(run, plt):
         tx(127.5, yk + 4.4, "reference, its difference from the designed long product,")
         tx(127.5, yk + 6.6, "off-target products.")
     note = "" if ins else "panels G and H without the in-silico product and specificity columns (no --reference)"
-    if n_all > n:
-        note = (note + "; " if note else "") + f"rows of the first {n} of {n_all} pairs"
     desc = ("A the flanking-pair assay for one marker; B-E expected bands of up to four markers per karyotype class (first marker with the deletion on class 2, first on class 0, longest and shortest deletion), "
             "with the deletion frequency of each class; F-H every primer pair: deletion frequency by karyotype, designed products" + (", product predicted in the reference and off-target products" if ins else "") +
             ". Bands are computed from the designed product sizes: these are not gel images and no laboratory test was made.")
@@ -381,7 +411,7 @@ def fig_schematic(run, plt):
         return "no primer pair was designed"
     from matplotlib.patches import Rectangle
     W, H = 120.0, 52.0
-    cv = style.canvas(plt, W, H, style.SZ_ED, thin=True); C = cv.overlay
+    cv = style.canvas(plt, W + 10.0, H, style.SZ_ED, thin=True); C = cv.overlay; C.set_xlim(-9.0, W + 1.0)
 
     def tx(x, y, s, **kw):
         kw.setdefault("fontsize", 6.0); kw.setdefault("va", "center"); kw.setdefault("color", NAVY)

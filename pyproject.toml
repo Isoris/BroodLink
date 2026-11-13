@@ -16,6 +16,7 @@ dependencies = ["numpy>=1.24", "pandas>=2.0", "scipy>=1.10", "networkx>=3.0", "m
 
 [project.optional-dependencies]
 test = ["pytest>=7"]
+primers = ["primer3-py>=2.0"]   # optional (GPL-2): Primer3, the design engine of the original PCR-marker procedure
 
 [project.scripts]
 broodlink = "broodlink.cli:main"

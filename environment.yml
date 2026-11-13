@@ -1,0 +1,26 @@
+# conda / mamba environment for BroodLink, including the optional Primer3 binding used by the
+# PCR-marker step (the procedure of the original study):
+#   mamba env create -f environment.yml
+#   mamba activate broodlink
+# The runtime dependencies are those of pyproject.toml; primer3-py is the extra `broodlink[primers]`.
+# primer3-py is GPL-2 and therefore stays an optional dependency of BroodLink (MIT): without it the
+# PCR-marker step falls back to its built-in routine and says so.
+name: broodlink
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.12
+  - pip
+  - numpy>=1.24
+  - pandas>=2.0
+  - scipy>=1.10
+  - networkx>=3.0
+  - matplotlib>=3.7
+  - pyyaml>=6.0
+  - openpyxl>=3.1
+  - pytest>=7
+  - pip:
+      # primer3-py from PyPI (wheels for Linux, macOS and Windows; 2.4.0 is the version BroodLink was tested with).
+      # bioconda also has it (linux-64, osx; no win-64 build, latest 2.3.1), which is why it is installed with pip here.
+      - .[primers]

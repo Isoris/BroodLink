@@ -432,3 +432,140 @@ centromere mark of the gene-level figure (cohort inventories); the ideogram and 
 population-genetic panels of the combined relatedness figure (genome displays and statistics
 outside this pipeline); the split of "not closed" families into unresolved and incompatible
 (rule not found, section 15 item 6).
+
+## 18. PCR markers of the structural haplotypes (step 10)
+
+`PCR/` = `FAM/_pcr_del_markers` (toolkit `code/`, tables `tables/`, bundle `from_bundle_pcr_del_toolkit_v01/`);
+`FUN/` = the functional-divergence manuscript folder (`manuscript_ready/_inv_functional_NLR`: `code/`, `ledger/`, `figures/`).
+Published tables: screened deletions (`PCR/tables/Supplementary_Data_S4_...`, 4,771 rows), designed primers
+(`...Data_S5_...` = `inversion_primers_ALL.tsv`, 35 pairs, the source of truth according to `FUN/ledger/POLARITY_and_primer_reconciliation_2026-10-29.md`),
+markers per interval (`...Table_S6_...`), assay per interval (`...Table_S7_...`, v3 in `FUN/supplementary/tables/`).
+
+### 18.1 What the original design used: Primer3, not the toolkit routine
+
+The script that wrote the published primer table was **not found**. Three scripts exist and none of them is it:
+`PCR/code/get_PCR_DEL_markers.py` (screening only, reports primer *windows* of 200 bp, designs nothing),
+`PCR/code/deltools.py` with `FAM/_inversions_localPCA_sv_discovery/code/03_design_primers_DELLY.py` (a later port "built from
+the MS_Inversions arrangement-PCR pipeline" for family-private and shared-parent deletions, bundle README and
+`FAM/_project_docs/tables/audit.txt`), and the check scripts in `FUN/code/`.
+
+Evidence, all re-run for this record:
+
+| Test | Result |
+|---|---|
+| `deltools.pick_flanking_primers` (default windows) on the split-read consensus of the 35 published deletions, primer3-py absent (its own Tm fallback) | 0 of 35 pairs reproduced (6 designs succeed, 26 `no_primer_in_window`, 3 `breakpoint_too_close_to_end`) |
+| the same with primer3-py 2.4.0 installed (Tm from `calc_tm`) | 0 of 35 (25 designs succeed, all different pairs) |
+| stored result of `FUN/code/recon_primers.py` (`FUN/ledger/recon_primers_QC.tsv`, column `repo_deltools_reproduces`) | False for 35 of 35; the ledger note says "the repository design tool does not reproduce the primers (0/35)" |
+| layout of the published primer table | Primer3's conventions: columns `fpos, flen, rpos, rlen` with `rpos` = last base of the reverse site and product = `rpos - fpos + 1` (Primer3 `PRIMER_LEFT_0`, `PRIMER_RIGHT_0`), and a column `expl` (Primer3 "explain"); `deltools` uses other positions |
+| Primer3 (`primer3.design_primers`, primer3-py 2.4.0) on the same consensus, target = the breakpoint, optimum Tm 56, Tm 54-57, minimum GC 30%, product 60-300 bp, everything else default | **33 of 35 pairs identical** (both primers), with identical Tm, band sizes and GC |
+| sensitivity of that result | optimum Tm 55.9 gives 21 of 35, 56.1 gives 19, 55.5 gives 3; Primer3 defaults (optimum 60) give 0; without the target 20; minimum GC 20% gives 31; a GC clamp gives 3 |
+
+So the published primers were designed **with Primer3** (the author's recollection is right); the statement in
+`recon_primers.py` that the table "reproduces exactly" with the toolkit routine is not borne out by its own output.
+The toolkit routine shares only the Tm function with the published table (`primer3.calc_tm` when primer3-py is
+installed); its Tm window (54.5-56.6) is the observed range of the published Tm values, not a design setting.
+
+The Primer3 settings are **recovered by reproduction, not read from a script**: optimum Tm 56.0 is sharply
+determined; the Tm range (54-57), the minimum GC (30%) and the product range sit on plateaus (several values give
+the same 33 pairs). Two published pairs are not returned (one primer of each differs by 2 and by 15 bp of position;
+the published primer has a higher Primer3 penalty than the one Primer3 2.4.0 returns): a setting or a Primer3
+version that was not recovered. No further setting was tried to force them.
+
+BroodLink therefore uses **Primer3 as the default engine** (`pcr.engine: primer3`, config block `pcr.primer3`) and
+the toolkit routine as the fallback when the optional package primer3-py is absent (`pcr.engine: builtin`,
+`--primer-engine builtin`; block `pcr.builtin` = the defaults of `pick_flanking_primers`). The fallback is stated
+in the run report and does not return the Primer3 pairs.
+
+### 18.2 Marker selection
+
+| Rule | Value | Source | Status |
+|---|---|---|---|
+| Deletions considered | inside the interval: `POS >= start` and `END <= end` | `get_PCR_DEL_markers.py`, line `inside = ...` | extracted |
+| Frequency per class | deletion allele frequency = mean genotype / 2 among the called individuals of the class (homokaryotype 0, heterokaryotype, homokaryotype 2) | same script, function `f` | extracted |
+| Called individuals per class | at least 5 in each homokaryotype class | the script's default is `--min-called 10`; the published table holds rows down to 5 and 5 | **from the published table** (smallest value observed); `pcr.selection.min_called_per_class` |
+| Diagnostic deletion | frequency difference between the homokaryotype classes >= 0.90 **and** heterokaryotype frequency 0.30-0.70 | published table: column `diagnostic` is true for 307 of 341 rows at difference >= 0.90; the 34 others have a heterokaryotype frequency of 0.05-0.295 or 0.72-0.91 (one at 0.458 with a displayed difference of 0.9, a rounding case), the 307 have 0.300-0.676. The script has `--min-diff 0.80` and a `het_near_midpoint` column (within 0.20 of the midpoint) | **reimplemented from the published table**; the two bounds lie in the gaps 0.295-0.300 and 0.676-0.723 and were set to 0.30 and 0.70 |
+| Screening bands | generic pair of 2 x 100 bp flank: 200 bp with the deletion, 200 + length without | published table (`band_deleted_bp` = 200 in every row); the script uses `--flank 200` (400 bp) | from the published table |
+| Gel-resolvable | deletion length <= 1,800 bp (long screening band <= 2 kb) | published table: `gel_resolvable` true for 290-1,800 bp, false from 1,803 bp | **reimplemented from the published table**. Lower bound: none can be read (the shortest deletion of that catalogue is 290 bp); BroodLink uses 60 bp, the band-difference rule of `deltools` (`abs(band_undeleted - band_deleted) >= 60`) |
+| Ranking | frequency difference, largest first; ties by position | order of the published table (458 of 458 adjacent ties are in position order) | from the published table |
+| How many per interval | one | published primer table (35 pairs, one per interval) | `pcr.markers_per_interval` |
+| Which candidate | the first diagnostic gel-resolvable deletion, in rank order, for which a pair can be designed | **not recorded**. In 32 of 35 intervals the published deletion is the first such candidate; in 3 it is the next one after a candidate for which the recovered Primer3 settings also return a pair | **reimplemented from Methods** ("one deletion was selected per inversion"); see REPRODUCTION |
+| Designed pair, toolkit flag `gel_resolvable` | products differ by >= 60 bp, short product 60-1,200 bp, long product <= 6,000 bp | `deltools.pick_flanking_primers`, last statement | extracted, reported as a check column |
+
+On the original cohort these rules return the published screening table row for row (REPRODUCTION, section (f)).
+The arrangement-private catalogue of the same folder (`...Data_S3_...`, carrier frequencies, 2,080 rows, columns
+`sizeok`, `fixed`, `pick_score`) is a different, older screen; its builder was not found (section 12) and it is not
+what the primers were picked from: step 10 does not use it. Step 10 screens every deletion inside an interval and
+marks those that are also step-6 tag variants (`step06_tag`); on the original cohort every diagnostic gel-resolvable deletion is one.
+
+### 18.3 Primer design
+
+| Constraint | Primer3 engine (default) | Built-in routine (fallback) |
+|---|---|---|
+| Source | recovered by reproduction of the published primer table (18.1) | `deltools.pick_flanking_primers` (signature defaults), unchanged |
+| Design sequence | split-read consensus of the junction (DELLY INFO `CONSENSUS`), breakpoint index `CONSBP` | the same |
+| Position | pair must contain the two bases around the breakpoint (`SEQUENCE_TARGET = [bp - 1, 2]`) | 3' end of each primer 40-160 nt from the breakpoint (`gap_min`, `gap_max`) |
+| Length | 18-27 nt, optimum 20 (Primer3 defaults; published primers are 19-26 nt) | 18-26 nt (`len_min`, `len_max`) |
+| Tm | optimum 56.0, range 54.0-57.0 (published primers: 54.5-56.6) | 54.5-56.6, target 55.5 (`tm_lo`, `tm_hi`, `tm_target`) |
+| GC | >= 30% (published: 30.8-50%) | 30-60% (`gc_lo`, `gc_hi`) |
+| Homopolymer | <= 5 (Primer3 default; a published primer has a run of 5) | <= 4 (`max_homopolymer`) |
+| Choice | lowest Primer3 pair penalty (\|Tm - optimum\| + \|length - optimum\| per primer) | per side the window with the smallest \|Tm - target\| + 0.6 when the 3' base is A or T |
+| Product on the allele with the deletion | 60-300 bp; = last base of the reverse site - first base of the forward primer + 1 | follows from the windows; `r1 - f0` |
+| Product on the allele without the deletion | the above + deletion length (END - POS) | the same (`band_deleted + svlen`) |
+
+Tm model (both engines, and every Tm in the tables): `primer3.calc_tm` with its defaults, i.e. nearest neighbour,
+SantaLucia (1998) parameters and salt correction, 50 mM monovalent, 1.5 mM divalent, 0.6 mM dNTP, 50 nM primer.
+`pcr.tm_formula` is a pure-Python implementation of the same model, equal to `calc_tm` to 1e-12 on random
+oligonucleotides (tested), used when primer3-py is absent, so the Tm scale never depends on what is installed.
+The toolkit's own fallback (`deltools.nn_tm`: 250 nM, 16.6 log10[Na+] term, no divalent cations) runs about
+10 degrees C lower; it is kept as `pcr.tm_toolkit_fallback` for the record and is **not** used (with it the
+built-in routine would pick different primers on machines without primer3-py). The validation script
+`FUN/code/primer_tm_gc_check_v1.py` recomputed Tm with another model (Biopython, Owczarzy salt correction, 250 nM:
+about 3.4 degrees higher); that is a check of the original, not its design model, and is not ported.
+
+New in BroodLink, not in the original tables: hairpin, self-dimer and cross-dimer Tm and free energy of every pair
+(primer3-py `calc_hairpin`, `calc_homodimer`, `calc_heterodimer`; empty without primer3-py); the design sequence
+cut from `--reference` (`pcr.reference_flank_bp` = 150 bp on each side of POS / END) for deletions without a
+consensus; `--consensus-vcf` and `--pcr-picks`.
+
+### 18.4 Checks
+
+Ported (generic): primers exact substrings of the design sequence, forward before and reverse after the breakpoint
+(`validate_primers_v1.py` V5, `primer_in_consensus_check_v1.py`); products recomputed from the primer positions and
+the deletion length (V6); frequency difference at or above the threshold (V8); frequencies per class recomputed from
+the genotypes (V7: they are computed by the step itself); in-silico PCR against `--reference`
+(`primer_in_silico_pcr_v1.py`: <= 2 mismatches per primer found by three exact seeds, matching 3' base, forward on
++ and reverse on - of one sequence, product 60-6,000 bp, "at the locus" = within 2,500 bp of the deletion; V9:
+product within 5 bp of the designed long product); Tm difference of the pair, lower GC, 3' base, longest
+homopolymer (`primer_tm_gc_check_v1.py`); markers per interval and the reason for an interval without one.
+
+Left out, because they need files of that cohort or a second assembly: V1-V4 (the deletion is in the catalogue VCF,
+coordinates and consensus equal the published tables, PRECISE / FILTER flags and read support, which the reader does
+not keep); the search in the other parental haplotype of the F1 (`primer_in_silico_mac_*.py`; a second run with
+that assembly as `--reference` gives the same numbers); the look-up of cohort SNPs at primer mismatch positions
+(`primer_site_cohort_check_v1.py`); the depth and heterozygosity support of the deletion calls
+(`del_validation_markers_v1.py`).
+
+### 18.5 Gel simulation and figures
+
+`PCR/code/04_simulate_gels_MPL.py`: three lanes per deletion (no deletion: long band; heterozygote: both; homozygous
+deletion: short band), migration on a log size axis, a ladder; "indicative only". The published sheets
+(`FUN/code/build_figure_PCR_v3.py`, upgraded in `FUN/figures/upgrades_2026-11-03/round_ed/F-S14`, `F-S15`) draw the
+lanes per karyotype class from the designed products with the ladder 100-1,000 bp by 100, 1.5, 2, 3, 4 kb, 18 and 17
+gels per sheet. BroodLink: the same gel, `pcr.gels_per_page` = 9 (each published sheet becomes two consecutive
+pages), `pcr.ladder_bp`. The assay figure is the port of `round_ed2/F-15/F-15.py` (panels A-H); its columns for the
+other parental haplotype are not drawn. The schematic is the port of `PCR/code/05_primer_schematic_MPL.py`. Example
+markers (typed by hand in the original): the first marker with the deletion on class 2 (panel A and B), the first
+on class 0, the longest and the shortest deletion.
+
+### 18.6 Tied to the cohort in the original
+
+Inversion labels (A1-A41) and the STD / INV names read from stored tables (BroodLink: M01... in interval order,
+class 0 / class 2); the four example markers of the figure; chromosome prefix added by hand in the in-silico script;
+the path of the catalogue VCF and of the assembly; 35 as an asserted count; the dagger footnotes naming markers.
+
+### 18.7 Not found
+
+The script that designed the published primers and its Primer3 settings (18.1); the rule that chose among candidates
+of equal rank (18.2); a lower size bound of "gel-resolvable"; the origin of the 0.30-0.70 heterokaryotype window
+(only its effect in the published table). `03_design_primers_DELLY.py` is not in the toolkit's `code/` folder but
+in `FAM/_inversions_localPCA_sv_discovery/code/`. A "Supplementary Note S12" cited by a draft does not exist (folder README).

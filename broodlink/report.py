@@ -51,6 +51,8 @@ COLUMN_DEFS = {
     "difference": "absolute difference of carrier frequency between the two homokaryotype classes", "fully_private": "carried by every called individual of one class and by none of the other",
     "marker_class": "marker class of the row (never mixed)", "n_markers": "number of markers behind the row",
     # PCR markers (step 10)
+    "chrom": "sequence (chromosome) name", "start": "start position (for a deletion: POS of the VCF, the last base before it)", "end": "end position (for a deletion: END, its last base)",
+    "interval_start": "start of the interval", "interval_end": "end of the interval",
     "marker": "label of the primer pair (M01, M02, ... in interval order)", "variant_id": "identifier of the deletion in the input",
     "length_bp": "length of the deletion (END - POS)", "arrangement_with_deletion": "homokaryotype class in which the deletion is the frequent allele (class 0 or class 2; labels carry no ancestral meaning)",
     "deletion_frequency_class_0": "allele frequency of the deletion among the called class-0 homokaryotypes", "deletion_frequency_class_2": "allele frequency of the deletion among the called class-2 homokaryotypes",

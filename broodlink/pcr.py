@@ -356,7 +356,7 @@ def _hits(arr, kcache, query, three_prime_last, max_mm):
         off = i * k; piece = query[off:off + k] if i < max_mm else query[off:]
         kk = len(piece)
         if kk not in kcache:
-            c = np.zeros(n - kk + 1, np.int64); bad = np.zeros(n - kk + 1, bool)
+            c = np.zeros(n - kk + 1, np.int32 if kk <= 15 else np.int64); bad = np.zeros(n - kk + 1, bool)
             for j in range(kk):
                 seg = arr[j:n - kk + 1 + j]; c = c * 4 + seg; bad |= seg > 3
             c[bad] = -1; kcache[kk] = c
@@ -388,14 +388,14 @@ def in_silico_pcr(fa, pairs, c):
         f = p["fwd"].upper(); r = revcomp(p["rev"].upper())
         if any(ch not in "ACGT" for ch in f + r):
             continue
-        q.append((p["pair"], MAP[np.frombuffer(f.encode(), np.uint8)].astype(np.int64), MAP[np.frombuffer(r.encode(), np.uint8)].astype(np.int64)))
+        q.append((p["pair"], MAP[np.frombuffer(f.encode(), np.uint8)], MAP[np.frombuffer(r.encode(), np.uint8)]))
     prods = {p["pair"]: [] for p in pairs}; nsite = {p["pair"]: [0, 0] for p in pairs}
     mm_max, lo, hi = int(c["max_mismatches"]), int(c["product_min"]), int(c["product_max"])
     for chrom in fa.index:
         seq = fa.chromosome(chrom)
         if not seq:
             continue
-        arr = MAP[np.frombuffer(seq.encode("ascii", "replace"), np.uint8)].astype(np.int64); del seq
+        arr = MAP[np.frombuffer(seq.encode("ascii", "replace"), np.uint8)]; del seq    # codes 0-3, 4 = other letter
         kc = {}
         for name, fq, rq in q:
             fp, fm = _hits(arr, kc, fq, True, mm_max); rp, rm = _hits(arr, kc, rq, False, mm_max)
