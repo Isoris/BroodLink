@@ -34,14 +34,27 @@ path); the package is NOT pip-installed on this machine.
   whether it was green at the last commit).
 
 ### Not started / to do next, in order
-1. `broodlink/sweep.py` and `broodlink/benchmark.py` (the CLI already imports them), docs
-   `SWEEP.md`, `BENCHMARK.md`; run both on the synthetic data; original-cohort sweeps and
-   single-input benchmark from existing intermediates into `local/` (GRM file: see Sources).
-2. `docs/REPRODUCTION.md` (tables a-e), `docs/DISPLAY_ITEMS.md`; add display-item and track
-   sections to `docs/EXTRACTED_METHOD.md`.
-3. README (author: git config name), CITATION.cff, CHANGELOG, gallery PNGs in `docs/figures/`.
-4. Zenodo folder `F:\data\broodlink_zenodo_v0.1.0\` (nothing there yet) and THESIS_INSERT.md.
-5. Privacy grep, delete this file, tag v0.1.0, `git archive` tarball + SHA-256.
+(Updated after commit 43a3b39.) Tests: 38 passed at dc97954.
+DONE since: sweep + benchmark + evaluate modules; synthetic sweep run (tables in `docs/sweep/`,
+`docs/SWEEP.md` written, includes the original-cohort sweep summary from
+`local/reproduction/sweeps_original/`); CITATION.cff; CHANGELOG.md.
+RUNNING / may have been cut (check `local/reproduction/*.log`, rerun what did not end with "done:"):
+  - original cohort through the CLI, config `local/config.local.yaml`, inputs in
+    `local/reproduction/` (samples_226.tsv, intervals41.bed, karyotypes41.tsv):
+    `run_full_cli` (relatedness + DEL + DUP + haplotypes + inversions), `run_relatedness_only`,
+    `run_gt_only`. A step cut mid-run can be finished with `broodlink <step> ...` then `report`.
+  - synthetic benchmark: `broodlink benchmark --out local/benchmark_synth`.
+  - NOT yet tried: `--bisnp` only on the original Beagle files (config `local/config.bisnp.local.yaml`,
+    step 6; expected about 20-30 min; skip and mark "not run" if time is short).
+TO DO:
+1. `docs/BENCHMARK.md` (synthetic table from `local/benchmark_synth/benchmark_report.md`; original:
+   `local/reproduction/sweeps_original/families_per_grm.tsv` + the CLI runs above).
+2. `docs/REPRODUCTION.md` (tables a-e; numbers in `local/reproduction/validation_20000.json`),
+   `docs/DISPLAY_ITEMS.md`; display-item and track sections in `docs/EXTRACTED_METHOD.md`.
+3. README with gallery PNGs in `docs/figures/` (small copies of the synthetic figures).
+4. Regenerate `example/expected/` if any output changed; rerun the tests.
+5. Zenodo folder `F:\data\broodlink_zenodo_v0.1.0\` (nothing there yet) and THESIS_INSERT.md.
+6. Privacy grep, delete this file, tag v0.1.0, `git archive` tarball + SHA-256.
 Not implemented so far (say so in the capability table and the final report unless done):
 panel-by-panel ports of the published nomination figure (A-J), families figure and Extended
 Data H3-H5 (fig14 is a compact composite only); reproduction table (e) from raw per-interval
