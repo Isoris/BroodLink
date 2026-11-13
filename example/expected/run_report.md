@@ -1,6 +1,6 @@
 # BroodLink run report
 
-BroodLink 0.1.0, 2026-11-13, config hash afaa86ec32, seed 1.
+BroodLink 0.1.0, 2026-11-14, config hash 6fdff7359a, seed 1.
 
 **Analysis set: 80 individuals** (0 removed by QC, 3 flagged and kept). Families are relatedness-based groups, not pedigree records. callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly).
 
@@ -18,6 +18,7 @@ Links between families are candidates. Nomination is screening; a link is 'suppo
 ## Notes and warnings
 
 - --bisnp is assumed to be the source of the supplied relatedness and is kept out of the audit
+- cross-marker concordance: 712 of 5,863 SNPs (12.1%) lie in SV regions (structural-haplotype intervals with a flank of 100,000 bp, and the spans of 971 deletion / duplication calls) and are left out of the masked SNP class
 
 ## Headline numbers
 
@@ -78,7 +79,11 @@ Links between families are candidates. Nomination is screening; a link is 'suppo
 | 08_family_effect | eta2_median [DEL (gt:sv.vcf.gz)] | 0.561 |
 | 08_family_effect | eta2_median [DUP (gt:sv.vcf.gz)] | 0.5821 |
 | 08_family_effect | eta2_median [HAPLOTYPE (structural haplotypes)] | 0.6067 |
+| 08_family_effect | eta2_median [SNP matched to DEL] | 0.5839 |
+| 08_family_effect | eta2_median [SNP matched to DUP] | 0.5837 |
+| 08_family_effect | eta2_median [SNP matched to HAPLOTYPE] | 0.6579 |
 | 09_cross_marker_concordance | auc_within_vs_between [SNP (bisnp)] | 0.9999 |
+| 09_cross_marker_concordance | auc_within_vs_between [SNP, SV regions masked (bisnp)] | 0.9999 |
 | 09_cross_marker_concordance | auc_within_vs_between [DEL (gt:sv.vcf.gz)] | 0.9988 |
 | 09_cross_marker_concordance | auc_within_vs_between [DUP (gt:sv.vcf.gz)] | 0.9904 |
 | 09_cross_marker_concordance | auc_within_vs_between [HAPLOTYPE (structural haplotypes)] | 0.8021 |
@@ -87,39 +92,41 @@ Definitions of every number: `statistics.tsv`.
 
 ## Run time
 
-- read inputs: 1.3 s
-- 00_qc: 0.8 s
-- 01_relatedness: 0.3 s
-- 02_families: 0.2 s
-- 03_nomination: 1.6 s
-- 04_audit: 0.4 s
-- 05_network: 0.2 s
-- haplotypes: SNP scan: 3.2 s
-- haplotypes: deletion scan: 0.2 s
-- 06_structural_haplotypes: 20.6 s
-- 07_barcode: 0.2 s
-- 08_family_effect: 24.0 s
-- 09_cross_marker_concordance: 0.8 s
-- total: 50.6 s
+- read inputs: 1.1 s
+- 00_qc: 0.4 s
+- 01_relatedness: 0.1 s
+- 02_families: 0.1 s
+- 03_nomination: 0.9 s
+- 04_audit: 0.3 s
+- 05_network: 1.3 s
+- haplotypes: SNP scan: 3.1 s
+- haplotypes: deletion scan: 0.1 s
+- 06_structural_haplotypes: 13.9 s
+- 07_barcode: 2.4 s
+- 08_family_effect: 9.2 s
+- 09_cross_marker_concordance: 2.6 s
+- total: 32.6 s
 
 ## Figures
 
 | file | title | status |
 |---|---|---|
+| fig00_overview | Overview: kinship per marker class and the network of families | drawn (PNG + PDF) |
 | fig01_qc_panels | QC panels | drawn (PNG + PDF) |
-| fig02_relatedness_theta_k2 | Relatedness: theta and k2 with thresholds | drawn (PNG + PDF) |
-| fig03_family_sizes_closure | Family sizes and closure | drawn (PNG + PDF) |
-| fig04_nomination_matrix_audit | Nomination matrix with audit triangle | drawn (PNG + PDF) |
-| fig05_audit_gates | Audit gates | drawn (PNG + PDF) |
-| fig06_latent_parent_incidence | Latent-parent incidence | drawn (PNG + PDF) |
-| fig07_network | Network of families and links | drawn (PNG + PDF) |
-| fig08_structural_haplotypes_pc1 | Structural haplotypes: PC1 against heterozygosity per interval | drawn (PNG + PDF) |
-| fig09_structural_haplotype_scan | Scan for large structural haplotypes | drawn (PNG + PDF) |
-| fig10_arrangement_tag_variants | Arrangement-tag deletions and duplications | drawn (PNG + PDF) |
-| fig11_barcode | Barcode of the shared parents | drawn (PNG + PDF) |
-| fig12_family_effect | Family effect (eta squared) | drawn (PNG + PDF) |
-| fig13_cross_marker_concordance | Cross-marker kinship concordance | drawn (PNG + PDF) |
-| fig14_shared_parent_overview | Shared-parent overview | drawn (PNG + PDF) |
+| fig02_structural_haplotypes_pc1 | Structural haplotypes: PC1 against heterozygosity per interval | drawn (PNG + PDF) |
+| fig03_structural_haplotype_scan | Scan for large structural haplotypes | drawn (PNG + PDF) |
+| fig04_arrangement_tag_variants | Arrangement-tag deletions and duplications | drawn (PNG + PDF) |
+| fig05_barcode_all_parents | Barcode of the shared parents | drawn (PNG + PDF) |
+| fig06_shared_parent_nomination_audit_network | Shared-parent links: nomination, audit gates and network | drawn (PNG + PDF) |
+| fig07_nomination_matrix_all_units | Family-pair nomination matrix, all units | drawn (PNG + PDF) |
+| fig08_sv_genotypes_and_kinship | SV genotypes follow the families and kinship recovers them | drawn (PNG + PDF) |
+| fig09_cross_marker_concordance | Cross-marker concordance of kinship | drawn (PNG + PDF) |
+| fig10_relatedness_and_families | Relatedness and the full-sib families | drawn (PNG + PDF) |
+| fig11_barcode_deletion_augmentation | Barcode of a shared parent with DEL augmentation | drawn (PNG + PDF) |
+| fig12_barcode_gene_level | Barcode at gene level | drawn (PNG + PDF) |
+| fig13_funnel_to_unsampled_parent | Funnel from offspring relationships to an unsampled parent | drawn (PNG + PDF) |
+| fig14_deletion_genotypes_linked_families_chain1_F7 | Deletion genotypes along linked families: F10 / F7 / F12 | drawn (PNG + PDF) |
+| fig15_deletion_genotypes_other_links | Deletion genotypes, the other links | drawn (PNG + PDF) |
 
 ## Capability table
 
@@ -135,6 +142,6 @@ Confidence: *benchmarked* = the step ran as in the analysis the code was extract
 | 5. Network, latent parents, slot limit | yes | relatedness table | benchmarked | links audited |
 | 6a. Structural haplotypes (genotyping and scan) | yes | SNP (bisnp), DEL (gt:sv.vcf.gz) | benchmarked | genotyping extracted from the original code; scan: SNP part reimplemented from Methods, candidates not validated |
 | 6b. Barcode of the shared parent | yes | supplied interval, genotyped by local PCA | benchmarked | posterior of the shared parent from the descendants' genotypes |
-| 7. Family effect (eta squared) | yes | SNP (bisnp); DEL (gt:sv.vcf.gz); DUP (gt:sv.vcf.gz); HAPLOTYPE (structural haplotypes) | benchmarked | once per marker class; individuals assigned to a family only |
-| 8. Cross-marker concordance | yes | SNP (bisnp); DEL (gt:sv.vcf.gz); DUP (gt:sv.vcf.gz); HAPLOTYPE (structural haplotypes) | benchmarked | cross-marker concordance against the reconstructed families, not pedigree truth |
+| 7. Family effect (eta squared) | yes | SNP (bisnp); DEL (gt:sv.vcf.gz); DUP (gt:sv.vcf.gz); HAPLOTYPE (structural haplotypes); SNP matched to DEL; SNP matched to DUP; SNP matched to HAPLOTYPE | benchmarked | once per marker class; individuals assigned to a family only |
+| 8. Cross-marker concordance | yes | SNP (bisnp); SNP, SV regions masked (bisnp); DEL (gt:sv.vcf.gz); DUP (gt:sv.vcf.gz); HAPLOTYPE (structural haplotypes) | benchmarked | cross-marker concordance against the reconstructed families, not pedigree truth |
 

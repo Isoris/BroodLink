@@ -399,3 +399,36 @@ The marker-count check quotes the benchmark rows above (17,276 markers: recovery
   (`nomination_seed_sweep.tsv`, `sweep_nomination.py`) and a k2 sensitivity inset in the
   families figure. `broodlink/sweep.py` and `broodlink/benchmark.py` are new; the provenance of
   every tested value is in `SWEEP.md`.
+
+## 17. Ports of the published figures (added with the figure package)
+
+The figures of the original study are now drawn by `broodlink run` from the tables of the run
+(`broodlink/figures/`; `docs/DISPLAY_ITEMS.md` has the panel-by-panel status). The house style
+(`figures/style.py`: fonts, type scale, palette, placement in millimetres, numbered banners)
+is ported from the style module of the original figures (`ros_figstyle.py`, `hat3_style.py`).
+Family names, counts, thresholds and every printed number come from the run; the printed
+numbers are listed with their source table in `figures/LEDGER.tsv` (the originals wrote one
+ledger per figure). Computations added to feed the panels:
+
+| Quantity | Module, step | Original | Status |
+|---|---|---|---|
+| Opposite homozygotes by relationship class: R0 of the biSNPs, opposite-homozygote rate of the deletions, ratio to unrelated / unlinked pairs | `opposite.py`, step 5 | tables `FAM/_sv_inheritance/tables/opposite_homozygote_test_v01.tsv` (NGSrelate column R0, column `cls`) and `opposite_homozygote_DEL_v01.tsv` (`oh_rate`, `n_shared`, `cls`), described in `FAM/_project_docs/docs/00_FUNNEL_STRATEGY.md`; the script that wrote them was **not found** | reimplemented from the tables and the note. R0 is read from the relatedness table when it has the column; the count from hard-called SNPs (opposite homozygotes / both heterozygous) is **new in BroodLink**. No marker filter is recorded: every deletion of the input is used |
+| Frequency-matched SNPs for the family effect | `family_effect.matched_snps`, step 7 | `compute_association_eta2_v1.py`, block "matched SNP pool" (bin width 0.02, seed + 7, null with seed + 1) | extracted |
+| GRM per marker class written out; SNPs outside SV regions; bootstrap intervals of AUC and recovery; Pearson correlation with the masked-SNP GRM | `concordance.py`, step 8 | `compute_sv_kinship_v1.py` (`merged`, `in_mask`: intervals + 100 kb, DEL and DUP spans), `build_extdata_SV_validation_v2.py` (`boot_ci`: 1,000 resamples of the families, seed 7) | extracted. The SV spans masked are those of the calls given to the run |
+| Closure, status and membership class of imported families (`--families`) | `families.reconstruct(given=...)`, step 2 | same rules as section 3 | extracted (applied to given labels) |
+| Deletions that fit a Mendelian cross in every family of a chain, expected-cross strip, thinning, order of individuals | `deletion_paths.py` (`fit_family`, `Context.block`, `order_individuals`, `both_hom`), step 5 | `HAT/code/build_supp_chromosome_DEL_heatmaps_v2.py` (`fit_family`, `block2`, `strips2`, `summarise`), `HAT/code/chromDEL_common.py` (`af_mask`, `order_fish`) | extracted: allele frequency among family individuals inside the audit window; call rate >= 0.90 among well-called individuals (at most 30% blank on the chromosome) of every family; best parental pair of 6 (error 0.02) with simulated P >= 0.05 (300 draws, seed 1, >= 3 called); thinning within 100 kb at >= 90% concordance; even subsample of 160 |
+| Sharing per link and chromosome against matched pairs | `deletion_paths.chrom_sharing`, step 5 | `HAT/code/build_supp_chromosome_DEL_heatmaps_v1.py` (`chrom_share_table`), `chromDEL_common.py` (`share`, `matched_null`, `edges`) | extracted. The allele-frequency filter is on the individuals in families (the genome-wide Gate 2 of section 5 uses the analysis set) |
+| Chains of linked families, family order in a chain, chromosome shown, paging | `deletion_paths.find_chains`, `choose_chromosome` | typed into the original scripts (one chain, one linkage group "with most DELs") | **new in BroodLink**: a chain = a junction family with its supported partners (`deletion_paths.chain_links: kept` adds families on two or more kept links); chromosome = the one with the most deletions |
+| Tag-variant evidence on the shared parent (obligate carriers), sweep over k and tag strength, permutation check, augmented barcode | `tag_evidence.py`, `augmentation.py`, step 7 | `FAM/_manuscript_figures_2026-10-28/code/compute_del_augmentation_v1.py` (`obligate`, `evidence`, `acc`), `HAT/per_inversion_first_pass/relabelled_augmentation/code/compute_augmentation_relabelled_v1.py` (`prep`, `ob`, `evidence`, `acc`) | extracted: both families hold a homozygous carrier, called in >= 2 individuals per family, allele frequency 0.02-0.98 among family individuals; evidence class from >= k obligate tag variants per class at tag strength >= delta (k = 2, delta = 0.8 shown; sweep 1-3 by 0.6 / 0.8 / 0.9); null = evidence classes permuted across intervals inside each link, 500 permutations. Checked cell for cell against the stored original when given the original catalogue and links. The tag catalogue is that of step 6 (section 12: the original catalogue builder was not found) |
+| Vote of the links of a junction family ("super barcode") | `augmentation.super_vote` | `ED_Fig_H5.py`, block "G vote logic" (from `HAT/code/build_extdata_SP_DEL_augmentation_v5.py`) | extracted |
+| Recurrence of a junction parent across two links, pseudo-chain null | `recurrence.py`, step 7 | `FAM/_project_docs/code/refine_LP.py` | extracted (section 7 listed it as not part of 0.1.0). Partners come from the network; a seeded subset is drawn when the null pairs exceed `barcode.recurrence.n_null_max` |
+| Genes of every barcode interval, tag variants on coding sequence | `genes.py`, step 7, needs `--genes` | `ED_Fig_H6.py` (`prepare`, `cell_color`), `HAT/code/del_gene_loci_common.py` (`load_hits`, `calls_table`, `size_label`) | gene membership by overlap extracted; hits on coding sequence computed from the gene file are **new in BroodLink** (the original read a cohort table of hits); the rule choosing the intervals opened is new |
+
+Not ported, with the reason: the held-out prediction of withheld offspring (panel I of the
+barcode-augmentation figure, `m_incremental_augmentation.py`: a validation outside the tool);
+the second, 60-draw run of the recurrence null; the read-support quality bar of the
+deletion-genotype figures (a caller-specific table); gene-family colours and the candidate
+centromere mark of the gene-level figure (cohort inventories); the ideogram and the
+population-genetic panels of the combined relatedness figure (genome displays and statistics
+outside this pipeline); the split of "not closed" families into unresolved and incompatible
+(rule not found, section 15 item 6).

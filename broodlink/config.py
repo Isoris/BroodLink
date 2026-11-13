@@ -78,7 +78,22 @@ DEFAULTS = {
     },
     "barcode": {"posterior_call": 0.90, "posterior_strict": 0.95, "genotype_error": 0.03,
                 # tag variants the shared parent must carry (compute_augmentation_relabelled_v1.py: called in >= 2 per family, k = 2, delta >= 0.8)
-                "tag_evidence": {"min_called_per_family": 2, "min_tags": 2, "min_delta": 0.8}},
+                # (allele frequency strictly inside af_min-af_max among the individuals in families: function prep of that script)
+                "tag_evidence": {"min_called_per_family": 2, "min_tags": 2, "min_delta": 0.8, "af_min": 0.02, "af_max": 0.98},
+                # sweep of the evidence rule and its permutation check (same script: k = 1, 2, 3; difference >= 0.6, 0.8, 0.9; 500 permutations)
+                "augmentation": {"k_sweep": [1, 2, 3], "delta_sweep": [0.6, 0.8, 0.9], "n_permutations": 500},
+                # recurrence of a junction parent across two links (refine_LP.py: rare deletions, pseudo-chain null)
+                "recurrence": {"af_min": 0.01, "af_max": 0.10, "min_call_rate": 0.80, "n_null_max": 200, "p_max": 0.05}},
+    # deletion genotypes along linked families (build_supp_chromosome_DEL_heatmaps_v2.py: fit_family, block2)
+    "deletion_paths": {
+        "low_call": 0.30,                          # individuals with more missing genotypes on the chromosome are not used for the fit
+        "genotype_error": 0.02, "fit_p_min": 0.05, "fit_draws": 300, "fit_seed": 1, "fit_min_called": 3,
+        "min_call": 0.90,                          # call rate among the well-called individuals of every family
+        "thin_kb": 100, "thin_concordance": 0.90, "thin_min_called": 3,
+        "max_columns": 160,                        # deletions drawn (even subsample of the eligible ones)
+        "max_chain_families": 6,                   # new in BroodLink
+        "chain_links": "supported",                # new in BroodLink: supported = chains around junction families (two or more supported links); kept = also families on two or more kept links
+    },
     "family_effect": {"af_min": 0.05, "af_max": 0.95, "min_called": 20, "n_permutations": 1000,
                       "max_markers_per_class": 20000},
     "concordance": {

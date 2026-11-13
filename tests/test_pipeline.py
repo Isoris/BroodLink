@@ -123,7 +123,11 @@ def test_barcode_matches_true_parent(run_with_haplotypes, truth):
 
 def test_family_effect_above_null(full_run):
     T = read(full_run, "08_family_effect/family_effect_summary.tsv")
-    assert len(T) == 4 and (T.eta2_obs_median > T.null_median_of_medians + 0.1).all()
+    # SNP, DEL, DUP, structural haplotypes, and frequency-matched SNPs for the three non-SNP classes
+    assert len(T) == 7 and (T.eta2_obs_median > T.null_median_of_medians + 0.1).all()
+    assert set(T.marker_class) == {"SNP", "DEL", "DUP", "HAPLOTYPE", "SNP_matched_DEL", "SNP_matched_DUP", "SNP_matched_HAPLOTYPE"}
+    n = T.set_index("marker_class").n_tested
+    assert n["SNP_matched_DEL"] == n["DEL"] and n["SNP_matched_DUP"] == n["DUP"]
 
 
 # ------------------------------------------------------------------ single-input modes and absent inputs
@@ -244,10 +248,26 @@ def test_outputs_and_figures_exist(full_run):
               "tracks/README.txt", "figures/MANIFEST.tsv"]:
         assert os.path.getsize(os.path.join(full_run, f)) > 0, f
     M = read(full_run, "figures/MANIFEST.tsv")
-    assert len(M) >= 14 and M.status.str.startswith("drawn").all(), M[~M.status.str.startswith("drawn")]
+    assert len(M) >= 16 and M.status.str.startswith("drawn").all(), M[~M.status.str.startswith("drawn")]
     for stem in M.file:
         assert os.path.getsize(os.path.join(full_run, "figures", stem + ".png")) > 5000
         assert os.path.getsize(os.path.join(full_run, "figures", stem + ".pdf")) > 2000
+    # the overview and every port of a published figure is drawn from the synthetic data
+    for name in PORTS:
+        assert M.file.str.contains(name).any(), name
+    assert M.file.str.startswith("fig00_overview").any()
+    # with SNPs every figure that has a biSNP panel shows it: no note about a missing SNP input
+    assert not M.note.fillna("").str.contains("no SNP input|no biSNP").any(), M[M.note.fillna("").str.contains("no SNP input|no biSNP")]
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    for stem in M.file:
+        with Image.open(os.path.join(full_run, "figures", stem + ".png")) as im:
+            dpi = im.info.get("dpi", (0, 0))[0]
+            assert dpi >= 449, (stem, dpi)                               # raster output at 450 dpi or more
+            assert im.height / dpi * 25.4 <= 297.5, (stem, im.height / dpi * 25.4)   # nothing taller than an A4 page
+    LG = read(full_run, "figures/LEDGER.tsv")
+    assert len(LG) > 50 and set(LG.columns) == {"figure", "panel", "printed_item", "value", "source"} and LG.source.notna().all()
+    assert set(LG.figure) <= set(stems_of(M))
     import openpyxl
     wb = openpyxl.load_workbook(os.path.join(full_run, "tables", "broodlink_tables.xlsx"), read_only=True)
     assert "definitions" in wb.sheetnames and len(wb.sheetnames) >= 10
@@ -255,6 +275,66 @@ def test_outputs_and_figures_exist(full_run):
     assert "## Capability table" in rep and "Analysis set: 80 individuals" in rep and "SNP scan" in rep
     meth = open(os.path.join(full_run, "methods_text.md"), encoding="utf-8").read()
     assert "relatedness-based groups, not pedigree records" in meth and "5,000 permutations" in meth
+
+
+PORTS = ["shared_parent_nomination_audit_network", "nomination_matrix_all_units", "sv_genotypes_and_kinship", "cross_marker_concordance", "relatedness_and_families",
+         "barcode_deletion_augmentation", "barcode_gene_level", "funnel_to_unsampled_parent", "deletion_genotypes_linked_families", "deletion_genotypes_other_links"]
+
+
+def stems_of(M):
+    from broodlink.figures import stems
+    return stems()
+
+
+def test_grm_outputs_and_bootstrap(full_run):
+    """Step 9 writes the GRM of every marker class and the table with bootstrap intervals."""
+    T = read(full_run, "09_cross_marker_concordance/cross_marker_concordance.tsv")
+    O = read(full_run, "09_cross_marker_concordance/kinship_grm_individuals.tsv")
+    assert list(T.marker_class) == ["SNP", "SNP_MASKED", "DEL", "DUP", "HAPLOTYPE"]
+    with np.load(os.path.join(full_run, "09_cross_marker_concordance", "kinship_grm.npz")) as z:
+        assert set(z.files) == set(T.grm_key)
+        for k in z.files:
+            K = z[k]
+            assert K.shape == (len(O), len(O)) and np.allclose(K, K.T, equal_nan=True)
+    assert (T.auc_ci95_low <= T.auc_within_vs_between + 1e-9).all() and (T.auc_within_vs_between <= T.auc_ci95_high + 1e-9).all()
+    assert (T.recovery_ci95_low <= T.recovery_ci95_high).all()
+    assert T.n_markers[T.marker_class == "SNP_MASKED"].iloc[0] < T.n_markers[T.marker_class == "SNP"].iloc[0]
+    assert T.pearson_r_vs_snp_outside_sv[T.marker_class == "DEL"].iloc[0] > 0.5
+    # family order: assigned individuals first, grouped by family
+    f = O.family.tolist(); first_un = f.index("unassigned")
+    assert all(x == "unassigned" for x in f[first_un:]) and len(set(f[:first_un])) == 15
+
+
+def test_figures_without_snps_and_without_genes(run_no_snps_with_figures):
+    """Optional inputs absent: the panels and figures that need them are left out, nothing fails."""
+    out = run_no_snps_with_figures
+    M = read(out, "figures/MANIFEST.tsv").fillna("")
+    assert not M.status.str.startswith("failed").any(), M[M.status.str.startswith("failed")]
+    row = lambda name: M[M.file.str.contains(name)].iloc[0]
+    assert row("barcode_gene_level").status == "not drawn: no --genes input"
+    for name in ("shared_parent_nomination_audit_network", "sv_genotypes_and_kinship", "cross_marker_concordance", "relatedness_and_families", "overview"):
+        assert row(name).status.startswith("drawn"), (name, row(name).status)
+    assert "biSNP R0 panel omitted" in row("shared_parent_nomination_audit_network").note
+    assert "no biSNP kinship matrix" in row("sv_genotypes_and_kinship").note and "matched biSNPs not drawn" in row("sv_genotypes_and_kinship").note
+    assert "needs SNPs and SV calls together" in row("cross_marker_concordance").note
+    assert "no biSNPs matrix" in row("overview").note
+    T = read(out, "09_cross_marker_concordance/cross_marker_concordance.tsv")
+    assert "SNP" not in set(T.marker_class) and "SNP_MASKED" not in set(T.marker_class)
+    assert not os.path.exists(os.path.join(out, "07_barcode", "barcode_interval_genes.tsv"))
+
+
+def test_readme_images_exist():
+    """The front page cannot ship with a broken image: every image the README shows is in the repository."""
+    import re
+    txt = open(os.path.join(ROOT, "README.md"), encoding="utf-8").read()
+    imgs = re.findall(r"!\[[^\]]*\]\(([^)\s]+)\)", txt) + re.findall(r"<img[^>]+src=\"([^\"]+)\"", txt)
+    assert imgs, "the README shows no image"
+    for rel in imgs:
+        if rel.startswith("http"):
+            continue
+        p_ = os.path.join(ROOT, rel.replace("/", os.sep))
+        assert os.path.exists(p_) and os.path.getsize(p_) > 2000, rel
+    assert "docs/figures/overview.png" in imgs
 
 
 def test_every_table_has_the_header(full_run):
@@ -300,7 +380,7 @@ def test_identical_results_for_a_fixed_seed(full_run, tmp_path):
     out = str(tmp_path / "again")
     main(["run", *FULL, "--out", out, "--no-figures"])
     a, b = _tables(full_run), _tables(out)
-    a.pop("figures/MANIFEST.tsv", None)
+    a.pop("figures/MANIFEST.tsv", None); a.pop("figures/LEDGER.tsv", None)
     assert set(a) == set(b)
     diff = [k for k in a if a[k] != b[k]]
     assert not diff, diff

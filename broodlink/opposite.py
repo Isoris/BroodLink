@@ -23,6 +23,12 @@ used):
                third degree | unrelated
   DEL classes: within-family (full-sib) | directly linked families | same group, not directly
                linked | no link
+
+"Link" and "group" are not defined in the original tables beyond their labels. BroodLink uses
+the network its figures show: kept (not rejected) nominated links between families of at least
+`network.figure_min_family_size` individuals, and the connected components of that network.
+On the original cohort this definition returns the pair counts of the original tables in every
+class (363 / 1,012 / 552 / 909 / 20,384 and 363 / 509 / 503 / 21,845).
 """
 from __future__ import annotations
 import numpy as np

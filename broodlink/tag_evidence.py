@@ -16,9 +16,10 @@ HAT/figures/upgrades_2026-11-03/round_ed/ED_Fig_H6/ED_Fig_H6.py:
     both), contradicted (0/0 with class 2 or both; 1/1 with class 0 or both), or the evidence
     fills a state the barcode left unresolved.
 The original settings were chosen in a sweep (k = 1, 2, 3; difference >= 0.6, 0.8, 0.9) with
-a permutation check; the sweep and the check are not part of the run. The original catalogue
-required >= 20 and >= 10 called homokaryotypes per class and an allele-frequency window; here
-the tag variants are those of step 6 (config inversions.tags).
+a permutation check; both are in augmentation.py, which applies the same rule over the sweep
+grid. The allele-frequency window of the original (0.02-0.98 among the individuals in
+families) is applied. The original catalogue required >= 20 and >= 10 called homokaryotypes
+per class; here the tag variants are those of step 6 (config inversions.tags).
 """
 from __future__ import annotations
 import numpy as np
@@ -51,6 +52,14 @@ def obligate(tags, sv_sets, members, links, cfg):
         if not len(tg):
             continue
         six = {s: i for i, s in enumerate(ms.samples)}
+        # allele-frequency window among the individuals in families (function prep of the original)
+        e = cfg["barcode"].get("tag_evidence", {})
+        famc = [six[s] for f, mem in members.items() if not str(f).startswith("S_") for s in mem if s in six]
+        if famc:
+            Gf = G[:, famc]; ncf = (Gf >= 0).sum(1)
+            af = np.where(ncf > 0, np.where(Gf >= 0, Gf, 0).sum(1) / (2.0 * np.maximum(ncf, 1)), np.nan)
+            okaf = (af > float(e.get("af_min", 0.02))) & (af < float(e.get("af_max", 0.98)))
+            tg = tg[okaf]; G = G[okaf]
         hom, nc = {}, {}
         for f in {x for a, b, _s in links for x in (a, b)}:
             c = [six[s] for s in members.get(f, []) if s in six]

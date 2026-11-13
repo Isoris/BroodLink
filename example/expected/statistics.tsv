@@ -1,4 +1,4 @@
-# BroodLink 0.1.0 | config afaa86ec32 | seed 1
+# BroodLink 0.1.0 | config 6fdff7359a | seed 1
 # analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
 # marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
 # relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
@@ -61,7 +61,11 @@ step	statistic	value	definition
 08_family_effect	eta2_median [DEL (gt:sv.vcf.gz)]	0.5610292433381696	median variance explained by family over 601 markers; null median 0.1939
 08_family_effect	eta2_median [DUP (gt:sv.vcf.gz)]	0.5821042281219272	median variance explained by family over 145 markers; null median 0.1932
 08_family_effect	eta2_median [HAPLOTYPE (structural haplotypes)]	0.6066565653946936	median variance explained by family over 4 markers; null median 0.1906
+08_family_effect	eta2_median [SNP matched to DEL]	0.5839156735283495	median variance explained by family over 601 markers; null median 0.2458
+08_family_effect	eta2_median [SNP matched to DUP]	0.5837024087024089	median variance explained by family over 145 markers; null median 0.2428
+08_family_effect	eta2_median [SNP matched to HAPLOTYPE]	0.6579069458179747	median variance explained by family over 4 markers; null median 0.2319
 09_cross_marker_concordance	auc_within_vs_between [SNP (bisnp)]	0.9998635611075689	5451 markers; recovery 98.7% of within-family pairs above the 99.9th percentile of between-family pairs
+09_cross_marker_concordance	auc_within_vs_between [SNP, SV regions masked (bisnp)]	0.9999370282034934	4797 markers; recovery 98.7% of within-family pairs above the 99.9th percentile of between-family pairs
 09_cross_marker_concordance	auc_within_vs_between [DEL (gt:sv.vcf.gz)]	0.9987877929172472	605 markers; recovery 82.4% of within-family pairs above the 99.9th percentile of between-family pairs
 09_cross_marker_concordance	auc_within_vs_between [DUP (gt:sv.vcf.gz)]	0.9904466537049719	148 markers; recovery 33.3% of within-family pairs above the 99.9th percentile of between-family pairs
 09_cross_marker_concordance	auc_within_vs_between [HAPLOTYPE (structural haplotypes)]	0.8020507815062329	4 markers; recovery 2.5% of within-family pairs above the 99.9th percentile of between-family pairs

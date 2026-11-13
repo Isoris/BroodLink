@@ -1,0 +1,445 @@
+# BroodLink 0.1.0 | config 6fdff7359a | seed 1
+# analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
+# marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
+# relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
+# Families are relatedness-based groups, not pedigree records.
+# callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
+# Ledger of the ported figures: every number printed in a panel, with the table (and column) of the run it was computed from.
+figure	panel	printed_item	value	source
+fig00_overview	A	AUC biSNPs	0.999864	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig00_overview	A	markers biSNPs	5451	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig00_overview	B	AUC DELs	0.998788	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig00_overview	B	markers DELs	605	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig00_overview	C	AUC DUPs	0.990447	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig00_overview	C	markers DUPs	148	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig00_overview	D	AUC structural haplotypes	0.802051	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig00_overview	D	markers structural haplotypes	4	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 HAPLOTYPE	0.606657	08_family_effect/family_effect_summary.tsv eta2_obs_median
+fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 DEL	0.561029	08_family_effect/family_effect_summary.tsv eta2_obs_median
+fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 DUP	0.582104	08_family_effect/family_effect_summary.tsv eta2_obs_median
+fig08_sv_genotypes_and_kinship	A	individuals in families	72	02_families/family_membership.tsv
+fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 DEL	0.561029	08_family_effect/family_effect_summary.tsv eta2_obs_median
+fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 DUP	0.582104	08_family_effect/family_effect_summary.tsv eta2_obs_median
+fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 HAPLOTYPE	0.606657	08_family_effect/family_effect_summary.tsv eta2_obs_median
+fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 SNP_matched_DEL	0.583916	08_family_effect/family_effect_summary.tsv eta2_obs_median
+fig08_sv_genotypes_and_kinship	banner 1 / B key	null median DEL	0.193908	08_family_effect/family_effect_summary.tsv null_median_of_medians
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 1	147	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 2	102	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 3	90	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 4	60	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 5	81	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 6	54	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 7	37	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 8	14	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	B	DELs in allele-frequency bin 9	16	08_family_effect/family_effect_per_marker.tsv af
+fig08_sv_genotypes_and_kinship	C	median excess DEL	0.367275	08_family_effect/family_effect_per_marker.tsv eta2_obs - null_median
+fig08_sv_genotypes_and_kinship	C	median excess SNP_matched_DEL	0.338782	08_family_effect/family_effect_per_marker.tsv eta2_obs - null_median
+fig08_sv_genotypes_and_kinship	C	median excess DUP	0.385814	08_family_effect/family_effect_per_marker.tsv eta2_obs - null_median
+fig08_sv_genotypes_and_kinship	C	median excess SNP_matched_DUP	0.321824	08_family_effect/family_effect_per_marker.tsv eta2_obs - null_median
+fig08_sv_genotypes_and_kinship	C	median excess HAPLOTYPE	0.407349	08_family_effect/family_effect_per_marker.tsv eta2_obs - null_median
+fig08_sv_genotypes_and_kinship	C	median excess SNP_matched_HAPLOTYPE	0.437959	08_family_effect/family_effect_per_marker.tsv eta2_obs - null_median
+fig08_sv_genotypes_and_kinship	D	AUC biSNPs	0.999864	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig08_sv_genotypes_and_kinship	D	markers biSNPs	5451	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig08_sv_genotypes_and_kinship	E	AUC biSNPs, SV masked	0.999937	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig08_sv_genotypes_and_kinship	E	markers biSNPs, SV masked	4797	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig08_sv_genotypes_and_kinship	F	AUC DELs	0.998788	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig08_sv_genotypes_and_kinship	F	markers DELs	605	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig08_sv_genotypes_and_kinship	G	AUC DUPs	0.990447	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig08_sv_genotypes_and_kinship	G	markers DUPs	148	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig08_sv_genotypes_and_kinship	H	AUC structural haplotypes	0.802051	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig08_sv_genotypes_and_kinship	H	markers structural haplotypes	4	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig08_sv_genotypes_and_kinship	note	individuals	80	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig08_sv_genotypes_and_kinship	note	assigned	72	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig08_sv_genotypes_and_kinship	note	unassigned	8	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	banner 1	highest AUC biSNPs, SV masked	0.999937	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig09_cross_marker_concordance	banner 1	lowest AUC structural haplotypes	0.802051	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig09_cross_marker_concordance	A	AUC [CI] biSNPs	0.9999 [0.9996, 1.0000]	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between, auc_ci95_low, auc_ci95_high
+fig09_cross_marker_concordance	A	AUC [CI] biSNPs, SV masked	0.9999 [0.9998, 1.0000]	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between, auc_ci95_low, auc_ci95_high
+fig09_cross_marker_concordance	A	AUC [CI] DELs	0.9988 [0.9957, 0.9999]	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between, auc_ci95_low, auc_ci95_high
+fig09_cross_marker_concordance	A	AUC [CI] DUPs	0.9904 [0.9783, 0.9996]	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between, auc_ci95_low, auc_ci95_high
+fig09_cross_marker_concordance	A	AUC [CI] structural haplotypes	0.8021 [0.7017, 0.8833]	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between, auc_ci95_low, auc_ci95_high
+fig09_cross_marker_concordance	B	within-family pairs	159	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	B	between-family pairs	2397	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	B	median between | within biSNPs	-0.06 | 0.43	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	B	median between | within biSNPs, SV masked	-0.06 | 0.43	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	B	median between | within DELs	-0.05 | 0.44	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	B	median between | within DUPs	-0.05 | 0.42	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	B	median between | within structural haplotypes	-0.05 | 0.40	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	banner 2	Pearson r DELs	0.870436	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	banner 2	recovery structural haplotypes	2.51572	09_cross_marker_concordance/cross_marker_concordance.tsv recovery_pct
+fig09_cross_marker_concordance	C	pairs	3160	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	C	Pearson r DELs	r = 0.87	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	C	Pearson r DUPs	r = 0.82	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	C	Pearson r structural haplotypes	r = 0.27	09_cross_marker_concordance/kinship_grm.npz + kinship_grm_individuals.tsv
+fig09_cross_marker_concordance	D	recovery [CI] biSNPs	99% [97, 100]	09_cross_marker_concordance/cross_marker_concordance.tsv recovery_pct, recovery_ci95_low, recovery_ci95_high
+fig09_cross_marker_concordance	D	recovery [CI] biSNPs, SV masked	99% [97, 100]	09_cross_marker_concordance/cross_marker_concordance.tsv recovery_pct, recovery_ci95_low, recovery_ci95_high
+fig09_cross_marker_concordance	D	recovery [CI] DELs	82% [55, 98]	09_cross_marker_concordance/cross_marker_concordance.tsv recovery_pct, recovery_ci95_low, recovery_ci95_high
+fig09_cross_marker_concordance	D	recovery [CI] DUPs	33% [21, 92]	09_cross_marker_concordance/cross_marker_concordance.tsv recovery_pct, recovery_ci95_low, recovery_ci95_high
+fig09_cross_marker_concordance	D	recovery [CI] structural haplotypes	3% [0, 8]	09_cross_marker_concordance/cross_marker_concordance.tsv recovery_pct, recovery_ci95_low, recovery_ci95_high
+fig10_relatedness_and_families	A	pairs below 3rd	2808	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	A	pairs 3rd degree	6	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	A	pairs 2nd degree	190	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	A	pairs 1st, between fam.	1	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	A	pairs within full-sib	159	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	B	individuals	80	02_families/family_membership.tsv
+fig10_relatedness_and_families	B	families	15	02_families/families.tsv
+fig10_relatedness_and_families	B	unassigned	8	02_families/family_membership.tsv
+fig10_relatedness_and_families	C	families of 2	2	02_families/families.tsv n
+fig10_relatedness_and_families	C	families of 3	1	02_families/families.tsv n
+fig10_relatedness_and_families	C	families of 4	4	02_families/families.tsv n
+fig10_relatedness_and_families	C	families of 5	3	02_families/families.tsv n
+fig10_relatedness_and_families	C	families of 6	2	02_families/families.tsv n
+fig10_relatedness_and_families	C	families of 7	2	02_families/families.tsv n
+fig10_relatedness_and_families	C	families of 8	1	02_families/families.tsv n
+fig10_relatedness_and_families	C	individuals in families	72	02_families/family_membership.tsv
+fig10_relatedness_and_families	C inset	pairs in band <3rd	2808	01_relatedness/relatedness_pairs.tsv theta
+fig10_relatedness_and_families	C inset	pairs in band 3rd	6	01_relatedness/relatedness_pairs.tsv theta
+fig10_relatedness_and_families	C inset	pairs in band 2nd	190	01_relatedness/relatedness_pairs.tsv theta
+fig10_relatedness_and_families	C inset	pairs in band 1st	156	01_relatedness/relatedness_pairs.tsv theta
+fig10_relatedness_and_families	D	between-family pairs below second degree	2814	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	D	between-family pairs at second degree or closer	187	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	D	within-family pairs	159	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	D	within-family median theta	0.25185	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	D	within-family pairs below first degree	4	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	D	between-family pairs at first degree	1	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	E	closed families	7	02_families/families.tsv status
+fig10_relatedness_and_families	E	within-family pairs passing the rule	144	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	E	within-family pairs	159	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	E	bridged pairs	15	01_relatedness/relatedness_pairs.tsv
+fig10_relatedness_and_families	E	unbridged pairs	0	01_relatedness/relatedness_pairs.tsv
+fig11_barcode_deletion_augmentation	banner1	arrangement-tag DELs	78	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig11_barcode_deletion_augmentation	banner1	match rate, homozygous calls	1	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	banner1	matching homozygous calls	4	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	banner1	homozygous calls with evidence	4	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	banner1	null mean	0.619567	07_barcode/tag_evidence_sweep.tsv
+fig11_barcode_deletion_augmentation	A	median tag variants per interval	19.5	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig11_barcode_deletion_augmentation	A	class 2-tagged	37	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig11_barcode_deletion_augmentation	A	class 0-tagged	41	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig11_barcode_deletion_augmentation	A	tag strength >= 0.8	78	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig11_barcode_deletion_augmentation	C	permutation P	0.10978	07_barcode/tag_evidence_sweep.tsv
+fig11_barcode_deletion_augmentation	C	links pooled	5	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	C	class 0 hom. x none	2	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	class 0 hom. x class 0	4	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	class 0 hom. x class 2	0	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	class 0 hom. x class 0 + 2	0	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	het. x none	0	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	het. x class 0	3	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	het. x class 2	0	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	het. x class 0 + 2	2	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	class 2 hom. x none	1	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	class 2 hom. x class 0	0	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	class 2 hom. x class 2	0	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	C	class 2 hom. x class 0 + 2	0	07_barcode/tag_evidence_by_setting.tsv pooled, k=2, delta>=0.8
+fig11_barcode_deletion_augmentation	D	lowest match rate	1	07_barcode/tag_evidence_sweep.tsv
+fig11_barcode_deletion_augmentation	D	highest match rate	1	07_barcode/tag_evidence_sweep.tsv
+fig11_barcode_deletion_augmentation	D	lowest null mean	0.612619	07_barcode/tag_evidence_sweep.tsv
+fig11_barcode_deletion_augmentation	D	highest null mean	0.645614	07_barcode/tag_evidence_sweep.tsv
+fig11_barcode_deletion_augmentation	E	F10xF7 barcode	2	07_barcode/shared_parent_barcode.tsv
+fig11_barcode_deletion_augmentation	E	F10xF7 DEL evidence	3	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	E	F10xF7 augmented	3	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	E	F12xF7 barcode	3	07_barcode/shared_parent_barcode.tsv
+fig11_barcode_deletion_augmentation	E	F12xF7 DEL evidence	2	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	E	F12xF7 augmented	3	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	F	F1xF5 barcode	2	07_barcode/shared_parent_barcode.tsv
+fig11_barcode_deletion_augmentation	F	F1xF5 barcode + DEL evidence	4	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	F	F10xF12 barcode	2	07_barcode/shared_parent_barcode.tsv
+fig11_barcode_deletion_augmentation	F	F10xF12 barcode + DEL evidence	2	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	F	F10xF7 barcode	2	07_barcode/shared_parent_barcode.tsv
+fig11_barcode_deletion_augmentation	F	F10xF7 barcode + DEL evidence	3	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	F	F12xF7 barcode	3	07_barcode/shared_parent_barcode.tsv
+fig11_barcode_deletion_augmentation	F	F12xF7 barcode + DEL evidence	3	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	F	F4xF9 barcode	3	07_barcode/shared_parent_barcode.tsv
+fig11_barcode_deletion_augmentation	F	F4xF9 barcode + DEL evidence	3	07_barcode/tag_evidence_by_setting.tsv
+fig11_barcode_deletion_augmentation	G	agreeing intervals	2	07_barcode/junction_super_barcode.tsv
+fig11_barcode_deletion_augmentation	G	intervals with a full vote and a called joint state	2	07_barcode/junction_super_barcode.tsv
+fig11_barcode_deletion_augmentation	G	opposing votes	0	07_barcode/junction_super_barcode.tsv
+fig11_barcode_deletion_augmentation	G	no vote	1	07_barcode/junction_super_barcode.tsv
+fig11_barcode_deletion_augmentation	G	called states of the joint barcode	2	07_barcode/shared_parent_barcode.tsv
+fig11_barcode_deletion_augmentation	G	full votes	3	07_barcode/junction_super_barcode.tsv
+fig11_barcode_deletion_augmentation	G	partial votes	0	07_barcode/junction_super_barcode.tsv
+fig12_barcode_gene_level	banner1	intervals informed per link (min, max)	2, 4	07_barcode/shared_parent_barcode.tsv + 07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	banner1	barcode intervals	4	07_barcode/shared_parent_barcode.tsv
+fig12_barcode_gene_level	A	intervals informed, F1xF5	4	07_barcode/shared_parent_barcode.tsv + 07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	A	intervals informed, F4xF9	3	07_barcode/shared_parent_barcode.tsv + 07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	A	intervals informed, F10xF7	3	07_barcode/shared_parent_barcode.tsv + 07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	A	intervals informed, F10xF12	2	07_barcode/shared_parent_barcode.tsv + 07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	A	intervals informed, F12xF7	3	07_barcode/shared_parent_barcode.tsv + 07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	A	intervals informed, F2xF8	3	07_barcode/shared_parent_barcode.tsv + 07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	A	intervals informed, F4xF6	3	07_barcode/shared_parent_barcode.tsv + 07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	banner2	calls hitting genes in the opened intervals	18	07_barcode/barcode_interval_tag_gene_hits.tsv
+fig12_barcode_gene_level	banner2	of them with difference < 0.8	0	07_barcode/barcode_interval_tag_gene_hits.tsv
+fig12_barcode_gene_level	B	genes, interval 1	8	07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B	calls hitting genes, interval 1	5	07_barcode/barcode_interval_tag_gene_hits.tsv
+fig12_barcode_gene_level	B	class-0-tagged, interval 1	11	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B	class-2-tagged, interval 1	9	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B label	interval 1	1.1–1.4: 2 genes	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B label	interval 1	1.5	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B	median length of the tagging DELs, interval 1	1770.5	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 1, F1xF5	11	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 1, F1xF5	1	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 1, F4xF9	9	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 1, F4xF9	8	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 1, F10xF7	10	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 1, F10xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 1, F10xF12	10	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 1, F10xF12	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 1, F12xF7	10	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 1, F12xF7	8	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 1, F2xF8	1	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 1, F2xF8	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 1, F4xF6	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 1, F4xF6	8	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	genes, interval 2	10	07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B	calls hitting genes, interval 2	3	07_barcode/barcode_interval_tag_gene_hits.tsv
+fig12_barcode_gene_level	B	class-0-tagged, interval 2	10	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B	class-2-tagged, interval 2	11	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B label	interval 2	2.1	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B label	interval 2	2.2	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B label	interval 2	2.3 sim75a	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B	median length of the tagging DELs, interval 2	1541	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 2, F1xF5	7	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 2, F1xF5	1	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 2, F4xF9	9	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 2, F4xF9	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 2, F10xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 2, F10xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 2, F10xF12	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 2, F10xF12	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 2, F12xF7	1	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 2, F12xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 2, F2xF8	8	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 2, F2xF8	8	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 2, F4xF6	10	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 2, F4xF6	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	genes, interval 3	8	07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B	calls hitting genes, interval 3	6	07_barcode/barcode_interval_tag_gene_hits.tsv
+fig12_barcode_gene_level	B	class-0-tagged, interval 3	9	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B	class-2-tagged, interval 3	10	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B label	interval 3	3.1 sim97b	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B label	interval 3	3.2 sim98a	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B label	interval 3	3.3 sim101b	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B label	interval 3	3.4–3.5: 1 gene	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B label	interval 3	3.6 sim103b	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B	median length of the tagging DELs, interval 3	1552	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 3, F1xF5	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 3, F1xF5	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 3, F4xF9	1	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 3, F4xF9	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 3, F10xF7	9	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 3, F10xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 3, F10xF12	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 3, F10xF12	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 3, F12xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 3, F12xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 3, F2xF8	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 3, F2xF8	1	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 3, F4xF6	9	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 3, F4xF6	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	genes, interval 4	6	07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B	calls hitting genes, interval 4	4	07_barcode/barcode_interval_tag_gene_hits.tsv
+fig12_barcode_gene_level	B	class-0-tagged, interval 4	11	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B	class-2-tagged, interval 4	7	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B label	interval 4	4.1	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B label	interval 4	4.2–4.4: 1 gene	07_barcode/barcode_interval_tag_gene_hits.tsv / 07_barcode/barcode_interval_genes.tsv
+fig12_barcode_gene_level	B	median length of the tagging DELs, interval 4	1933.5	06_structural_haplotypes/arrangement_tag_variants.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 4, F1xF5	1	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 4, F1xF5	6	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 4, F4xF9	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 4, F4xF9	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 4, F10xF7	9	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 4, F10xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 4, F10xF12	10	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 4, F10xF12	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 4, F12xF7	9	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 4, F12xF7	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 4, F2xF8	10	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 4, F2xF8	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-0 tags, interval 4, F4xF6	0	07_barcode/barcode_tag_evidence.tsv
+fig12_barcode_gene_level	B	obligate class-2 tags, interval 4, F4xF6	0	07_barcode/barcode_tag_evidence.tsv
+fig13_funnel_to_unsampled_parent	1	individuals in the analysis set	80	02_families/family_membership.tsv
+fig13_funnel_to_unsampled_parent	1	full-sib families	15	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	1	individuals in families	72	02_families/family_membership.tsv
+fig13_funnel_to_unsampled_parent	1	closed families	7	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	1	individuals in closed families	29	02_families/family_membership.tsv
+fig13_funnel_to_unsampled_parent	1	unassigned individuals	8	02_families/family_membership.tsv
+fig13_funnel_to_unsampled_parent	A	families of 2	2	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A	families of 3	1	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A	families of 4	4	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A	families of 5	3	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A	families of 6	2	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A	families of 7	2	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A	families of 8	1	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A,B	families closed	7	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A,B	families not closed	8	02_families/families.tsv
+fig13_funnel_to_unsampled_parent	A,B	assigned individuals outside closed families	43	02_families/family_membership.tsv
+fig13_funnel_to_unsampled_parent	2	unit pairs	253	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	2	units	23	02_families/family_membership.tsv
+fig13_funnel_to_unsampled_parent	2	nominated	7	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	2	nominated family pairs compatible at Gate 1	7	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	2	supported	5	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	≥ 4 individuals, auditable: nominated	7	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	≥ 4 individuals, auditable: Gate-1 compatible	7	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	≥ 4 individuals, auditable: supported	5	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	3 individuals, provisional: nominated	0	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	3 individuals, provisional: Gate-1 compatible	0	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	3 individuals, provisional: supported	0	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	2 individuals, provisional: nominated	0	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	2 individuals, provisional: Gate-1 compatible	0	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	2 individuals, provisional: supported	0	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	D	single individual, not testable: nominated	0	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	3	supported links	5	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	3	compatible links without support	2	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	E	support threshold DEL	0.726908	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	E	support threshold DUP	0.688525	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	E	matched-null median DEL	0.618613	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	E	matched-null median DUP	0.57072	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	F	auditable nominated pairs	7	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	F	auditable pairs compatible at Gate 1	7	04_audit/audit_edges.tsv
+fig13_funnel_to_unsampled_parent	F	DEL + DUP support	1	04_audit/audit_edges.tsv link_class, evidence
+fig13_funnel_to_unsampled_parent	F	DEL support	2	04_audit/audit_edges.tsv link_class, evidence
+fig13_funnel_to_unsampled_parent	F	DUP support	2	04_audit/audit_edges.tsv link_class, evidence
+fig13_funnel_to_unsampled_parent	F	passed Gate 1, no SV support	2	04_audit/audit_edges.tsv link_class, evidence
+fig13_funnel_to_unsampled_parent	F	failed Gate 1	0	04_audit/audit_edges.tsv link_class, evidence
+fig13_funnel_to_unsampled_parent	F	DEL observed median	0.726908	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	F	DEL matched-null median	0.618613	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	F	DEL one-sided P	0.00355872	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	F	DUP observed median	0.688525	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	F	DUP matched-null median	0.57072	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	F	DUP one-sided P	0.00355872	04_audit/audit_gate2_summary.tsv
+fig13_funnel_to_unsampled_parent	4	barcode intervals	4	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	G	F10xF7 P, shared: called states	2	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	G	F10xF7 QA, F10 private: called states	1	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	G	F10xF7 QB, F7 private: called states	3	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	5	matching jointly resolved intervals	2	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	5	jointly resolved intervals	2	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	5	pseudo-chains	36	07_barcode/junction_recurrence.tsv
+fig13_funnel_to_unsampled_parent	5	empirical P	0.027027	07_barcode/junction_recurrence.tsv
+fig13_funnel_to_unsampled_parent	H	called states of the joint barcode	2	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	H	called class 0 hom.	1	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	H	called het.	1	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	H	called class 2 hom.	0	07_barcode/shared_parent_barcode.tsv
+fig13_funnel_to_unsampled_parent	I	statistic	0.358333	07_barcode/junction_recurrence.tsv
+fig13_funnel_to_unsampled_parent	I	null mean	0.101146	07_barcode/junction_recurrence.tsv
+fig13_funnel_to_unsampled_parent	I	null maximum	0.175	07_barcode/junction_recurrence.tsv
+fig14_deletion_genotypes_linked_families	1	individuals drawn	13	05_network/deletion_path_blocks.tsv n_individuals
+fig14_deletion_genotypes_linked_families	1	DELs drawn	51	05_network/deletion_path_blocks.tsv n_drawn
+fig14_deletion_genotypes_linked_families	A	DELs eligible	51	05_network/deletion_path_blocks.tsv n_eligible
+fig14_deletion_genotypes_linked_families	A	F10 expected cross 1:1 / 1:2:1 / all alike	33/1/17	05_network/deletion_path_blocks.tsv n_split_1_1, n_split_1_2_1, n_all_alike
+fig14_deletion_genotypes_linked_families	A	F10 individuals drawn	4	05_network/deletion_path_blocks.tsv n_individuals
+fig14_deletion_genotypes_linked_families	A	F10 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig14_deletion_genotypes_linked_families	A	F7 expected cross 1:1 / 1:2:1 / all alike	24/2/25	05_network/deletion_path_blocks.tsv n_split_1_1, n_split_1_2_1, n_all_alike
+fig14_deletion_genotypes_linked_families	A	F7 individuals drawn	5	05_network/deletion_path_blocks.tsv n_individuals
+fig14_deletion_genotypes_linked_families	A	F7 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig14_deletion_genotypes_linked_families	A	F12 expected cross 1:1 / 1:2:1 / all alike	12/1/38	05_network/deletion_path_blocks.tsv n_split_1_1, n_split_1_2_1, n_all_alike
+fig14_deletion_genotypes_linked_families	A	F12 individuals drawn	4	05_network/deletion_path_blocks.tsv n_individuals
+fig14_deletion_genotypes_linked_families	A	F12 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig14_deletion_genotypes_linked_families	A	F7 x F10 DELs 1/1 in both families, of those drawn	13	05_network/deletion_path_links.tsv n_hom_alt_in_both_drawn
+fig14_deletion_genotypes_linked_families	A	F7 x F12 DELs 1/1 in both families, of those drawn	8	05_network/deletion_path_links.tsv n_hom_alt_in_both_drawn
+fig14_deletion_genotypes_linked_families	A	step of the subsample	1	05_network/deletion_path_blocks.tsv n_eligible / n_drawn
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chromosomes above null median	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chromosomes above null p95	5	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chr1 observed share	0.75	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chr2 observed share	0.82	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chr3 observed share	0.66	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chr4 observed share	0.73	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chr5 observed share	0.71	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chr6 observed share	0.71	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chr7 observed share	0.72	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F1 x F5 chr8 observed share	0.62	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chromosomes above null median	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chromosomes above null p95	6	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chr1 observed share	0.77	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chr2 observed share	0.75	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chr3 observed share	0.73	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chr4 observed share	0.68	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chr5 observed share	0.74	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chr6 observed share	0.64	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chr7 observed share	0.67	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F4 x F9 chr8 observed share	0.60	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chromosomes above null median	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chromosomes above null p95	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chr1 observed share	0.85	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chr2 observed share	0.78	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chr3 observed share	0.71	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chr4 observed share	0.81	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chr5 observed share	0.84	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chr6 observed share	0.63	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chr7 observed share	0.75	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F7 chr8 observed share	0.58	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chromosomes above null median	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chromosomes above null p95	7	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chr1 observed share	0.81	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chr2 observed share	0.83	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chr3 observed share	0.77	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chr4 observed share	0.79	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chr5 observed share	0.75	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chr6 observed share	0.67	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chr7 observed share	0.74	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F10 x F12 chr8 observed share	0.61	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chromosomes above null median	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chromosomes above null p95	6	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chr1 observed share	0.81	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chr2 observed share	0.77	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chr3 observed share	0.68	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chr4 observed share	0.86	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chr5 observed share	0.74	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chr6 observed share	0.71	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chr7 observed share	0.81	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	B	F12 x F7 chr8 observed share	0.67	05_network/deletion_sharing_per_chromosome.tsv observed
+fig14_deletion_genotypes_linked_families	2	squares above the null median	40	05_network/deletion_sharing_per_chromosome.tsv
+fig14_deletion_genotypes_linked_families	2	squares	40	05_network/deletion_sharing_per_chromosome.tsv
+fig14_deletion_genotypes_linked_families	2	squares above the null p95	32	05_network/deletion_sharing_per_chromosome.tsv
+fig14_deletion_genotypes_linked_families	B	matched unlinked pairs per link	40	05_network/deletion_sharing_per_chromosome.tsv n_null_pairs
+fig15_deletion_genotypes_other_links	A	F1 individuals drawn	8	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	A	F1 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	A	F5 individuals drawn	6	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	A	F5 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	A	DELs drawn	43	05_network/deletion_path_blocks.tsv n_drawn
+fig15_deletion_genotypes_other_links	A	DELs eligible	43	05_network/deletion_path_blocks.tsv n_eligible
+fig15_deletion_genotypes_other_links	A	step of subsample	1	05_network/deletion_path_blocks.tsv n_eligible / n_drawn
+fig15_deletion_genotypes_other_links	A	DELs 1/1 in both families, of those drawn	11	05_network/deletion_path_links.tsv n_hom_alt_in_both_drawn
+fig15_deletion_genotypes_other_links	B	F4 individuals drawn	6	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	B	F4 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	B	F9 individuals drawn	4	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	B	F9 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	B	DELs drawn	54	05_network/deletion_path_blocks.tsv n_drawn
+fig15_deletion_genotypes_other_links	B	DELs eligible	54	05_network/deletion_path_blocks.tsv n_eligible
+fig15_deletion_genotypes_other_links	B	step of subsample	1	05_network/deletion_path_blocks.tsv n_eligible / n_drawn
+fig15_deletion_genotypes_other_links	B	DELs 1/1 in both families, of those drawn	9	05_network/deletion_path_links.tsv n_hom_alt_in_both_drawn
+fig15_deletion_genotypes_other_links	C	F10 individuals drawn	4	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	C	F10 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	C	F12 individuals drawn	4	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	C	F12 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	C	DELs drawn	56	05_network/deletion_path_blocks.tsv n_drawn
+fig15_deletion_genotypes_other_links	C	DELs eligible	56	05_network/deletion_path_blocks.tsv n_eligible
+fig15_deletion_genotypes_other_links	C	step of subsample	1	05_network/deletion_path_blocks.tsv n_eligible / n_drawn
+fig15_deletion_genotypes_other_links	C	DELs 1/1 in both families, of those drawn	7	05_network/deletion_path_links.tsv n_hom_alt_in_both_drawn
+fig15_deletion_genotypes_other_links	D	F2 individuals drawn	7	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	D	F2 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	D	F8 individuals drawn	5	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	D	F8 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	D	DELs drawn	46	05_network/deletion_path_blocks.tsv n_drawn
+fig15_deletion_genotypes_other_links	D	DELs eligible	46	05_network/deletion_path_blocks.tsv n_eligible
+fig15_deletion_genotypes_other_links	D	step of subsample	1	05_network/deletion_path_blocks.tsv n_eligible / n_drawn
+fig15_deletion_genotypes_other_links	D	DELs 1/1 in both families, of those drawn	10	05_network/deletion_path_links.tsv n_hom_alt_in_both_drawn
+fig15_deletion_genotypes_other_links	E	F4 individuals drawn	6	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	E	F4 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	E	F6 individuals drawn	5	05_network/deletion_path_blocks.tsv n_individuals
+fig15_deletion_genotypes_other_links	E	F6 individuals > 30% blank on chr3	0	05_network/deletion_path_blocks.tsv n_low_call
+fig15_deletion_genotypes_other_links	E	DELs drawn	49	05_network/deletion_path_blocks.tsv n_drawn
+fig15_deletion_genotypes_other_links	E	DELs eligible	49	05_network/deletion_path_blocks.tsv n_eligible
+fig15_deletion_genotypes_other_links	E	step of subsample	1	05_network/deletion_path_blocks.tsv n_eligible / n_drawn
+fig15_deletion_genotypes_other_links	E	DELs 1/1 in both families, of those drawn	13	05_network/deletion_path_links.tsv n_hom_alt_in_both_drawn
+fig15_deletion_genotypes_other_links	F	F1 x F5 chromosomes above null median	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig15_deletion_genotypes_other_links	F	F1 x F5 chromosomes above null p95	5	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig15_deletion_genotypes_other_links	F	F4 x F9 chromosomes above null median	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig15_deletion_genotypes_other_links	F	F4 x F9 chromosomes above null p95	6	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig15_deletion_genotypes_other_links	F	F10 x F12 chromosomes above null median	8	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig15_deletion_genotypes_other_links	F	F10 x F12 chromosomes above null p95	7	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig15_deletion_genotypes_other_links	F	F2 x F8 chromosomes above null median	7	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig15_deletion_genotypes_other_links	F	F2 x F8 chromosomes above null p95	5	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig15_deletion_genotypes_other_links	F	F4 x F6 chromosomes above null median	7	05_network/deletion_sharing_per_chromosome.tsv observed > null_median
+fig15_deletion_genotypes_other_links	F	F4 x F6 chromosomes above null p95	5	05_network/deletion_sharing_per_chromosome.tsv observed > null_p95
+fig15_deletion_genotypes_other_links	F	cells above null median	38	05_network/deletion_sharing_per_chromosome.tsv
+fig15_deletion_genotypes_other_links	F	cells above null p95	28	05_network/deletion_sharing_per_chromosome.tsv
+fig15_deletion_genotypes_other_links	F	cells	40	05_network/deletion_sharing_per_chromosome.tsv

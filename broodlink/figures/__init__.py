@@ -15,31 +15,29 @@ import os
 import pandas as pd
 
 from ..io import detail, log, write_tsv
-from . import generic, kinship, shared_parent, style
-from . import deletion_paths                                       # noqa: E402  (deletion genotypes along linked families)
+from . import barcode_genes, deletion_paths, generic, kinship, parent_barcode, relatedness, shared_parent, style
 
 # (name, function, step whose tables it needs, "house" = style set by the figure itself)
 FIGURES = [
     ("overview", kinship.fig_overview, "families"),
+    # views without a published counterpart
     ("qc_panels", generic.f_qc, "qc"),
     ("structural_haplotypes_pc1", generic.f_hap, "haplotypes"),
     ("structural_haplotype_scan", generic.f_scan, "haplotypes"),
-    ("relatedness_theta_k2", generic.f_rel, "relatedness"),
-    ("family_sizes_closure", generic.f_fam, "families"),
     ("arrangement_tag_variants", generic.f_tags, "haplotypes"),
-    ("barcode", generic.f_barcode, "barcode"),
+    ("barcode_all_parents", generic.f_barcode, "barcode"),
+    # ports of the published figures
     ("shared_parent_nomination_audit_network", shared_parent.fig_shared_parent, "nomination"),
     ("nomination_matrix_all_units", shared_parent.fig_matrix_all_units, "nomination"),
     ("sv_genotypes_and_kinship", kinship.fig_sv_kinship, "concordance"),
     ("cross_marker_concordance", kinship.fig_concordance, "concordance"),
+    ("relatedness_and_families", relatedness.fig_relatedness, "families"),
+    ("barcode_deletion_augmentation", parent_barcode.fig_augmentation, "barcode"),
+    ("barcode_gene_level", barcode_genes.fig_barcode_gene_level, "barcode"),
+    ("funnel_to_unsampled_parent", parent_barcode.fig_funnel, "nomination"),
     ("deletion_genotypes_linked_families", deletion_paths.fig_chains, "network"),
     ("deletion_genotypes_other_links", deletion_paths.fig_other_links, "network"),
 ]
-from . import barcode_genes                                        # noqa: E402  (barcode at gene level; needs --genes)
-FIGURES.append(("barcode_gene_level", barcode_genes.fig_barcode_gene_level, "barcode"))
-from . import parent_barcode                                       # noqa: E402  (barcode with tag-variant evidence; funnel to an unsampled parent)
-FIGURES.append(("barcode_deletion_augmentation", parent_barcode.fig_augmentation, "barcode"))
-FIGURES.append(("funnel_to_unsampled_parent", parent_barcode.fig_funnel, "nomination"))
 FIRST_NUMBER = 0
 
 

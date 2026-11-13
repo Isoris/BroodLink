@@ -3,6 +3,17 @@
 **Full-sib families, candidate shared-parent links and structural-haplotype barcodes from one
 cohort of related individuals without a pedigree.**
 
+![Kinship matrix per marker class and the audited network of families, example cohort](docs/figures/overview.png)
+
+*Example (simulated) cohort, drawn by `broodlink run`. Top: kinship between all pairs of
+individuals from each marker class (biSNPs, deletions, duplications, structural haplotypes),
+individuals in family order, so every family is a block on the diagonal. Bottom: the network
+of families with a candidate shared parent, links coloured by the outcome of the audit. Against the
+simulated truth this run recovers 15 of 15 families, keeps 7 of 7 true links and 0 false ones
+(5 reach "supported"), and calls 17 of 28 shared-parent genotypes, 17 of them correctly; the AUC
+of within- against between-family kinship is 0.9999 for biSNPs, 0.9988 for deletions, 0.9904 for
+duplications and 0.8021 for the four structural haplotypes.*
+
 Author: Quentin Andres. Version 0.1.0. Licence: MIT.
 
 BroodLink is a Python command-line pipeline for cohorts such as hatchery broodstock: a few
@@ -60,13 +71,15 @@ genotype of each shared parent at them (the barcode).
 Every other input is optional and adds something: a relatedness table computed from the
 likelihoods (`--relatedness`, e.g. NGSrelate, gives k2 and is more accurate at low
 coverage), known polyINV intervals (`--inversions`), a callable mask, the assembly index,
-sample metadata and depth for QC. The full example with all of them:
+sample metadata and depth for QC, gene models (`--genes`, for the gene-level view of the
+barcode). The full example with all of them:
 
 ```bash
 broodlink run --relatedness tests/data/relatedness.tsv --bisnp tests/data/snps.beagle.gz \
     --gt tests/data/sv.vcf.gz --inversions tests/data/inversions.bed \
     --mask tests/data/callable.bed --genome tests/data/genome.fai \
     --samples tests/data/samples.tsv --depth tests/data/depth.tsv \
+    --genes tests/data/genes.gff3 \
     --config example/config.example.yaml --out broodlink_out
 ```
 
@@ -76,7 +89,8 @@ long loops, and the headline result of each step. Add `--quiet` for one line per
 **4. Look at the results**, all in `broodlink_out/`:
 
 - `run_report.md`: start here (what ran, what was found, how far to trust it)
-- `figures/`: every plot, PNG and PDF, drawn automatically
+- `figures/`: every plot, PNG and PDF, drawn automatically (`MANIFEST.tsv` lists them and says
+  which panels were left out because an input is absent)
 - `tables/`: every result table, TSV and one Excel file
 - `statistics.tsv`: the headline numbers
 
@@ -93,12 +107,26 @@ broodlink run --relatedness my_ngsrelate.res --gt my_delly.vcf.gz --out my_run
 The example data are simulated by `tests/data/simulate_pedigree.py` (80 individuals,
 15 full-sib families of 2 to 8, seven pairs of families sharing one parent, 8 unrelated
 individuals, one sample genotyped twice, one low-coverage sample, four inversion-like
-intervals). On this cohort the example run finds the 15 families, nominates the 7 true links
+intervals, and a simulated gene file). On this cohort the example run finds the 15 families, nominates the 7 true links
 and no other, labels 5 of them "supported", and calls 17 of 28 shared-parent genotypes, all
 17 correct.
 
-Run the tests with `pip install pytest && pytest` (38 tests, about five minutes; the unit
+Run the tests with `pip install pytest && pytest` (41 tests, about seven minutes; the unit
 tests alone, `pytest tests/test_units.py`, take under a minute).
+
+## Does it work?
+
+![Cross-marker concordance of kinship on the example cohort](docs/figures/does_it_work_concordance.png)
+
+On the simulated cohort, where the truth is known, the example run finds the 15 families and
+the 7 links without a false one, and every marker class tells sibling pairs from other pairs
+(figure above, drawn by the run: AUC with its interval from a bootstrap over families, kinship
+of within- and between-family pairs, each SV class against the biSNPs outside SV regions, and
+the share of sibling pairs recovered at a strict cut). The weaker modes are in
+[docs/BENCHMARK.md](docs/BENCHMARK.md): with deletions alone, 12 of 15 families and 3 of 7
+links. On the real cohort the code was extracted from, the published numbers are returned
+from the original tables ([docs/REPRODUCTION.md](docs/REPRODUCTION.md)); no image of that
+cohort is shown here. Two data sets are not a validation: see [Limits](#limits).
 
 ## Inputs
 
@@ -117,7 +145,8 @@ with what each will be used for.
 | `--inversions BED` | intervals of large structural haplotypes | genotyped by local PCA |
 | `--mask FILE` (repeatable), `--mask-exclude BED` | callable regions (BED, or soft-masked FASTA) | restricts every marker class; denominator of per-base numbers |
 | `--samples FILE`, `--depth FILE_OR_DIR`, `--genome FAI` | sample list / metadata, depth, chromosome lengths | QC, sample order |
-| `--families FILE` | family labels from elsewhere | skips reconstruction |
+| `--families FILE` | family labels from elsewhere | skips reconstruction (closure and membership class are still described) |
+| `--genes FILE` | gene models of the assembly: GFF3 (gene features; CDS used when present) or BED (chrom, start, end, name, score, strand) | optional: genes of every barcode interval and the figure "barcode at gene level"; no step depends on it |
 | `--config FILE` | thresholds and permutation counts ([config.yaml](config.yaml) lists every default) | |
 
 `broodlink run` runs everything. Each step can be re-run alone (`broodlink qc`,
@@ -132,12 +161,16 @@ broodlink_out/
   run_report.md  statistics.tsv  methods_text.md  config_used.yaml
   00_qc/  01_relatedness/  02_families/  03_nomination/  04_audit/  05_network/
   06_structural_haplotypes/  07_barcode/  08_family_effect/  09_cross_marker_concordance/
-  tables/ (TSV + one XLSX with a definitions sheet)   figures/ (PNG 450 dpi + PDF)   tracks/ (GFF3, BED)
+  tables/ (TSV + one XLSX with a definitions sheet)   tracks/ (GFF3, BED)
+  figures/ (PNG 450 dpi + PDF, MANIFEST.tsv, LEDGER.tsv = every number printed in a panel and its source table)
 ```
 
 Every folder has a `README.txt` describing its files and columns. Every table starts with
 header lines giving the version, configuration hash, analysis set, marker classes, callable
 span, and the sentence "Families are relatedness-based groups, not pedigree records."
+The kinship matrix (GRM) of every marker class is written to
+`09_cross_marker_concordance/kinship_grm.npz`, with the order of individuals in
+`kinship_grm_individuals.tsv`.
 
 ## Capabilities
 
@@ -148,13 +181,13 @@ span, and the sentence "Families are relatedness-based groups, not pedigree reco
 | 2 Families | connected blocks of full-sib pairs (theta >= 0.177 and k2 >= 0.15); closure and membership class reported | step 1 | extracted | reproduced (51 families) |
 | 3 Nomination | excess of cross-unit pairs at second-degree kinship or closer against a size-matched permutation null; BH q < 0.05 | step 2 | extracted | reproduced (90 pairs) |
 | 4 Audit | Gate 1: likelihood of one shared parent; Gate 2: sharing of inherited structural variants against matched pairs | genotypes not used for nomination | extracted | reproduced (12 audited, 11 pass, 6 supported) |
-| 5 Network | components, latent parents per size tier, two-parent slot limit | step 3 | extracted | reproduced |
+| 5 Network | components, latent parents per size tier, two-parent slot limit; opposite homozygotes by relationship class; deletions that fit a Mendelian cross along chains of linked families, sharing per chromosome | step 3 | extracted; opposite-homozygote classes reimplemented from the original tables | reproduced |
 | 6a Structural haplotypes | local-PCA genotyping of intervals with five criteria; deletion-based genotyping; tag variants; sub-clusters | SNPs or deletions, `--inversions` | extracted | differs in part: SNP calls agree with the published calls for a median 98% of individuals per interval, at least 95% in 33 of 41 intervals, below 80% in 5; tiers equal for 40 of 41 |
 | 6a scan | SNP scan (local PCA in windows) and deletion scan (LD in windows) | SNPs or deletions | SNP scan reimplemented from Methods; deletion scan extracted | runs; candidates are not validated; weak recovery on the original cohort from deletions alone |
-| 6b Barcode | posterior genotype of the shared parent at each structural haplotype | step 6a or `--haplotypes`, and links | extracted | reproduced (25 of 41 states at 0.90) |
-| 7 Family effect | eta squared per marker class against permuted family labels | genotypes, families | extracted | reproduced (0.585 / 0.528 / 0.602) |
-| 8 Concordance | kinship per marker class within and between families (AUC, recovery) | genotypes, families | extracted | reproduced; no bootstrap intervals |
-| Reports | statistics with definitions, run report with capability table, Methods text, tables, 14 figures, tracks | | new | runs |
+| 6b Barcode | posterior genotype of the shared parent at each structural haplotype; evidence of tag variants on that parent with a sweep and a permutation check; recurrence of a junction parent across two links; genes per interval with `--genes` | step 6a or `--haplotypes`, and links | extracted | reproduced (25 of 41 states at 0.90; recurrence statistic and null as published); the tag-variant evidence differs in part because the original tag catalogue could not be rebuilt |
+| 7 Family effect | eta squared per marker class against permuted family labels; frequency-matched SNPs as the reference level | genotypes, families | extracted | reproduced (0.585 / 0.528 / 0.602) |
+| 8 Concordance | kinship (GRM, written out) per marker class within and between families: AUC, recovery, bootstrap intervals over families; SNPs outside SV regions as a separate class | genotypes, families | extracted | reproduced, intervals included |
+| Reports | statistics with definitions, run report with capability table, Methods text, tables, 16 figures (10 are ports of the published figures), tracks | | new; figures ported from the original scripts | runs |
 
 What changes with the inputs (the run report states it for every run):
 
@@ -168,16 +201,21 @@ What changes with the inputs (the run report states it for every run):
 ## Figures (synthetic data)
 
 Rendered by the example run (step 3 of [How to run](#how-to-run)); small copies are committed in `docs/figures/`.
+`fig06` to `fig15` are the figures of the original study, drawn by the tool from the tables of
+the run: same panels, encodings and style, with family names, counts and thresholds taken
+from the run ([docs/DISPLAY_ITEMS.md](docs/DISPLAY_ITEMS.md) compares each with the original).
+A panel whose input is absent is left out (for example the biSNP panels without SNPs).
 
 | | |
 |---|---|
-| ![overview](docs/figures/fig14_shared_parent_overview.png) Shared-parent overview: matrix, network, gates, incidence, barcode | ![relatedness](docs/figures/fig02_relatedness_theta_k2.png) theta against k2 with thresholds |
-| ![matrix](docs/figures/fig04_nomination_matrix_audit.png) Nomination (lower) and audit (upper) for all units | ![gates](docs/figures/fig05_audit_gates.png) Audit gates |
-| ![haplotypes](docs/figures/fig08_structural_haplotypes_pc1.png) Structural haplotypes: PC1 against heterozygosity | ![scan](docs/figures/fig09_structural_haplotype_scan.png) Scan for structural haplotypes |
-| ![qc](docs/figures/fig01_qc_panels.png) QC panels | ![eta](docs/figures/fig12_family_effect.png) Family effect per marker class |
+| ![shared parent](docs/figures/fig06_shared_parent_nomination_audit_network.png) Shared-parent links: nomination, audit gates, network | ![kinship](docs/figures/fig08_sv_genotypes_and_kinship.png) SV genotypes follow the families; kinship per marker class |
+| ![relatedness](docs/figures/fig10_relatedness_and_families.png) Relatedness and the full-sib families | ![matrix](docs/figures/fig07_nomination_matrix_all_units.png) Nomination and audit matrix, all units |
+| ![augmentation](docs/figures/fig11_barcode_deletion_augmentation.png) Barcode of a shared parent with deletion evidence | ![funnel](docs/figures/fig13_funnel_to_unsampled_parent.png) Funnel from offspring relationships to an unsampled parent |
+| ![genes](docs/figures/fig12_barcode_gene_level.png) Barcode at gene level (needs `--genes`) | ![deletions](docs/figures/fig14_deletion_genotypes_linked_families_chain1_F7.png) Deletion genotypes along linked families |
 
-All 14: [docs/figures/](docs/figures/). They are generic views drawn from BroodLink's tables,
-not ports of the published figures ([docs/DISPLAY_ITEMS.md](docs/DISPLAY_ITEMS.md)).
+All 16: [docs/figures/](docs/figures/). `fig01` to `fig05` (QC panels, PC1 against
+heterozygosity per interval, the scan, tag variants, the barcode of every parent) have no
+published counterpart.
 
 ## A quick benchmark
 
@@ -243,14 +281,18 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
   multi-generation pedigrees, strong population structure, inbred lines or polyploids.
   Performance: 216 individuals with 20,000 deletions and 20,000 permutations run in about 20
   minutes on a laptop; inputs are held in memory.
-- **Not implemented in 0.1.0:** a likelihood-based k0 / k1 / k2 estimator; bootstrap
-  intervals for the concordance; the recurrence test of one parent across two links and the
-  parental-slot topology test (a junction barcode assumes the same parent on every link and
-  is labelled a candidate); held-out validation of links; deletion evidence against the
-  barcode; the unresolved / incompatible distinction of family blocks; an exact maximum
-  unrelated set (a greedy set is used); panel-by-panel ports of the published figures
-  (panels B and I of the shared-parent figure, the kinship heat map); reading BCF; a
-  `--bisnp`-only and a `--snp_indel`-only run on the original cohort
+- **Ported figures are not the published figures.** They are drawn from the tables of the
+  run with generated family colours and layouts; on the original cohort the printed numbers
+  agree with the published ones except where [docs/DISPLAY_ITEMS.md](docs/DISPLAY_ITEMS.md)
+  says otherwise (mainly the tag-variant evidence, whose original catalogue could not be
+  rebuilt). Not drawn: the held-out prediction panel, the read-support quality bar, gene-family
+  colours, the ideogram.
+- **Not implemented:** a tested likelihood-based k0 / k1 / k2 estimator (one is in the code,
+  not wired and not tested); the parental-slot topology test (a junction barcode assumes the
+  same parent on every link and is labelled a candidate; the recurrence test of a junction
+  parent across two links is reported); held-out validation of links; the unresolved /
+  incompatible distinction of family blocks; an exact maximum unrelated set (a greedy set is
+  used); reading BCF; a `--bisnp`-only and a `--snp_indel`-only run on the original cohort
   ([docs/REPRODUCTION.md](docs/REPRODUCTION.md) lists what was not rerun and why).
 
 ## Documentation

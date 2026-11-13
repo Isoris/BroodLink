@@ -56,7 +56,7 @@ def settings(cfg):
     sweep grid, permutations and allele-frequency window = DEFAULT, overridden by barcode.augmentation."""
     b = cfg.get("barcode", {}) or {}; e = b.get("tag_evidence", {}) or {}
     c = dict(DEFAULT); c.update(b.get("augmentation", {}) or {})
-    c.update({"k": int(e.get("min_tags", 2)), "delta": float(e.get("min_delta", 0.8)), "min_called_per_family": int(e.get("min_called_per_family", 2))})
+    c.update({"af_min": float(e.get("af_min", c["af_min"])), "af_max": float(e.get("af_max", c["af_max"])), "k": int(e.get("min_tags", 2)), "delta": float(e.get("min_delta", 0.8)), "min_called_per_family": int(e.get("min_called_per_family", 2))})
     c["k_sweep"] = sorted(set(list(c["k_sweep"]) + [c["k"]])); c["delta_sweep"] = sorted(set([float(x) for x in c["delta_sweep"]] + [c["delta"]]))
     return c
 

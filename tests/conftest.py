@@ -16,7 +16,8 @@ from broodlink.cli import main  # noqa: E402
 
 FULL = ["--relatedness", os.path.join(DATA, "relatedness.tsv"), "--bisnp", os.path.join(DATA, "snps.beagle.gz"), "--gt", os.path.join(DATA, "sv.vcf.gz"),
         "--inversions", os.path.join(DATA, "inversions.bed"), "--mask", os.path.join(DATA, "callable.bed"), "--genome", os.path.join(DATA, "genome.fai"),
-        "--samples", os.path.join(DATA, "samples.tsv"), "--depth", os.path.join(DATA, "depth.tsv"), "--config", EXAMPLE_CFG]
+        "--samples", os.path.join(DATA, "samples.tsv"), "--depth", os.path.join(DATA, "depth.tsv"), "--genes", os.path.join(DATA, "genes.gff3"),
+        "--config", EXAMPLE_CFG]
 
 QUICK_CFG = """seed: 1
 nomination: {n_permutations: 1000}
@@ -73,6 +74,23 @@ def snp_vcf(tmp_path_factory):
         for j in range(ms.n):
             fh.write(f"{ms.chrom[j]}\t{ms.pos[j]}\t.\tA\tC\t.\tPASS\t.\tGT\t" + "\t".join(code[ms.G[j]]) + "\n")
     return p
+
+
+@pytest.fixture(scope="session")
+def fig_cfg(tmp_path_factory):
+    """Quick settings with small figures, for the runs that check which figures are drawn."""
+    p = tmp_path_factory.mktemp("cfg") / "quick_figures.yaml"
+    p.write_text(QUICK_CFG + "figures: {dpi: 60}\nconcordance: {n_bootstrap: 50}\n", encoding="utf-8")
+    return str(p)
+
+
+@pytest.fixture(scope="session")
+def run_no_snps_with_figures(tmp_path_factory, fig_cfg):
+    """Relatedness table + SV calls + supplied structural-haplotype genotypes: no SNP input, no --genes."""
+    out = str(tmp_path_factory.mktemp("nosnp") / "out")
+    main(["run", "--relatedness", os.path.join(DATA, "relatedness.tsv"), "--gt", os.path.join(DATA, "sv.vcf.gz"), "--haplotypes", os.path.join(DATA, "haplotypes.tsv"),
+          "--config", fig_cfg, "--out", out, "--no-inversion-scan", "--quiet"])
+    return out
 
 
 def run_mode(tmp_path_factory, name, args, quick_cfg):

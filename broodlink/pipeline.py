@@ -542,8 +542,11 @@ class Run:
         self.put("network", "slot", v, "slot_limit_violations.tsv", "Families whose link partners cannot be split into two groups of mutually linked families (a family has two parents).")
         # opposite homozygotes by relationship class (biSNP R0 and deletions)
         _u, fam_of, _m = self.units()
-        kept = net["edges"][net["edges"].status != "rejected"]
-        comp_of = dict(zip(net["nodes"].family.astype(str), net["nodes"].component.astype(int)))
+        # links and groups = the network of the figures (kept links between families of at least network.figure_min_family_size)
+        kept = net["edges"][(net["edges"].status != "rejected") & (net["edges"].min_n.astype(int) >= int(self.cfg["network"]["figure_min_family_size"]))]
+        import networkx as nx
+        Gk = nx.Graph(); Gk.add_edges_from(zip(kept.unit_a.astype(str), kept.unit_b.astype(str)))
+        comp_of = {f: i + 1 for i, c in enumerate(sorted(nx.connected_components(Gk), key=lambda c: sorted(c))) for f in c}
         snps = [m for m in self.sets if m.klass == "SNP"]; dls = [m for m in self.sets if m.klass == "DEL"]
         OP, OS, oinfo = opposite.opposite_homozygotes(self.t["relatedness"]["pairs"], fam_of, kept, comp_of, max(snps, key=lambda m: (m.flag == "bisnp", m.n)) if snps else None,
                                                       max(dls, key=lambda m: m.n) if dls else None, self.cfg)

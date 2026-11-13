@@ -98,6 +98,28 @@ def p_perchrom(run, plt, ax):
     ax.set_ylabel(("markers per Mb" if y == "markers_per_Mb" else "markers") + "\n(relative to the densest chromosome)"); ax.set_title("Marker density per chromosome"); ax.legend(ncols=3)
 
 
+def p_het_kinship(run, plt, ax):
+    """Heterozygosity of every individual against its median kinship to the other individuals
+    (the contamination panel of the published cohort figure: a contaminated sample is related to
+    everybody and too heterozygous). Kinship = theta of the relatedness step, analysis set only."""
+    PS = run.t["qc"]["per_sample"]; X = run.t["qc"]["flags"]
+    R = run.t.get("relatedness", {}).get("pairs")
+    if R is None or not len(R):
+        ax.text(0.5, 0.5, "no relatedness table", ha="center", va="center", transform=ax.transAxes); ax.set_axis_off(); return
+    med = pd.concat([R[["id1", "theta"]].rename(columns={"id1": "sample"}), R[["id2", "theta"]].rename(columns={"id2": "sample"})]).groupby("sample").theta.median()
+    name = next((n for n in dict.fromkeys(PS.input) if n.startswith("SNP")), list(dict.fromkeys(PS.input))[0])
+    g = PS[PS.input == name].set_index("sample"); g = g[g.index.isin(med.index)]
+    x = med.reindex(g.index).to_numpy(); y = g.heterozygosity.to_numpy()
+    con = set(X[X.reason == "possible contamination"]["sample"]); low = set(X[X.reason == "low coverage"]["sample"])
+    col = np.where(g.index.isin(con), PURPLE, np.where(g.index.isin(low), RED, GREY))
+    ax.scatter(x, y, s=9, c=col, lw=0, alpha=0.9)
+    ax.axvline(np.nanmedian(x), color=INK, lw=0.7, ls=":")
+    ax.set_xlabel("median kinship to the other individuals (theta)"); ax.set_ylabel(f"heterozygosity, {name.split(' (')[0]}")
+    ax.set_title("Heterozygosity against kinship to the cohort")
+    ax.legend(handles=_handles(plt, [("no flag of these two kinds", GREY), ("possible contamination (flag)", PURPLE), ("low coverage (flag)", RED)], "o") +
+              [plt.Line2D([], [], color=INK, ls=":", lw=0.7, label="cohort median")], fontsize=6)
+
+
 def p_theta_k2(run, plt, ax):
     R = run.t["relatedness"]["pairs"]; cfg = run.cfg; r = cfg["relatedness"]
     order = [("unrelated", "#CCCCCC"), ("third degree", YELLOW), ("second degree", ORANGE), ("first degree, not full-sib (k2 below gate)", PURPLE),
@@ -332,11 +354,13 @@ def p_concordance(run, plt, ax):
 
 # ------------------------------------------------------------------ figures
 def f_qc(run, plt):
-    fig, ax = plt.subplots(2, 2, figsize=(9.5, 7), constrained_layout=True)
-    p_callrate(run, plt, ax[0, 0]); p_het(run, plt, ax[0, 1]); p_depth(run, plt, ax[1, 0]); p_perchrom(run, plt, ax[1, 1])
-    for a, l in zip(ax.ravel(), "ABCD"):
+    fig = plt.figure(figsize=(9.5, 10.2), constrained_layout=True); gs = fig.add_gridspec(3, 2)
+    ax = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 1]), fig.add_subplot(gs[2, 0])]
+    p_callrate(run, plt, ax[0]); p_het(run, plt, ax[1]); p_depth(run, plt, ax[2]); p_perchrom(run, plt, ax[3]); p_het_kinship(run, plt, ax[4])
+    for a, l in zip(ax, "ABCDE"):
         _panel(a, l)
-    return fig, "QC panels", "A call rate per sample and input with the low-coverage rule; B heterozygosity against call rate; C depth over the mask against depth over the assembly; D marker density per chromosome."
+    return fig, "QC panels", ("A call rate per sample and input with the low-coverage rule; B heterozygosity against call rate; C depth over the mask against depth over the assembly; "
+                              "D marker density per chromosome; E heterozygosity against the median kinship to the other individuals (the contamination panel of the published cohort figure, for the analysis set).")
 
 
 def f_rel(run, plt):

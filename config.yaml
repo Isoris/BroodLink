@@ -128,6 +128,38 @@ barcode:
     min_called_per_family: 2
     min_tags: 2
     min_delta: 0.8
+    af_min: 0.02
+    af_max: 0.98
+  augmentation:
+    k_sweep:
+    - 1
+    - 2
+    - 3
+    delta_sweep:
+    - 0.6
+    - 0.8
+    - 0.9
+    n_permutations: 500
+  recurrence:
+    af_min: 0.01
+    af_max: 0.1
+    min_call_rate: 0.8
+    n_null_max: 200
+    p_max: 0.05
+deletion_paths:
+  low_call: 0.3
+  genotype_error: 0.02
+  fit_p_min: 0.05
+  fit_draws: 300
+  fit_seed: 1
+  fit_min_called: 3
+  min_call: 0.9
+  thin_kb: 100
+  thin_concordance: 0.9
+  thin_min_called: 3
+  max_columns: 160
+  max_chain_families: 6
+  chain_links: supported
 family_effect:
   af_min: 0.05
   af_max: 0.95
