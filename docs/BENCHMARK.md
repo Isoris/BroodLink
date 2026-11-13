@@ -49,7 +49,7 @@ Runs were made through a local, git-ignored configuration; no sample identifier 
 
 | Mode | How it was run | Families identical to the 51 | Pair precision / recall | Supported links: in the 6 / other | Seconds |
 |---|---|---|---|---|---|
-| full run (relatedness + DEL + DUP + 41 intervals) | `broodlink run`, 20,000 permutations | 51 / 51 | 1.00 / 1.00 | 6 / 0 | about 1,400 |
+| full run (relatedness + DEL + DUP + 41 intervals) | `broodlink run`, 20,000 permutations | 51 / 51 | 1.00 / 1.00 | 6 / 0 | not timed as one run (interrupted and resumed step by step) |
 | `--relatedness` only | `broodlink run`, 20,000 permutations | 51 / 51 | 1.00 / 1.00 | not audited; all 6 among the 54 nominated family pairs | 183 |
 | `--gt` only (DEL and DUP matrices) | `broodlink run`, 20,000 permutations; GRM of 17,266 deletions, audit on duplications | 42 / 51 (49 called) | 0.80 / 0.99 | 4 / 2 | 1,069 |
 | SNPs (stand-in for `--bisnp` with a second input) | stored SNP GRM of the original benchmark (every third SNP, 1,307,168 SNPs), nomination and audit by the library functions, 5,000 permutations; **not** through the command line | 46 / 51 (49 called) | 0.98 / 0.99 | 6 / 1 | not timed |
@@ -106,8 +106,9 @@ family-level bootstrap):
 These are observations of cross-marker concordance. That benchmark set **no GRM-specific
 kinship threshold and no minimum marker count**; BroodLink applies kinship >= 0.177 because
 an older script of the project did, and quotes the two marker counts above as reference
-points in its marker-count check. BroodLink's own run on the same cohort gave AUC 0.99983
-(deletions), 0.99708 (duplications) and 0.98058 (inversions) in step 09: reproduced for
-duplications and inversions; the deletion value differs in the fifth decimal because
-BroodLink converts the absolute call-rate filter (100 of 216) to a fraction applied to the
-individuals present, which keeps a slightly different set of deletions.
+points in its marker-count check. BroodLink's own cross-marker step (09) on the same cohort
+returned the same marker counts (17,276, 1,178 and 41), AUC values (0.99982, 0.99708, 0.98058)
+and recovery (95.9%, 74.1%, 29.8%): reproduced. A first run kept 17,266 deletions because the
+call-rate filter "100 of 216" had been stored as the rounded fraction 0.463, which excluded
+markers called in exactly 100 individuals; the default fractions were corrected to 0.4629 and
+0.6944 and the step was rerun. Bootstrap intervals are not computed by BroodLink.
