@@ -1,0 +1,10 @@
+sweep	setting	value	is_default	planted_recovered	planted_total	extra_candidates	n_candidates	windows_tested	seconds	discriminator
+scan_del	window_bp = 500000, hit_quantile = 0.85	500000	False	1	4	0	1	39	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_del	window_bp = 500000, hit_quantile = 0.9	500000	False	1	4	0	1	39	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_del	window_bp = 500000, hit_quantile = 0.95	500000	False	1	4	0	1	39	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_del	window_bp = 1000000, hit_quantile = 0.85	1000000	False	3	4	0	3	54	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_del	window_bp = 1000000, hit_quantile = 0.9	1000000	True	3	4	0	3	54	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_del	window_bp = 1000000, hit_quantile = 0.95	1000000	False	3	4	0	3	54	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_del	window_bp = 2000000, hit_quantile = 0.85	2000000	False	2	4	0	2	32	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_del	window_bp = 2000000, hit_quantile = 0.9	2000000	False	2	4	0	2	32	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_del	window_bp = 2000000, hit_quantile = 0.95	2000000	False	2	4	0	2	32	0.1	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval

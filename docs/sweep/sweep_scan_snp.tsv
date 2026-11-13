@@ -1,0 +1,13 @@
+sweep	setting	value	is_default	planted_recovered	planted_total	extra_candidates	n_candidates	chromosomes_skipped	seconds	discriminator
+scan_snp	window_snps = 15, z_outlier = 2.0	15	False	4	4	1	5	0	11.2	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 15, z_outlier = 2.5	15	False	3	4	0	3	0	8.5	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 15, z_outlier = 3.0	15	False	0	4	0	0	0	6.3	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 25, z_outlier = 2.0	25	False	4	4	0	4	0	4.3	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 25, z_outlier = 2.5	25	False	1	4	0	1	0	4.6	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 25, z_outlier = 3.0	25	False	0	4	0	0	0	3.8	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 50, z_outlier = 2.0	50	False	0	4	0	0	0	1.7	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 50, z_outlier = 2.5	50	False	0	4	0	0	0	1.6	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 50, z_outlier = 3.0	50	False	0	4	0	0	0	2.0	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 100, z_outlier = 2.0	100	False	0	4	0	0	8	0.0	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 100, z_outlier = 2.5	100	False	0	4	0	0	8	0.0	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval
+scan_snp	window_snps = 100, z_outlier = 3.0	100	True	0	4	0	0	8	0.0	planted intervals overlapped by a scan candidate and candidates that overlap no planted interval

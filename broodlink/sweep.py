@@ -255,11 +255,14 @@ def figure(rows, stem, name):
     from .figures import BLUE, GREY, INK, ORANGE, RED, _plt
     plt = _plt()
     A = pd.DataFrame(rows)
+    if "links_true_min" in A:
+        A["links_true_share"] = A.links_true_min / A.links_reference
     panels = [("families_theta", [("families_identical", BLUE, "families identical to the reference")], "families_reference"),
               ("families_k2", [("families_identical", BLUE, "families identical to the reference")], "families_reference"),
               ("nomination_theta", [("links_true", BLUE, "reference links nominated"), ("links_false", RED, "other family pairs nominated")], "links_reference"),
               ("audit_min_family_size", [("reference_links_auditable", GREY, "reference links auditable"), ("supported_true", BLUE, "supported, reference link"), ("supported_false", RED, "supported, not a reference link")], "links_reference"),
-              ("permutations", [("jaccard_across_seeds_mean", BLUE, "nominated set: mean Jaccard across seeds"), ("jaccard_across_seeds_min", ORANGE, "minimum Jaccard")], None),
+              ("permutations", [("jaccard_across_seeds_mean", BLUE, "nominated set: mean Jaccard across seeds"), ("jaccard_across_seeds_min", ORANGE, "minimum Jaccard"),
+                                ("links_true_share", GREY, "share of reference links nominated (worst seed)")], None),
               ("barcode_posterior", [("accuracy_of_called", BLUE, "called states equal to the reference"), ("share_called", GREY, "share of states called")], None),
               ("grm_kinship", [("pair_recall", BLUE, "pair recall"), ("pair_precision", ORANGE, "pair precision")], None),
               ("scan_snp", [("planted_recovered", BLUE, "planted intervals recovered"), ("extra_candidates", RED, "extra candidates")], "planted_total"),

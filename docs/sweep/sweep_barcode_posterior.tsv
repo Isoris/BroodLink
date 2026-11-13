@@ -1,0 +1,7 @@
+sweep	setting	value	is_default	n_states	n_called	share_called	accuracy_of_called	n_called_wrong	discriminator
+barcode_posterior	posterior_call = 0.5	0.5	False	28	28	1.0	0.8571	4	share of called states equal to the reference parent genotype, against the share of states called
+barcode_posterior	posterior_call = 0.7	0.7	False	28	23	0.8214	0.9565	1	share of called states equal to the reference parent genotype, against the share of states called
+barcode_posterior	posterior_call = 0.8	0.8	False	28	20	0.7143	0.95	1	share of called states equal to the reference parent genotype, against the share of states called
+barcode_posterior	posterior_call = 0.9	0.9	True	28	17	0.6071	1.0	0	share of called states equal to the reference parent genotype, against the share of states called
+barcode_posterior	posterior_call = 0.95	0.95	False	28	14	0.5	1.0	0	share of called states equal to the reference parent genotype, against the share of states called
+barcode_posterior	posterior_call = 0.99	0.99	False	28	6	0.2143	1.0	0	share of called states equal to the reference parent genotype, against the share of states called

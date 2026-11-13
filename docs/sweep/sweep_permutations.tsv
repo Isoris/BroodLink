@@ -1,0 +1,8 @@
+sweep	setting	value	is_default	n_seeds	nominated_min	nominated_max	jaccard_across_seeds_mean	jaccard_across_seeds_min	links_true_min	links_false_max	links_reference	seconds_per_run	discriminator
+permutations	n_permutations = 200	200	False	5	0	0	1.0	1.0	0	0	7	0.1	stability of the nominated set across seeds (mean pairwise Jaccard index) and reference links nominated
+permutations	n_permutations = 500	500	False	5	0	0	1.0	1.0	0	0	7	0.29	stability of the nominated set across seeds (mean pairwise Jaccard index) and reference links nominated
+permutations	n_permutations = 1000	1000	False	5	7	7	1.0	1.0	7	0	7	0.67	stability of the nominated set across seeds (mean pairwise Jaccard index) and reference links nominated
+permutations	n_permutations = 1500	1500	False	5	7	7	1.0	1.0	7	0	7	0.91	stability of the nominated set across seeds (mean pairwise Jaccard index) and reference links nominated
+permutations	n_permutations = 2000	2000	False	5	7	7	1.0	1.0	7	0	7	0.99	stability of the nominated set across seeds (mean pairwise Jaccard index) and reference links nominated
+permutations	n_permutations = 5000	5000	False	5	7	7	1.0	1.0	7	0	7	2.4	stability of the nominated set across seeds (mean pairwise Jaccard index) and reference links nominated
+permutations	n_permutations = 20000	20000	True	5	7	7	1.0	1.0	7	0	7	15.81	stability of the nominated set across seeds (mean pairwise Jaccard index) and reference links nominated

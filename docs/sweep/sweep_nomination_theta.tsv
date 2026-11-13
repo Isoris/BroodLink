@@ -1,0 +1,11 @@
+sweep	setting	value	is_default	n_nominated_all_units	links_called	links_true	links_false	links_missed	links_reference	n_permutations	discriminator
+nomination_theta	theta_min = 0.0442, theta_max = none	0.0442	False	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.0625, theta_max = none	0.0625	False	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.0884, theta_max = none	0.0884	True	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.1, theta_max = none	0.1	False	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.125, theta_max = none	0.125	False	6	6	6	0	1	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.0442, theta_max = 0.177	0.0442	False	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.0625, theta_max = 0.177	0.0625	False	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.0884, theta_max = 0.177	0.0884	False	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.1, theta_max = 0.177	0.1	False	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links
+nomination_theta	theta_min = 0.125, theta_max = 0.177	0.125	False	7	7	7	0	0	7	5000	reference links nominated (of the reference links) and family pairs nominated that are not reference links

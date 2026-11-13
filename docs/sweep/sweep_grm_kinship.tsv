@@ -1,0 +1,13 @@
+sweep	setting	value	is_default	marker_class	n_markers	families_called	families_reference	families_identical	pair_precision	pair_recall	discriminator
+grm_kinship	SNP (hard calls): kinship >= 0.1	0.1	False	SNP (hard calls)	5451	9	15	5	0.4274	1.0	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	SNP (hard calls): kinship >= 0.125	0.125	False	SNP (hard calls)	5451	10	15	7	0.4907	1.0	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	SNP (hard calls): kinship >= 0.15	0.15	False	SNP (hard calls)	5451	15	15	15	1.0	1.0	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	SNP (hard calls): kinship >= 0.177	0.177	True	SNP (hard calls)	5451	15	15	15	1.0	1.0	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	SNP (hard calls): kinship >= 0.2	0.2	False	SNP (hard calls)	5451	15	15	13	1.0	0.9623	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	SNP (hard calls): kinship >= 0.225	0.225	False	SNP (hard calls)	5451	17	15	7	1.0	0.6226	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	DEL: kinship >= 0.1	0.1	False	DEL	605	9	15	5	0.4274	1.0	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	DEL: kinship >= 0.125	0.125	False	DEL	605	9	15	5	0.4274	1.0	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	DEL: kinship >= 0.15	0.15	False	DEL	605	10	15	6	0.4732	1.0	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	DEL: kinship >= 0.177	0.177	True	DEL	605	14	15	12	0.8387	0.9811	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	DEL: kinship >= 0.2	0.2	False	DEL	605	14	15	8	0.8204	0.8616	families identical to the reference; pair precision and recall, per marker class
+grm_kinship	DEL: kinship >= 0.225	0.225	False	DEL	605	14	15	7	1.0	0.6981	families identical to the reference; pair precision and recall, per marker class

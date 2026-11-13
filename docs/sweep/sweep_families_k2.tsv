@@ -1,0 +1,8 @@
+sweep	setting	value	is_default	families_called	families_reference	families_identical	pair_precision	pair_recall	discriminator
+families_k2	k2_min = 0.0	0.0	False	14	15	13	0.8196	1.0	families identical to the reference; pair precision and recall
+families_k2	k2_min = 0.05	0.05	False	15	15	15	1.0	1.0	families identical to the reference; pair precision and recall
+families_k2	k2_min = 0.1	0.1	False	15	15	15	1.0	1.0	families identical to the reference; pair precision and recall
+families_k2	k2_min = 0.12	0.12	False	15	15	15	1.0	1.0	families identical to the reference; pair precision and recall
+families_k2	k2_min = 0.15	0.15	True	15	15	15	1.0	1.0	families identical to the reference; pair precision and recall
+families_k2	k2_min = 0.2	0.2	False	15	15	14	1.0	0.9811	families identical to the reference; pair precision and recall
+families_k2	k2_min = 0.25	0.25	False	15	15	12	1.0	0.9245	families identical to the reference; pair precision and recall
