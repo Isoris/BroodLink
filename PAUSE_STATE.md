@@ -10,50 +10,42 @@ installed with `pip --user` (the only package installed). No PDF converter is av
 locally (no pandoc / LibreOffice / reportlab): use python-docx for the Zenodo documents.
 Heredocs with several files in one Bash call failed to parse: write files with the Write tool.
 
-## Done
-- `docs/EXTRACTED_METHOD.md` (committed): every step with source script, function, line,
-  thresholds, nulls, cohort-specific hard-coding, and the "not found" list. Still to add:
-  sections for the display items / figure scripts and for the tracks (nothing extracted yet).
-- `broodlink/config.py`: all defaults (includes the inversion scan, sub-clusters, tags keys).
-- `broodlink/io.py`: MarkerSet; readers for beagle, VCF/gVCF (pandas-free parser), genotype
-  matrix TSV, haplotype tables, interval BED, relatedness (.res, folder, KING, TSV), samples,
-  FAI, depth; `write_tsv`. Not yet run against real VCF/beagle files (only `read_relatedness`,
-  `read_gt_matrix`, `read_haplotypes` were exercised).
-- `broodlink/mask.py`: BED / soft-masked FASTA masks, intersect, subtract, SV rule. Untested.
-- `broodlink/relatedness.py` (VanRaden GRM, NGSrelate call, pair matrices, unrelated subset),
-  `families.py`, `nomination.py`, `audit.py`, `network.py`, `barcode.py`, `family_effect.py`.
-- **Core validated on the original tables** (scratch script, 2,000 permutations): 51 families
-  holding 188 (identical sets); 3,081 unit pairs; 253 pairs between families >= 4; 12
-  nominated, 11 pass Gate 1, 1 rejected; 6 supported links, 11 families, 5 components;
-  Gate-2 medians 0.779 (DEL) / 0.663 (DUP) vs null 0.701 / 0.532, P = 0.0023; barcode of the
-  junction family (three families) 25 states at >= 0.90 and 24 at >= 0.95; eta squared
-  medians 0.585 / 0.528 / 0.602 (200 permutations in that check). Total nominated was 82 at
-  2,000 permutations; the 20,000-permutation run (expected 90 with the canonical labels) was
-  stopped at the pause and must be rerun.
-- `broodlink/inversions.py`: written in full, **never imported or run**: interval genotyping
-  (SNP and deletion local PCA, five criteria, ambiguous -> missing), SNP scan (reimplemented
-  from Methods), deletion scan, overlap table, tag variants, sub-clusters + deletion support.
+## State at the last milestone (13 November 2026, second session)
 
-## Half-done
-- `broodlink/inversions.py`: untested; `tag_variants` contains a leftover no-op loop
-  (`for cls, name in ((0, "0"), (2, "2")): pass`) to delete.
-- `network.build`: latent parents are computed on all nominated family pairs. The original
-  post-audit network (22 edges, 14 cliques) is restricted to families of at least 3
-  individuals; add a tier (min family size 4 / 3 / 2) to the latent-parent table and use
-  min size 3 for the network figure. The check of "22 edges / 14 cliques at tier 3" was
-  running when paused (appended at the end of the scratch script; not confirmed).
-- Family labels: BroodLink numbers families by size then first member, which differs from
-  the original F numbers, so the Monte Carlo stream of the nomination differs (same n >= 4
-  set expected). `families.read_families` exists to import labels (`--families`) for the
-  exact reproduction of the 90 nominated pairs.
+Run things with `PYTHONPATH=<repo>` or through pytest (tests/conftest.py adds the repo to the
+path); the package is NOT pip-installed on this machine.
 
-## Not started
-- `broodlink/__init__.py` (empty file exists; needs `__version__ = "0.1.0"`), `cli.py`,
-  `pipeline.py`, `qc.py`, `figures.py`, `report.py`, `tracks.py`, `pyproject.toml`,
-  `config.yaml`, README, LICENSE, CITATION.cff, CHANGELOG, `.gitattributes` (`* text=auto eol=lf`).
-- `tests/data/simulate_pedigree.py`, the synthetic data, all tests, `example/expected/`.
-- docs: `REPRODUCTION.md`, `DISPLAY_ITEMS.md`.
-- Zenodo folder (nothing written there yet), `THESIS_INSERT.md`.
+### Done and run
+- 20,000-permutation validation on the original tables: `local/validate_original.py`, results in
+  `local/reproduction/validation_20000.json` (git-ignored). All published numbers reproduced:
+  51 families / 188; 79 units, 3,081 pairs, 90 nominated (with the original labels AND with
+  BroodLink's own labels); 23 families >= 4, 253 pairs, 12 nominated, 11 Gate 1, 1 rejected;
+  6 supported, 11 families, 5 components; tier 3: 21 kept links + 1 rejected = the 22 edges of the
+  original table, 14 latent parents; barcode of the junction 25 (>= 0.90) / 24 (>= 0.95) of 41;
+  eta squared 0.585 / 0.528 / 0.602 at 1,000 permutations.
+- Package: config, io, mask, relatedness, families, nomination, audit, network (tiers), barcode,
+  family_effect, inversions (debugged, runs), qc, pipeline (numbered folders, headers, README.txt
+  and summary.json per step, step re-run from tables), cli (run, one subcommand per step, report,
+  sweep, benchmark), report (statistics.tsv, run_report.md with capability table, methods_text.md,
+  qc_report.md, tables TSV + XLSX), tracks (GFF3 + BED), figures (14 figures, PNG + PDF, MANIFEST).
+- Synthetic cohort: `tests/data/simulate_pedigree.py` + data + truth (about 1.1 MB).
+- `example/config.example.yaml`, `example/expected/` (outputs of the README command).
+- Tests: `tests/test_units.py` (16 passed), `tests/test_pipeline.py` (end to end; see git log for
+  whether it was green at the last commit).
+
+### Not started / to do next, in order
+1. `broodlink/sweep.py` and `broodlink/benchmark.py` (the CLI already imports them), docs
+   `SWEEP.md`, `BENCHMARK.md`; run both on the synthetic data; original-cohort sweeps and
+   single-input benchmark from existing intermediates into `local/` (GRM file: see Sources).
+2. `docs/REPRODUCTION.md` (tables a-e), `docs/DISPLAY_ITEMS.md`; add display-item and track
+   sections to `docs/EXTRACTED_METHOD.md`.
+3. README (author: git config name), CITATION.cff, CHANGELOG, gallery PNGs in `docs/figures/`.
+4. Zenodo folder `F:\dataroodlink_zenodo_v0.1.0\` (nothing there yet) and THESIS_INSERT.md.
+5. Privacy grep, delete this file, tag v0.1.0, `git archive` tarball + SHA-256.
+Not implemented so far (say so in the capability table and the final report unless done):
+panel-by-panel ports of the published nomination figure (A-J), families figure and Extended
+Data H3-H5 (fig14 is a compact composite only); reproduction table (e) from raw per-interval
+dosage; reproduction (d) mask/depth from raw data.
 
 ## Pending scope (all coordinator messages, in the agreed priority order)
 1. Core path with tests passing on the synthetic data (single-input modes, absent-input
@@ -157,14 +149,3 @@ Roots: `FAM` = `F:\data\Gariepinus_families_v1.0`, `HAT` = `F:\data\manuscript_r
 - Mask and depth: `POP\_callable_mask_denominator_2026-10\` (ledger, `callable_mask_per_LG.tsv`);
   per-sample depth table = Supplementary Data H57 (cohort coverage-QC table; path not located yet).
 
-## Next three actions on resume
-1. Rerun the scratch validation at 20,000 permutations (families, nomination with the
-   original labels through `read_families`, audit, network tiers, barcode, eta squared) and
-   record the numbers; fix `network.build` to carry tiers.
-2. Write `qc.py`, `pipeline.py` (numbered step folders, headers), `cli.py`, `report.py`,
-   `pyproject.toml`, `config.yaml`; write `tests/data/simulate_pedigree.py` (families with
-   shared parents, unassigned individuals, low-coverage likelihoods, DEL/DUP, two or three
-   inversions with tag deletions, mask, identical pair, low-coverage sample) and get a
-   first `broodlink run` on the synthetic data to finish; import and debug `inversions.py`.
-3. Write the tests (core path first), then figures, tracks, reproduction tables, the Zenodo
-   folder and the thesis insert, in the priority order above.

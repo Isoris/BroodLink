@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "broodlink"
+version = "0.1.0"
+description = "Adaptive reconstruction of full-sib families, shared-parent links and structural-haplotype barcodes from low-coverage cohorts"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Quentin Andres" }]
+keywords = ["relatedness", "kinship", "full-sib families", "half-sibs", "structural variants", "inversions", "low coverage", "aquaculture", "population genomics"]
+classifiers = ["Programming Language :: Python :: 3", "License :: OSI Approved :: MIT License", "Topic :: Scientific/Engineering :: Bio-Informatics"]
+dependencies = ["numpy>=1.24", "pandas>=2.0", "scipy>=1.10", "networkx>=3.0", "matplotlib>=3.7", "pyyaml>=6.0", "openpyxl>=3.1"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+broodlink = "broodlink.cli:main"
+
+[tool.setuptools]
+packages = ["broodlink"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: end-to-end runs of the pipeline (about a minute each)"]

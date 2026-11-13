@@ -1,0 +1,126 @@
+# BroodLink configuration: every threshold and permutation count.
+# This file lists the defaults (it is generated from broodlink/config.py; a test checks that
+# the two agree). Copy it, change what you need and pass it with --config; keys you leave out
+# keep their defaults. The source of every default is given in docs/EXTRACTED_METHOD.md and,
+# for the swept parameters, in docs/SWEEP.md. Keys marked "new in BroodLink" in
+# broodlink/config.py are not rules of the original analysis.
+#
+# nomination.theta_max: null = second degree or closer, no upper bound (the original code and
+# Methods). Set 0.177 to restrict the statistic to the second-degree band.
+seed: 1
+samples:
+  exclude_confirmed: []
+genotypes:
+  gl_hard_call: 0.9
+  bisnp_step: 1
+  max_markers_snp: 2000000
+mask:
+  sv_min_callable_fraction: 0.5
+  sv_class_loss_warning: 0.5
+qc:
+  low_coverage_factor: 0.5
+  identical_theta: 0.354
+  identical_concordance: 0.99
+  contamination_mad: 5.0
+  po_k1_min: 0.8
+  po_k2_max: 0.05
+relatedness:
+  theta_duplicate: 0.354
+  theta_first: 0.177
+  theta_second: 0.0884
+  theta_third: 0.0442
+  ngsrelate_binary: ngsRelate
+  grm:
+    af_min: 0.05
+    af_max: 0.95
+    min_called_fraction_snp: 0.694
+    min_called_fraction_sv: 0.463
+    markers_benchmarked_high: 17276
+    markers_benchmarked_low: 1178
+families:
+  theta_min: 0.177
+  k2_min: 0.15
+  rule: components
+nomination:
+  theta_min: 0.0884
+  theta_max: null
+  n_permutations: 20000
+  q_max: 0.05
+  single_input_split: chromosome_parity
+  block_size_bp: 5000000
+audit:
+  min_family_size: 4
+  af_min: 0.02
+  af_max: 0.98
+  genotype_error: 0.03
+  k_match: 40
+  support_rule: median_of_gate1_pass
+  gate1_max_markers: 50000
+network:
+  slot_tiers:
+  - 4
+  - 3
+  - 2
+  figure_min_family_size: 3
+inversions:
+  scan: true
+  min_unrelated: 30
+  min_snps: 50
+  min_dels: 8
+  del_af_min: 0.1
+  del_af_max: 0.9
+  del_link_cut: 0.3
+  ambiguous_posterior: 0.95
+  tier:
+    separation_sd: 2.0
+    het_p: 0.05
+    concordance: 0.9
+    min_minor_copies: 5
+    eta2_null_quantile: 0.95
+    eta2_permutations: 200
+  barcode_min_tier: all
+  barcode_scan_criteria:
+  - separation
+  - heterozygote_excess
+  snp_scan:
+    window_snps: 100
+    n_pcs: 2
+    mds_coords: 20
+    z_outlier: 3.0
+    test_coords: 2
+    merge_gap_windows: 3
+    min_windows: 3
+    thin_to: 200000
+    min_windows_per_chrom: 10
+    min_size_bp: 0
+  del_scan:
+    window_bp: 1000000
+    min_dels: 5
+    hit_quantile: 0.9
+    core_quantile: 0.95
+    merge_gap_bp: 2000000
+  subclusters:
+    min_class: 12
+    min_component: 5
+    k_max: 4
+    restarts: 12
+    merge_sd: 2.0
+    del_af_min: 0.05
+    del_af_max: 0.95
+    diagnostic_delta: 1.0
+    n_permutations: 200
+  tags:
+    min_called_per_class: 5
+    min_delta: 0.6
+barcode:
+  posterior_call: 0.9
+  posterior_strict: 0.95
+  genotype_error: 0.03
+family_effect:
+  af_min: 0.05
+  af_max: 0.95
+  min_called: 20
+  n_permutations: 1000
+  max_markers_per_class: 20000
+figures:
+  dpi: 300
