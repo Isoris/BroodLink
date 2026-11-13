@@ -34,31 +34,30 @@ path); the package is NOT pip-installed on this machine.
   whether it was green at the last commit).
 
 ### Not started / to do next, in order
-(Updated after commit 43a3b39.) Tests: 38 passed at dc97954.
-DONE since: sweep + benchmark + evaluate modules; synthetic sweep run (tables in `docs/sweep/`,
-`docs/SWEEP.md` written, includes the original-cohort sweep summary from
-`local/reproduction/sweeps_original/`); CITATION.cff; CHANGELOG.md.
-RUNNING / may have been cut (check `local/reproduction/*.log`, rerun what did not end with "done:"):
-  - original cohort through the CLI, config `local/config.local.yaml`, inputs in
-    `local/reproduction/` (samples_226.tsv, intervals41.bed, karyotypes41.tsv):
-    `run_full_cli` (relatedness + DEL + DUP + haplotypes + inversions), `run_relatedness_only`,
-    `run_gt_only`. A step cut mid-run can be finished with `broodlink <step> ...` then `report`.
-  - synthetic benchmark: `broodlink benchmark --out local/benchmark_synth`.
-  - NOT yet tried: `--bisnp` only on the original Beagle files (config `local/config.bisnp.local.yaml`,
-    step 6; expected about 20-30 min; skip and mark "not run" if time is short).
-TO DO:
-1. `docs/BENCHMARK.md` (synthetic table from `local/benchmark_synth/benchmark_report.md`; original:
-   `local/reproduction/sweeps_original/families_per_grm.tsv` + the CLI runs above).
-2. `docs/REPRODUCTION.md` (tables a-e; numbers in `local/reproduction/validation_20000.json`),
-   `docs/DISPLAY_ITEMS.md`; display-item and track sections in `docs/EXTRACTED_METHOD.md`.
-3. README with gallery PNGs in `docs/figures/` (small copies of the synthetic figures).
-4. Regenerate `example/expected/` if any output changed; rerun the tests.
-5. Zenodo folder `F:\data\broodlink_zenodo_v0.1.0\` (nothing there yet) and THESIS_INSERT.md.
-6. Privacy grep, delete this file, tag v0.1.0, `git archive` tarball + SHA-256.
-Not implemented so far (say so in the capability table and the final report unless done):
-panel-by-panel ports of the published nomination figure (A-J), families figure and Extended
-Data H3-H5 (fig14 is a compact composite only); reproduction table (e) from raw per-interval
-dosage; reproduction (d) mask/depth from raw data.
+(Updated after commit 1749131.) Tests: 38 passed at dc97954; rerun before tagging.
+DONE and committed: package, tests, example, sweeps (docs/SWEEP.md), benchmark (docs/BENCHMARK.md),
+docs/REPRODUCTION.md, docs/DISPLAY_ITEMS.md, README with gallery (docs/figures), CITATION.cff,
+CHANGELOG.md. `pip install .` and the `broodlink` entry point were tested in a throwaway venv.
+Original-cohort results are in `local/reproduction/` (git-ignored): validation_20000.json,
+run_full_cli/, run_relatedness_only/, run_gt_only/, sweeps_original/, table_e_snp_karyotypes.tsv,
+table_e_b.json, collected.json (made by `local/collect.py`).
+Zenodo folder `F:\data\broodlink_zenodo_v0.1.0\` so far: BroodLink_method_description.md/.docx
+(built by `local/build_excerpt.py <copy of thesis docx> <zenodo folder>`), BroodLink_GRM_benchmark.md,
+figures/CAPTIONS.md, CHECKLIST.md, .zenodo.json, THESIS_INSERT.md.
+TO DO, in order:
+1. If `local/reproduction/run_gt_only` was rerun after the GRM call-rate fix (relatedness_markers
+   17,276 in its statistics.tsv), rerun `local/collect.py` and update the `--gt` only rows in
+   README, docs/BENCHMARK.md, docs/REPRODUCTION.md if the numbers changed (they were written
+   from the run with 17,266 markers: 42/51 families, precision 0.80, 4 + 2 supported links).
+2. Zenodo folder: copy the three figures (PNG + PDF: shared-parent v13, 79-unit matrix, GRM benchmark
+   figure renamed GRM_benchmark_SV_kinship_recovers_families) into figures/; GRM benchmark .docx;
+   example/ (tests/data + example/expected); REPRODUCTION.md copy; README.md.
+3. Regenerate `example/expected/` (config hash changed), run the whole test suite.
+4. Privacy grep over the repo (tracked files) and the Zenodo folder: "CGA" and drive paths.
+5. Delete this file, commit, tag v0.1.0, `git archive` tarball + SHA-256 into the Zenodo folder.
+Not implemented / not run (already stated in README and REPRODUCTION): --bisnp-only and
+--snp_indel-only runs on the original cohort; mask and depth on the original cohort; SNP scan on
+the original cohort; panel-by-panel figure ports.
 
 ## Pending scope (all coordinator messages, in the agreed priority order)
 1. Core path with tests passing on the synthetic data (single-input modes, absent-input
