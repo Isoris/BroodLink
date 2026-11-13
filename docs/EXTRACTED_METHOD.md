@@ -56,7 +56,10 @@ Source: `FAM/_project_docs/code/common.py` (toolkit "hatchpg").
   reproduced here"; that script computes KING-robust kinship and IBS0 from hard calls and was
   used only as a masked-versus-unmasked contrast, never to call families. BroodLink therefore
   calls NGSrelate when it is installed and otherwise falls to the GRM (section 2). It does
-  not contain a likelihood-based k0/k1/k2 estimator.
+  not contain a likelihood-based k0/k1/k2 estimator. The NGSrelate call (`relatedness.try_ngsrelate`)
+  is made by `broodlink run` when the binary is on the PATH, but that branch was NEVER RUN: the
+  tool is not installed on the development machine. Without the binary, `--bisnp` alone uses
+  the GRM of hard-called genotypes and the run says so.
 
 ## 2. GRM-based relatedness and its benchmark
 
@@ -377,3 +380,22 @@ The marker-count check quotes the benchmark rows above (17,276 markers: recovery
 8. Any QC script (call rate panel, coverage pass, KING contamination screen).
 9. A GRM-specific full-sib threshold or minimum marker count.
 10. A k2 estimator for hard genotypes: with a GRM, families rest on the kinship threshold alone.
+
+## 16. Display items, tracks, sweeps (added after the first version of this record)
+
+- **Figure scripts read**: the shared-parent figure (`HAT/Fig_sharedparent_nomination_upgrade_2026-11-12/
+  code/build_fig3_sharedparent_v13.py`, panels A-J), the matrix of all units
+  (`build_suppfig_matrix79_v1.py`), the families figure (`HAT/figures/main/code_relatedness/
+  build_hatchery_fig_A_v6.py`) and the captions of the Extended Data figures on kinship
+  concordance and arrangement-private deletions. They hard-code family order, colours, panel
+  positions in millimetres and stored network layouts of one cohort. Only the slot-limit
+  function was extracted (section 6). BroodLink's figures are written new from its own tables;
+  `DISPLAY_ITEMS.md` maps each original panel to a BroodLink figure and says which are not drawn.
+- **Tracks**: the original project has no track writer for these results. `broodlink/tracks.py`
+  is **new in BroodLink** (GFF3 1-based closed, BED 0-based half-open).
+- **Coordinates of intervals**: the original interval ids (`chrom:start-end`) are used as
+  given; BroodLink reads `--inversions` as BED (0-based start).
+- **Sweeps and benchmark**: the original project has a seed sweep of the nomination
+  (`nomination_seed_sweep.tsv`, `sweep_nomination.py`) and a k2 sensitivity inset in the
+  families figure. `broodlink/sweep.py` and `broodlink/benchmark.py` are new; the provenance of
+  every tested value is in `SWEEP.md`.

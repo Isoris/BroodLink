@@ -117,7 +117,7 @@ class Run:
         self.genome = read_fai(a.genome) if a.genome else {}
         self.samples_meta = read_samples(a.samples) if a.samples else None
         self.depth = read_depth(a.depth) if a.depth else None
-        sets = []
+        sets, bg = [], []
         if a.bisnp:
             files = expand(a.bisnp)
             bg = [f for f in files if sniff(f) == "beagle"]
@@ -140,6 +140,16 @@ class Run:
         if a.relatedness:
             names = self.samples_meta.id.tolist() if self.samples_meta is not None else None
             self.R_given, self.rel_info = read_relatedness(a.relatedness, names)
+        elif a.bisnp and bg:
+            # the original analysis used the external tool NGSrelate; this branch needs the binary
+            # and was never exercised on the development machine (tool not installed)
+            Rn, msg = relatedness.try_ngsrelate(bg, len(sets[0].samples), sets[0].samples, cfg)
+            self.note("--bisnp without --relatedness: " + msg)
+            if Rn is not None:
+                ids_ = sorted(set(Rn.id1) | set(Rn.id2))
+                self.R_given = Rn
+                self.rel_info = {"format": "NGSrelate run by BroodLink", "n_files": 1, "n_samples": len(ids_), "n_pairs": len(Rn),
+                                 "n_pairs_expected": len(ids_) * (len(ids_) - 1) // 2, "complete": True}
         self.hap_given = None
         known = set().union(*[set(m.samples) for m in sets]) if sets else set()
         if self.R_given is not None:
@@ -208,8 +218,8 @@ class Run:
             self.primary = bis[0] if bis else max(geno, key=lambda m: m.n)
             self.rel_source = f"genomic relationship matrix (VanRaden, kinship = GRM / 2) from {self.primary.name}; no k2 can be estimated"
             if bis:
-                self.note("--bisnp given without --relatedness: BroodLink has no likelihood-based estimator of its own; NGSrelate is called when installed, "
-                          "otherwise relatedness comes from a GRM of hard-called genotypes (likelihood > %s)" % cfg["genotypes"]["gl_hard_call"])
+                self.note("--bisnp given without --relatedness: BroodLink has no likelihood-based estimator of its own; "
+                          "relatedness comes from a GRM of hard-called genotypes (likelihood > %s)" % cfg["genotypes"]["gl_hard_call"])
             if len(geno) == 1:
                 self.single_input = True
                 self.audit_plan = []
