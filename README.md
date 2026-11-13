@@ -85,6 +85,8 @@ broodlink run --relatedness tests/data/relatedness.tsv --bisnp tests/data/snps.b
 
 The run prints each step as it goes (`[3/10] 03_nomination: ...`), a progress line for the
 long loops, and the headline result of each step. Add `--quiet` for one line per step.
+On the example the ten steps take about half a minute and the sixteen figures (450 dpi)
+about two minutes more; `--no-figures` skips them and `broodlink report` draws them later.
 
 **4. Look at the results**, all in `broodlink_out/`:
 
@@ -111,7 +113,7 @@ intervals, and a simulated gene file). On this cohort the example run finds the 
 and no other, labels 5 of them "supported", and calls 17 of 28 shared-parent genotypes, all
 17 correct.
 
-Run the tests with `pip install pytest && pytest` (41 tests, about eight minutes; the unit
+Run the tests with `pip install pytest && pytest` (41 tests, about five minutes; the unit
 tests alone, `pytest tests/test_units.py`, take under a minute).
 
 ## Does it work?

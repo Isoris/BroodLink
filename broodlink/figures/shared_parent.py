@@ -396,7 +396,14 @@ def _template(G, comp, seed):
         a, b, c = comp; tpl = {a: (0, 1), b: (1, 0), c: (2, 1)}
         return tpl, {a, c}
     p = nx.kamada_kawai_layout(sub)
-    return {f: (float(p[f][0]), float(p[f][1])) for f in comp}, set()
+    X = np.array([[float(p[f][0]), float(p[f][1])] for f in comp]); X = X - X.mean(0)
+    _u, _s, vt = np.linalg.svd(X, full_matrices=False)             # longest axis of the layout along x (the boxes are usually wider than tall)
+    X = X @ vt.T
+    if X[np.argmax(np.abs(X[:, 0])), 0] < 0:
+        X[:, 0] = -X[:, 0]
+    if X[np.argmax(np.abs(X[:, 1])), 1] < 0:
+        X[:, 1] = -X[:, 1]
+    return {f: (float(X[i, 0]), float(X[i, 1])) for i, f in enumerate(comp)}, set()
 
 
 def draw_network(cv, run, x0, y_top, aw, ah, sz, kj=None, key=True, nd=None):
@@ -475,7 +482,9 @@ def draw_network(cv, run, x0, y_top, aw, ah, sz, kj=None, key=True, nd=None):
                 box[k] = (xx, by, w_, hb); xx += w_ + GAPB
     posn, LAB = {}, {}
     for k in range(nC):
-        p_, l_ = fit(TPL[k], *box[k], max_aniso=1.25 if (k == 0 and len(comps[0]) > 3) else None); posn.update(p_); LAB.update(l_)
+        force = len(comps[k]) > 3 and not HIGH & set(comps[k])
+        tpl = {f: (y_, x_) for f, (x_, y_) in TPL[k].items()} if force and box[k][3] > box[k][2] else TPL[k]
+        p_, l_ = fit(tpl, *box[k], max_aniso=1.8 if force else None); posn.update(p_); LAB.update(l_)
     STY = {"Gate-1 only": (S.NOTE_GREY, 1.1, "-")}
     used = {}
     for a, b, d in G.edges(data=True):

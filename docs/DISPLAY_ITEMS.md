@@ -73,9 +73,25 @@ Summary table of the kinship benchmark (published Supplementary Table S-H3) agai
 | DELs | 17,276; 0.99982 [0.99961, 0.99997]; 95.9 [90.6, 99.7] | 17,276; 0.99982 [0.99961, 0.99997]; 95.9 [90.6, 99.7] |
 | DUPs | 1,178; 0.99708 [0.99516, 0.99856]; 74.1 [63.2, 84.0] | 1,178; 0.99708 [0.99516, 0.99856]; 74.1 [63.2, 84.0] |
 | candidate polyINVs | 41; 0.98058 [0.97395, 0.98590]; 29.8 [17.8, 48.4] | 41; 0.98058 [0.97395, 0.98590]; 29.8 [17.8, 48.4] |
-BISNP_ROWS
+| biSNPs | 1,307,168 (every third SNP); 0.99996 [0.99989, 1.00000]; 99.4 [96.3, 100] | 653,632 (every sixth SNP); 0.99996 [0.99988, 1.00000]; 99.2 [96.3, 100] |
+| biSNPs, SV regions masked | 985,007; 0.99990 [0.99975, 0.99998]; 97.2 [90.8, 100] | 492,564; 0.99990 [0.99976, 0.99998]; 97.2 [90.4, 100] |
 
-BISNP_NOTE
+The three SV rows are equal to the published table to the last printed digit. The biSNP rows come
+from the run that read the 28 genotype-likelihood files through `--bisnp` with every sixth SNP
+(about 25 minutes; the published matrices used every third), so half as many SNPs enter and the
+values agree to three or four digits, not exactly. Given the stored GRMs of the original study, the
+same functions return the published AUC, recovery and both intervals to the last digit in all five
+rows (`docs/REPRODUCTION.md`).
+
+biSNP panels in that run, against the originals: kinship matrices of biSNPs and masked biSNPs
+present beside the DEL / DUP / candidate-polyINV ones (`fig08` D-H, `fig00`); kinship medians
+-0.03 / 0.42 for biSNPs as published and for masked biSNPs (published -0.02 / 0.42); Pearson r of SV kinship against masked-biSNP
+kinship 0.96 / 0.83 / 0.49 over 23,220 pairs as published, and the same second headline (r = 0.96,
+30% recovered); recovery 99% [96, 100] and 97% [90, 100] (published 97% [91, 100]); matched biSNPs
+of the family effect: median eta squared 0.61 for the three matched sets (published 0.62 / 0.61 /
+0.59) and excess over the null 0.31 / 0.31 / 0.32 (published 0.32 / 0.32 / 0.29): another SNP
+subset and, in this local run only, 5,000 deletions and 200 permutations instead of all deletions
+and 1,000. The biSNP R0 panel of `fig06` uses the R0 column of the relatedness table in both runs.
 
 ## Tables
 

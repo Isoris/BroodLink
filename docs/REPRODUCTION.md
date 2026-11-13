@@ -80,7 +80,7 @@ Reference: the 51 families and the 6 supported links of the full run.
 |---|---|---|---|---|
 | `--gt` only (deletion and duplication matrices; GRM of deletions, audit on duplications; through the command line) | 42 (49 called) | 0.80 / 0.99 | 6 supported: 4 of the reference six, 2 others; 5 of the six among the kept links | run; differs from the full run because a GRM has no k2 (families sharing a parent merge) and the nomination uses GRM kinship |
 | SNPs: stored GRM of every third SNP (1,307,168), nomination and audit on deletions and duplications by the library functions, 5,000 permutations | 46 (49 called) | 0.98 / 0.99 | 7 supported: all six of the reference, 1 other | run outside the command line; not the single-input split mode |
-| `--bisnp` only through the command line | | | | **not run**: reading the 28 genotype-likelihood files takes 20-30 minutes; command in `BENCHMARK.md` |
+| `--bisnp` only through the command line | | | | **not run** as a single-input mode (the biSNPs were read once, together with the relatedness table and the SV matrices: see "Quantities added with the figure ports"); command in `BENCHMARK.md` |
 | `--snp_indel` only | | | | **not run**: the small-variant cohort VCF was not among the located inputs. `broodlink run --snp_indel <cohort.vcf.gz> --samples <list> --out out_snp_indel` |
 
 ## (c) `--relatedness` alone
@@ -134,7 +134,7 @@ of the figures and of the numbers printed in them, not a pixel comparison.
 | Recurrence of the junction parent across its two links | statistic 0.320, null mean 0.094, null maximum 0.181, 190 pseudo-chains, P = 0.005 | the same values | reproduced |
 | Deletions that fit a Mendelian cross along the chain of three families; sharing per link and chromosome | 160 drawn of 645 eligible; 157 of 168 squares above the null median, 93 above its 95th percentile | the same values; all 168 observed and null values equal | reproduced |
 | Deletion evidence on the shared parent (tag strength >= 0.8, at least 2 tagging deletions) | 43 of 45 homozygous calls match, null 45%, P = 0.002 | the same when given the original tag catalogue and links; 38 of 40 with BroodLink's own tag variants and links | reproduced for the rule; differs in the run because the original tag catalogue could not be rebuilt (its script was not found) and one link entered by hand is not a link of the run |
-| Frequency-matched biSNPs of the family effect; biSNP kinship through the command line | medians 0.62 / 0.61 / 0.59; AUC 0.99996 (1,307,168 SNPs, every third) | BISNP_REPRO | BISNP_STATUS |
+| Frequency-matched biSNPs of the family effect; biSNP kinship through the command line | medians 0.62 / 0.61 / 0.59; AUC 0.99996 (1,307,168 SNPs, every third) | medians 0.61 / 0.61 / 0.61 (5,000 deletions, 200 permutations in this run); AUC 0.99996 [0.99988, 1.00000] with 653,632 SNPs (every sixth), 0.99990 with SV regions masked (492,564 SNPs); Pearson r of SV kinship against masked-biSNP kinship 0.96 / 0.83 / 0.49 as published | run through the command line with `--relatedness`, `--bisnp` (28 files, every sixth SNP, about 25 minutes), `--gt`, `--haplotypes`; agrees to three or four digits, not exactly, because half as many SNPs enter |
 
 ## What this page does not show
 

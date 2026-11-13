@@ -92,20 +92,20 @@ Definitions of every number: `statistics.tsv`.
 
 ## Run time
 
-- read inputs: 1.1 s
-- 00_qc: 0.4 s
-- 01_relatedness: 0.1 s
+- read inputs: 1.0 s
+- 00_qc: 0.5 s
+- 01_relatedness: 0.2 s
 - 02_families: 0.1 s
 - 03_nomination: 0.9 s
 - 04_audit: 0.3 s
-- 05_network: 1.3 s
-- haplotypes: SNP scan: 3.1 s
+- 05_network: 0.9 s
+- haplotypes: SNP scan: 2.7 s
 - haplotypes: deletion scan: 0.1 s
-- 06_structural_haplotypes: 13.9 s
-- 07_barcode: 2.4 s
-- 08_family_effect: 9.2 s
-- 09_cross_marker_concordance: 2.6 s
-- total: 32.6 s
+- 06_structural_haplotypes: 11.5 s
+- 07_barcode: 2.1 s
+- 08_family_effect: 7.1 s
+- 09_cross_marker_concordance: 1.4 s
+- total: 26.2 s
 
 ## Figures
 
