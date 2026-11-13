@@ -28,8 +28,8 @@ DEFAULTS = {
         "ngsrelate_binary": "ngsRelate",
         "grm": {
             "af_min": 0.05, "af_max": 0.95,
-            "min_called_fraction_snp": 0.694,      # 150 of 216 in the original
-            "min_called_fraction_sv": 0.463,       # 100 of 216 in the original
+            "min_called_fraction_snp": 0.6944,     # 150 of 216 in the original
+            "min_called_fraction_sv": 0.4629,      # 100 of 216 in the original
             "markers_benchmarked_high": 17276,     # benchmark: recovery 95.9% (deletions)
             "markers_benchmarked_low": 1178,       # benchmark: recovery 74.1% (duplications)
         },

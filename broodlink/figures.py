@@ -516,8 +516,12 @@ def make_figures(run):
         if res is None:
             rows.append({"file": stem, "title": "", "status": "not drawn: the step did not run or produced nothing to draw", "description": ""}); continue
         fig, title, desc = res
-        fig.canvas.draw(); fig.set_layout_engine("none")              # lay out once, then save twice
-        fig.savefig(os.path.join(d, stem + ".png"), dpi=dpi); fig.savefig(os.path.join(d, stem + ".pdf"))
+        try:
+            fig.canvas.draw(); fig.set_layout_engine("none")          # lay out once, then save twice
+            fig.savefig(os.path.join(d, stem + ".png"), dpi=dpi); fig.savefig(os.path.join(d, stem + ".pdf"))
+        except Exception as exc:                                  # e.g. a write error: report it, keep the run
+            log(f"WARNING: figure {stem} could not be saved ({type(exc).__name__}: {exc})")
+            rows.append({"file": stem, "title": title, "status": f"failed: {type(exc).__name__}: {exc}", "description": desc}); plt.close("all"); continue
         plt.close(fig)
         rows.append({"file": stem, "title": title, "status": "drawn (PNG + PDF)", "description": desc})
     M = pd.DataFrame(rows)

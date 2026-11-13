@@ -33,8 +33,8 @@ relatedness:
   grm:
     af_min: 0.05
     af_max: 0.95
-    min_called_fraction_snp: 0.694
-    min_called_fraction_sv: 0.463
+    min_called_fraction_snp: 0.6944
+    min_called_fraction_sv: 0.4629
     markers_benchmarked_high: 17276
     markers_benchmarked_low: 1178
 families:

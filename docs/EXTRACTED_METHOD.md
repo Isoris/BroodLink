@@ -366,7 +366,7 @@ The marker-count check quotes the benchmark rows above (17,276 markers: recovery
 | `compute_subclusters_v1.py`, `build_extdata_haplotype_subclusters_v1.py` | paths; `range(41)`; interval labels A1-A41 |
 | `build_fig2_halfsib_v8.py` | stored layout, family names, panel positions |
 | Sample names | prefix of the cohort's sample identifiers assumed in several figure scripts; Beagle columns `Ind0..Ind225` mapped through a 226-line order file |
-| Absolute counts | `min_called = 20` (eta squared), `>= 12` individuals per class and `>= 5` per component (sub-clusters), `k_match = 40`, `>= 5` minor copies: kept as config defaults in BroodLink; the GRM call-rate filters are converted to fractions (150/216 = 0.694, 100/216 = 0.463) |
+| Absolute counts | `min_called = 20` (eta squared), `>= 12` individuals per class and `>= 5` per component (sub-clusters), `k_match = 40`, `>= 5` minor copies: kept as config defaults in BroodLink; the GRM call-rate filters are converted to fractions (150/216 and 100/216, stored as 0.6944 and 0.4629, rounded down so that a marker called in exactly 150 or 100 individuals is kept, as in the original) |
 
 ## 15. Not found (no rule was invented)
 

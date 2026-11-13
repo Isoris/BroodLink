@@ -82,6 +82,6 @@ Source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs).
 | full-sib | 143 |
 | first degree, not full-sib (k2 below gate) | 12 |
 | third degree | 6 |
-| identical genotypes (theta >= duplicate threshold) | 1 |
+| identical genotypes (theta at or above the identity threshold) | 1 |
 
 Parent-offspring pairs (k1 >= 0.8 and k2 <= 0.05): 0.
