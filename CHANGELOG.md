@@ -6,8 +6,10 @@ Relatedness from genotype likelihoods: with `--bisnp` and no `--relatedness`, Br
 ngsRelate-fast or NGSrelate when one is installed (`ngsRelate-fast`, then `ngsRelate`, on the
 PATH, or `--ngsrelate PATH`; new options `--freqs`, `--threads`; config
 `relatedness.ngsrelate_binaries`, `ngsrelate_threads`, `ngsrelate_fast_sites_per_gb`). It
-concatenates the Beagle files, writes the allele-frequency file (EM on the likelihoods) and
-the sample-name file, and calls the binary as the original cohort run did. Files and the
+concatenates the Beagle files, thins the sites to a balanced density along each chromosome
+(`relatedness.ngsrelate_sites_per_gb`, 100,000 per Gb by default, 0 = all; not applied with
+`--freqs` or with an ngsRelate-fast binary, which thins itself), writes the allele-frequency
+file (EM on the likelihoods) and the sample-name file, and calls the binary. Files and the
 command are kept in `01_relatedness/ngsrelate/`. Without a binary the GRM fallback is used.
 
 

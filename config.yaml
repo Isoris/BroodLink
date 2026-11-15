@@ -34,6 +34,7 @@ relatedness:
   - ngsRelate
   - ngsrelate
   ngsrelate_threads: null
+  ngsrelate_sites_per_gb: 100000
   ngsrelate_fast_sites_per_gb: 100000
   method: auto
   ml:

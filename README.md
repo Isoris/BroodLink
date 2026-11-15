@@ -45,7 +45,8 @@ cd BroodLink
 
 **2. Make a clean environment and install BroodLink**
 
-With conda / mamba (recommended; it includes Primer3 for the PCR-marker step):
+With conda / mamba (recommended; it includes NGSrelate for the relatedness step and Primer3 for
+the PCR-marker step):
 
 ```bash
 mamba env create -f environment.yml
@@ -74,9 +75,8 @@ genotype of each shared parent at them (the barcode). Because the example deleti
 carries the sequence across each deletion junction (the `CONSENSUS` field DELLY writes), the
 run also designs one PCR primer pair per polyINV ([PCR markers](#pcr-markers)).
 
-Relatedness (theta, k0, k1, k2) is estimated from the likelihoods by
-[ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast) or NGSrelate when one of them is
-installed (see [Limits](#limits)); without them BroodLink falls back to a simpler kinship
+Relatedness (theta, k0, k1, k2) is estimated from the likelihoods by NGSrelate when it is
+installed (see [Limits](#limits)); without it BroodLink falls back to a simpler kinship
 matrix and says so.
 
 Every other input is optional and adds something: a relatedness table you already have
@@ -306,17 +306,21 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
   second-degree band; the sweep shows the effect.
 - **Low coverage: relatedness comes from NGSrelate.** BroodLink does not estimate theta and
   k0 / k1 / k2 from genotype likelihoods itself. With `--bisnp` and no `--relatedness`, it
-  runs [ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast) (the binary used for the
-  original cohort) or NGSrelate when one of them is installed: it looks for `ngsRelate-fast`,
-  then `ngsRelate`, on the PATH, or takes `--ngsrelate PATH`. It concatenates the Beagle files,
-  estimates the allele frequencies from the likelihoods (or takes `--freqs`), and calls the
-  binary as the original run did (`-G -f -n -z -p -O`, with `-D` for ngsRelate-fast). These
-  tools are GPL-licensed C++ programs that you build yourself; BroodLink (MIT) calls them and
-  does not include them. The call is tested with a stand-in binary in the test suite, and
-  was run once with a real NGSrelate build (upstream ANGSD/NgsRelate, Linux) on the example
-  cohort: 15 families holding 72 individuals and 7 links nominated, against 5 nominated with
-  the GRM fallback. It has not been run with the ngsRelate-fast binary itself (its `-D` option)
-  and not on the original cohort through BroodLink.
+  runs NGSrelate when a binary is installed: it looks for `ngsRelate-fast`, then `ngsRelate`,
+  on the PATH, or takes `--ngsrelate PATH`. It concatenates the Beagle files, thins the sites
+  to a balanced density along each chromosome (100,000 per Gb by default,
+  `relatedness.ngsrelate_sites_per_gb`; 0 keeps every site), estimates the allele frequencies
+  from the likelihoods (or takes `--freqs`, which turns the thinning off), and calls the binary
+  (`-G -f -n -z -p -O`). NGSrelate ([ANGSD/NgsRelate](https://github.com/ANGSD/NgsRelate)) is
+  a separate GPL-licensed program: `environment.yml` installs it from bioconda (Linux and
+  macOS; on Windows use WSL), so after `mamba env create -f environment.yml` the basic command
+  uses it without any option. BroodLink (MIT) calls it and does not include its code. Tested with a stand-in
+  binary in the test suite, and with real NGSrelate (a build of upstream and the bioconda package) on
+  the example cohort ([docs/BENCHMARK.md](docs/BENCHMARK.md)): all 15
+  families and all 7 links, none false, with every site, with the default thinning and with
+  25,000 sites per Gb. The thinning follows the idea of the
+  [ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast) fork; that fork's own binary
+  (option `-D`) could not be built from its current patch and was not run.
   When no binary is found, `--bisnp` alone is hard-called (likelihood > 0.90) into a GRM,
   which underestimates half-sib kinship and has no k2, and the run report says so.
 - **GRM thresholds are not benchmarked.** The original GRM benchmark measured concordance

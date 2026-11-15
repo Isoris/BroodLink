@@ -67,8 +67,8 @@ def relatedness_from_markers(ms, cfg, label=None):
 def find_ngsrelate(cfg, override=None):
     """Path of an NGSrelate binary, or None. `override` (--ngsrelate) may be a path or a name;
     otherwise the names of relatedness.ngsrelate_binaries are looked up on the PATH, in order
-    (ngsRelate-fast first: a fork of NGSrelate with the same estimator and per-chromosome
-    downsampling of sites, the binary used for the original cohort)."""
+    (ngsRelate-fast first: a fork of NGSrelate with per-chromosome downsampling of sites built
+    in; with a standard NGSrelate binary BroodLink does that downsampling itself)."""
     names = [override] if override else list(cfg["relatedness"]["ngsrelate_binaries"])
     for n in names:
         if n and os.path.isfile(n):
@@ -79,16 +79,24 @@ def find_ngsrelate(cfg, override=None):
     return None
 
 
-def write_beagle_frequencies(beagle_files, out_beagle, out_freq):
+def write_beagle_frequencies(beagle_files, out_beagle, out_freq, sites_per_gb=0):
     """One Beagle file and one allele-frequency file for NGSrelate (-G, -f).
 
     Several Beagle files (one per chromosome) are concatenated under the header of the first.
     The frequency file has one line per site: the frequency of allele 2 of the Beagle file (the
     minor allele in ANGSD output, i.e. the knownEM column of the ANGSD .mafs file), estimated
-    here from the genotype likelihoods by EM under Hardy-Weinberg. Returns the number of sites."""
+    here from the genotype likelihoods by EM under Hardy-Weinberg.
+
+    sites_per_gb > 0 thins the sites to a balanced density along every chromosome before
+    NGSrelate sees them: the first site of each window of 1e9 / sites_per_gb bp is kept (marker
+    names must be <chromosome>_<position>, as ANGSD writes them). This is the downsampling idea
+    of the ngsRelate-fast fork, done here so that a standard NGSrelate binary can be used.
+    Returns (sites written, sites read)."""
     import gzip
     from .io import _open
-    n_sites = 0
+    n_sites = n_read = 0
+    width = int(1e9 // sites_per_gb) if sites_per_gb and sites_per_gb > 0 else 0
+    last = (None, -1)
     with gzip.open(out_beagle, "wt", encoding="utf-8", newline="\n", compresslevel=3) as ob, open(out_freq, "w", encoding="utf-8", newline="\n") as of:
         for k, path in enumerate(beagle_files):
             with _open(path) as fh:
@@ -99,15 +107,31 @@ def write_beagle_frequencies(beagle_files, out_beagle, out_freq):
                     lines = fh.readlines(64 * 1024 * 1024)
                     if not lines:
                         break
-                    rows = [l.rstrip("\n").split("\t") for l in lines if l.strip()]
+                    lines = [l for l in lines if l.strip()]
+                    n_read += len(lines)
+                    if width:
+                        kept = []
+                        for l in lines:
+                            mk = l[:l.index("\t")]
+                            ch, _sep, ps = mk.rpartition("_")
+                            try:
+                                key = (ch, int(ps) // width)
+                            except ValueError:
+                                key = (mk, 0)                 # not <chromosome>_<position>: keep the site
+                            if key != last:
+                                kept.append(l); last = key
+                        lines = kept
+                    if not lines:
+                        continue
+                    rows = [l.rstrip("\n").split("\t") for l in lines]
                     L = np.array([r[3:] for r in rows], dtype=np.float32)
                     L = L.reshape(len(rows), -1, 3)
                     sm = L.sum(2, keepdims=True)
                     p = gl_allele_freq(L / np.where(sm > 0, sm, 1))
-                    ob.write("".join(l if l.endswith("\n") else l + "\n" for l in lines if l.strip()))
+                    ob.write("".join(l if l.endswith("\n") else l + "\n" for l in lines))
                     of.write("".join(f"{x:.6f}\n" for x in p))
                     n_sites += len(rows)
-    return n_sites
+    return n_sites, n_read
 
 
 def try_ngsrelate(beagle_files, n_ind, sample_names, cfg, override=None, freqs=None, threads=None, workdir=None):
@@ -119,16 +143,20 @@ def try_ngsrelate(beagle_files, n_ind, sample_names, cfg, override=None, freqs=N
     exe = find_ngsrelate(cfg, override)
     if exe is None:
         return None, "NGSrelate is not installed (looked for %s)" % (override or ", ".join(c["ngsrelate_binaries"]))
+    fast_bin = "fast" in os.path.basename(exe).lower()
     wd = workdir or tempfile.mkdtemp(prefix="broodlink_ngsrelate_")
     os.makedirs(wd, exist_ok=True)
     out = os.path.join(wd, "relatedness.res")
     try:
         if freqs is None or len(beagle_files) != 1:
             beagle = os.path.join(wd, "all_sites.beagle.gz"); fq = os.path.join(wd, "allele2_frequencies.txt")
-            n_sites = write_beagle_frequencies(beagle_files, beagle, fq)
+            thin = 0 if (fast_bin or freqs is not None) else int(c["ngsrelate_sites_per_gb"] or 0)
+            n_sites, n_read = write_beagle_frequencies(beagle_files, beagle, fq, thin)
             if freqs is not None:
                 fq = freqs
             how = "frequencies estimated from the likelihoods by BroodLink" if freqs is None else "frequencies supplied"
+            if thin:
+                how += f"; sites thinned by BroodLink to {thin:,} per Gb along each chromosome, {n_sites:,} of {n_read:,} kept"
         else:
             beagle, fq, n_sites, how = beagle_files[0], freqs, None, "frequencies supplied"
         zf = os.path.join(wd, "samples.txt")
@@ -136,7 +164,7 @@ def try_ngsrelate(beagle_files, n_ind, sample_names, cfg, override=None, freqs=N
             fh.write("\n".join(map(str, sample_names)) + "\n")
         th = int(threads or c["ngsrelate_threads"] or os.cpu_count() or 1)
         cmd = [exe, "-G", beagle, "-f", fq, "-n", str(n_ind), "-z", zf, "-p", str(th), "-O", out]
-        fast = "fast" in os.path.basename(exe).lower()
+        fast = fast_bin
         if fast:
             cmd += ["-D", str(c["ngsrelate_fast_sites_per_gb"])]
         log(f"relatedness: running {os.path.basename(exe)} on {n_ind} individuals" + (f", {n_sites:,} sites" if n_sites else "") + f", {th} threads (this can take minutes to hours)")

@@ -20,6 +20,9 @@ dependencies:
   - pyyaml>=6.0
   - openpyxl>=3.1
   - pytest>=7
+  # NGSrelate (GPL, bioconda; Linux and macOS, on Windows use WSL): relatedness from the genotype
+  # likelihoods of --bisnp. BroodLink finds the binary on the PATH and runs it; it is not part of BroodLink.
+  - ngsrelate=2.3.1
   - pip:
       # primer3-py from PyPI (wheels for Linux, macOS and Windows; 2.4.0 is the version BroodLink was tested with).
       # bioconda also has it (linux-64, osx; no win-64 build, latest 2.3.1), which is why it is installed with pip here.

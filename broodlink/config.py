@@ -27,6 +27,7 @@ DEFAULTS = {
         "theta_duplicate": 0.354, "theta_first": 0.177, "theta_second": 0.0884, "theta_third": 0.0442,
         "ngsrelate_binaries": ["ngsRelate-fast", "ngsRelate", "ngsrelate"],   # looked up on the PATH in this order (or --ngsrelate PATH)
         "ngsrelate_threads": None,                 # None = all cores
+        "ngsrelate_sites_per_gb": 100000,          # sites kept per Gb along each chromosome before a standard NGSrelate (0 = all sites); new in BroodLink
         "ngsrelate_fast_sites_per_gb": 100000,     # -D of ngsRelate-fast (its default; 0 = no downsampling)
         "method": "auto",                          # auto | ml | grm (auto: ml, the likelihood estimator; new in BroodLink)
         "ml": {
