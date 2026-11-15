@@ -97,7 +97,13 @@ def write_beagle_frequencies(beagle_files, out_beagle, out_freq, sites_per_gb=0,
     from .io import _open
     n_sites = n_read = 0
     width = int(1e9 // sites_per_gb) if sites_per_gb and sites_per_gb > 0 else 0
-    last = (None, -1)
+    done = set()                                              # windows that already have their site (previous block of lines)
+
+    def freq(sub):
+        L = np.array([l.rstrip("\n").split("\t")[3:] for l in sub], dtype=np.float32).reshape(len(sub), -1, 3)
+        sm = L.sum(2, keepdims=True)
+        return gl_allele_freq(L / np.where(sm > 0, sm, 1))
+
     with gzip.open(out_beagle, "wt", encoding="utf-8", newline="\n", compresslevel=3) as ob, open(out_freq, "w", encoding="utf-8", newline="\n") as of:
         for k, path in enumerate(beagle_files):
             with _open(path) as fh:
@@ -110,24 +116,41 @@ def write_beagle_frequencies(beagle_files, out_beagle, out_freq, sites_per_gb=0,
                         break
                     lines = [l for l in lines if l.strip()]
                     n_read += len(lines)
-                    rows = [l.rstrip("\n").split("\t") for l in lines]
-                    L = np.array([r[3:] for r in rows], dtype=np.float32)
-                    L = L.reshape(len(rows), -1, 3)
-                    sm = L.sum(2, keepdims=True)
-                    p = gl_allele_freq(L / np.where(sm > 0, sm, 1))
                     if width:
-                        sel = []
-                        for q, r in enumerate(rows):
-                            if p[q] < maf_min or 1 - p[q] < maf_min:
-                                continue                      # NGSrelate would not use the site (its minMaf filter)
-                            ch, _sep, ps = r[0].rpartition("_")
+                        # Only the sites that can be kept are parsed: the first site of each window,
+                        # then the next one of the same window when it fails NGSrelate's minMaf filter.
+                        # Parsing every likelihood of every site took hours on a full cohort.
+                        wins = {}
+                        for q, l in enumerate(lines):
+                            name = l[:l.index("\t")] if "\t" in l else l
+                            ch, _sep, ps = name.rpartition("_")
                             try:
                                 key = (ch, int(ps) // width)
                             except ValueError:
-                                key = (r[0], q)               # not <chromosome>_<position>: keep the site
-                            if key != last:
-                                sel.append(q); last = key
-                        lines = [lines[q] for q in sel]; p = p[sel]
+                                key = (name, n_read, q)       # not <chromosome>_<position>: keep the site
+                            if key not in done:
+                                wins.setdefault(key, []).append(q)
+                        kept = {}
+                        ptr = dict.fromkeys(wins, 0)
+                        todo = list(wins)
+                        while todo:
+                            cand = [wins[w][ptr[w]] for w in todo]
+                            pc = freq([lines[q] for q in cand])
+                            nxt = []
+                            for w, q, x in zip(todo, cand, pc):
+                                if x < maf_min or 1 - x < maf_min:
+                                    ptr[w] += 1
+                                    if ptr[w] < len(wins[w]):
+                                        nxt.append(w)
+                                else:
+                                    kept[q] = x
+                            todo = nxt
+                        hit = sorted(kept)
+                        # a window may continue in the next block of lines: remember the filled ones
+                        done.update(w for w, qs in wins.items() if ptr[w] < len(qs))
+                        lines = [lines[q] for q in hit]; p = np.array([kept[q] for q in hit])
+                    else:
+                        p = freq(lines) if lines else np.zeros(0)
                     if not len(lines):
                         continue
                     ob.write("".join(l if l.endswith("\n") else l + "\n" for l in lines))

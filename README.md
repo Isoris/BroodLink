@@ -323,8 +323,10 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
   option. BroodLink (MIT) calls it and does not include its code. Tested with a stand-in
   binary in the test suite, and with real binaries on the example cohort (upstream NGSrelate,
   its bioconda package, and ngsRelate-fast; [docs/BENCHMARK.md](docs/BENCHMARK.md)): all 15
-  families and all 7 links, none false, in every case. Not yet run through BroodLink on the
-  original cohort, whose published relatedness table was computed with every site.
+  families and all 7 links, none false, in every case. On the original cohort (226 individuals), one
+  run with the thinned sites (86,387, against about 884,000 per pair in the published table)
+  gave the same 51 families and the same 6 supported links; 87 unit pairs were nominated
+  against 90, the differences being non-auditable pairs of small units near the q threshold.
   When no binary is found, `--bisnp` alone is hard-called (likelihood > 0.90) into a GRM,
   which underestimates half-sib kinship and has no k2, and the run report says so.
 - **GRM thresholds are not benchmarked.** The original GRM benchmark measured concordance

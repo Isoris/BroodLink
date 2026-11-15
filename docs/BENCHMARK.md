@@ -151,6 +151,46 @@ full-sib boundary, and the families are unchanged.
 Reading these tables: with NGSrelate the two links that the GRM misses are nominated, and
 thinning does not change families or links on these data. The synthetic genome is small
 (60 Mb) and its likelihoods are clean, so this shows that the wiring is right; it is not a
-statement about how few sites a real low-coverage cohort needs. Not run: NGSrelate through
-BroodLink on the original cohort (its published relatedness table was computed with every
-site, outside BroodLink, and is passed with `--relatedness`).
+statement about how few sites a real low-coverage cohort needs. The original cohort is below.
+
+### Original cohort: NGSrelate run by BroodLink against the published relatedness table
+
+One run on the original cohort (226 individuals, 216 in the analysis set, low-coverage
+genotype likelihoods, 28 Beagle files, deletion and duplication genotypes for the audit):
+`broodlink run --beagle <28 files> --gt <DEL> --gt <DUP>` with no `--relatedness`, NGSrelate
+2.3.1 from bioconda, default thinning, 20,000 permutations, Linux (WSL), 20 threads. It is
+compared with a BroodLink run given the published relatedness table, which had been computed
+outside BroodLink with every site (about 884,000 per pair).
+
+| Quantity | Published table (`--relatedness`) | NGSrelate run by BroodLink, thinned |
+|---|---|---|
+| Sites given to NGSrelate | about 950,000 | 86,387 of 3,927,726 read |
+| Sites used per pair, median | 883,570 | 79,962 |
+| Full-sib families / individuals in them | 51 / 188 | 51 / 188, the same members in every family |
+| Units, unit pairs tested | 79, 3,081 | 79, 3,081 |
+| Unit pairs nominated | 90 | 87 (84 in both; 6 only with the published table, 3 only here) |
+| Auditable nominated pairs: Gate 1 passed / rejected | 11 / 1 | 11 / 1, the same pairs |
+| Supported links / Gate-1 only | 6 / 5 | 6 / 5, the same pairs |
+| Network links kept | 54 | 53 (52 in both) |
+| Barcode states called (posterior >= 0.9 / >= 0.95) | not compared | 230 / 190 of 492 |
+
+Pair by pair in the analysis set (23,220 pairs): theta r = 0.9992, mean absolute difference
+0.0008, largest 0.011; k2 r = 0.9966, largest difference 0.031. The relationship class is the
+same for 23,073 pairs; the 147 others sit at a class boundary (60 between third degree and
+unrelated on one side, 39 on the other, 44 between second and third degree, 4 at the
+full-sib gate). The membership class inside a family (core, attached) differs for 6 of 216
+individuals. The 9 nominations that differ all involve a unit of fewer than 4 individuals,
+are not auditable in either run, and have q values near 0.05 in one of the two runs or a
+change of one or two cross-unit pairs. Pairs that include one of the 10 individuals removed
+by QC have few usable sites and differ more (theta differences up to 0.86); they are not in
+the analysis.
+
+Run time: 3 h 35 min in total, of which 15 min reading the Beagle files, 2 h 34 min writing
+the thinned Beagle file and the allele frequencies, 22 min NGSrelate, 15 min local PCA of 41
+intervals, 4 min permutations. The writing step parsed every likelihood of every site; it was
+changed afterwards to parse only the sites that can be kept, with identical output (same
+sites and frequencies on two chromosomes of the cohort, 3.9 min for 368,698 sites read,
+against about 14 min before). The whole run was not repeated with the new code.
+
+This is one cohort and one run. NGSrelate does not fix its random starts, so a second run
+will differ in the last digits and a nomination near q = 0.05 can change.

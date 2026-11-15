@@ -8,10 +8,12 @@ PATH, or `--ngsrelate PATH`; new options `--freqs`, `--threads`; config
 `relatedness.ngsrelate_binaries`, `ngsrelate_threads`, `ngsrelate_fast_sites_per_gb`). It
 concatenates the Beagle files, thins the sites to a balanced density along each chromosome
 (`relatedness.ngsrelate_sites_per_gb`, 100,000 per Gb by default, 0 = all: the first site of
-each window that passes the frequency filter; not applied with `--freqs` or with an
-ngsRelate-fast binary, which applies the same rule itself through `-D`), writes the allele-frequency
-file (EM on the likelihoods) and the sample-name file, and calls the binary. Files and the
-command are kept in `01_relatedness/ngsrelate/`. Without a binary the GRM fallback is used.
+each window that passes the frequency filter, the same rule as option `-D` of ngsRelate-fast;
+not applied with `--freqs`), writes the allele-frequency file (EM on the likelihoods) and the
+sample-name file, and calls the binary. Only the sites that can be kept are parsed. Files and
+the command are kept in `01_relatedness/ngsrelate/`. Without a binary the GRM fallback is
+used. Run once on the original cohort: same 51 families and same 6 supported links as with
+the published relatedness table (docs/BENCHMARK.md).
 
 
 PCR markers (step `10_pcr_markers`, `broodlink pcr-markers`): for every structural haplotype
