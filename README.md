@@ -39,7 +39,7 @@ You need Python 3.10 or later and git. Everything below takes a few minutes.
 **1. Get the code**
 
 ```bash
-git clone https://github.com/<github-user>/broodlink.git
+git clone https://github.com/Isoris/broodlink.git
 cd broodlink
 ```
 
