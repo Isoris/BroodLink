@@ -8,8 +8,9 @@ license: MIT
 authors:
   - family-names: Andres
     given-names: Quentin
-    # orcid: "https://orcid.org/<to be added by the author>"
-repository-code: "https://github.com/Isoris/broodlink"
+    orcid: "https://orcid.org/0009-0003-3434-1778"
+    affiliation: "Kasetsart University"
+repository-code: "https://github.com/Isoris/BroodLink"
 doi: "10.5281/zenodo.24249045"
 keywords:
   - relatedness

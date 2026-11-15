@@ -39,8 +39,8 @@ You need Python 3.10 or later and git. Everything below takes a few minutes.
 **1. Get the code**
 
 ```bash
-git clone https://github.com/Isoris/broodlink.git
-cd broodlink
+git clone https://github.com/Isoris/BroodLink.git
+cd BroodLink
 ```
 
 **2. Make a clean environment and install BroodLink**
@@ -358,7 +358,7 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
 
 Andres Q. (2026) BroodLink: adaptive reconstruction of full-sib families, shared-parent links
 and structural-haplotype barcodes from low-coverage cohorts. Version 0.2.0. Zenodo.
-https://doi.org/10.5281/zenodo.24249045. Repository: https://github.com/Isoris/broodlink.
+https://doi.org/10.5281/zenodo.24249045. Repository: https://github.com/Isoris/BroodLink.
 
 See [CITATION.cff](CITATION.cff). The method is described in the thesis chapter the code was
 extracted from; a reference will be added when it is public.
