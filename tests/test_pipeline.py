@@ -343,7 +343,7 @@ def test_every_table_has_the_header(full_run):
         for f in files:
             if f.endswith(".tsv"):
                 head = open(os.path.join(root, f), encoding="utf-8").read(1500)
-                assert head.startswith("# BroodLink 0.1.0 | config "), f
+                assert head.startswith("# BroodLink 0.2.0 | config "), f
                 assert "Families are relatedness-based groups, not pedigree records." in head, f
                 assert "analysis set: 80 individuals" in head and "marker classes:" in head, f
                 n += 1

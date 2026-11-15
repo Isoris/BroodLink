@@ -2,7 +2,7 @@
 
 Generated from the configuration and the steps that ran. Edit before use.
 
-Analyses were run with BroodLink 0.1.0 (seed 1). Input quality control flagged samples with a call rate below 0.5 times the cohort median, pairs of samples with identical genotypes (theta >= 0.354) and outliers in heterozygosity or median relatedness; 0 samples were removed and 80 individuals were analysed. Markers were restricted to the callable mask (47,620,925 bp (79.37% of the 60,000,000-bp assembly)). 
+Analyses were run with BroodLink 0.2.0 (seed 1). Input quality control flagged samples with a call rate below 0.5 times the cohort median, pairs of samples with identical genotypes (theta >= 0.354) and outliers in heterozygosity or median relatedness; 0 samples were removed and 80 individuals were analysed. Markers were restricted to the callable mask (47,620,925 bp (79.37% of the 60,000,000-bp assembly)). 
 
 Pairwise relatedness (theta, k0, k1, k2) was read from a precomputed table (plain TSV).
 

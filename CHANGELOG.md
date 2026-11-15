@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-11-15)
 
 PCR markers (step `10_pcr_markers`, `broodlink pcr-markers`): for every structural haplotype
 the deletions inside it are screened, and one flanking primer pair is designed on the sequence

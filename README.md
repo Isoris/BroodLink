@@ -16,7 +16,7 @@ example cohort shipped with the code is in the [gallery](#figures-synthetic-data
 of 15 families, keeps 7 of 7 true links and 0 false ones (5 reach "supported"), and calls 17
 of 28 shared-parent genotypes, 17 of them correctly.*
 
-Author: Quentin Andres. Version 0.1.0. Licence: MIT.
+Author: Quentin Andres. Version 0.2.0. Licence: MIT.
 
 BroodLink is a Python command-line pipeline for cohorts such as hatchery broodstock: a few
 hundred individuals, many of them siblings, sequenced at low coverage, with no pedigree
@@ -185,7 +185,7 @@ The kinship matrix (GRM) of every marker class is written to
 
 ## Capabilities
 
-| Step | What it does | Needs | Origin of the code | Status in 0.1.0 |
+| Step | What it does | Needs | Origin of the code | Status in 0.2.0 |
 |---|---|---|---|---|
 | 0 QC | per-sample and per-input tables, flags (low coverage, identical genotypes, possible contamination, missing samples, sex / batch effects), exclusion table; flags only, removal on request | any input | reimplemented from the written Methods | runs; tested on synthetic data |
 | 1 Relatedness | uses the supplied table; otherwise a VanRaden GRM (kinship = GRM / 2) of the densest genotype input | `--relatedness`, or genotypes | GRM extracted | reproduced on the original cohort |
@@ -357,8 +357,8 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
 ## How to cite
 
 Andres Q. (2026) BroodLink: adaptive reconstruction of full-sib families, shared-parent links
-and structural-haplotype barcodes from low-coverage cohorts. Version 0.1.0. Zenodo.
-DOI: <to be assigned>. Repository: <GitHub URL>.
+and structural-haplotype barcodes from low-coverage cohorts. Version 0.2.0. Zenodo.
+https://doi.org/10.5281/zenodo.24249045. Repository: https://github.com/Isoris/broodlink.
 
 See [CITATION.cff](CITATION.cff). The method is described in the thesis chapter the code was
 extracted from; a reference will be added when it is public.

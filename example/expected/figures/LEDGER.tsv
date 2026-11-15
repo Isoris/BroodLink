@@ -1,4 +1,4 @@
-# BroodLink 0.1.0 | config 64177d3d75 | seed 1
+# BroodLink 0.2.0 | config 64177d3d75 | seed 1
 # analysis set: 80 individuals (0 removed by QC; 3 flagged and kept)
 # marker classes: SNP (bisnp): 5,863 markers; DEL (gt:sv.vcf.gz): 768 markers; DUP (gt:sv.vcf.gz): 203 markers
 # relatedness source: --relatedness, used as is (plain TSV, 80 samples, 3160 pairs)
@@ -6,14 +6,14 @@
 # callable span: 47,620,925 bp (79.37% of the 60,000,000-bp assembly)
 # Ledger of the ported figures: every number printed in a panel, with the table (and column) of the run it was computed from.
 figure	panel	printed_item	value	source
-fig00_overview	A	AUC biSNPs	0.999864	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
-fig00_overview	A	markers biSNPs	5451	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
-fig00_overview	B	AUC DELs	0.998788	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
-fig00_overview	B	markers DELs	605	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
-fig00_overview	C	AUC DUPs	0.990447	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
-fig00_overview	C	markers DUPs	148	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
-fig00_overview	D	AUC structural haplotypes	0.802051	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
-fig00_overview	D	markers structural haplotypes	4	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig00_overview	SNP	AUC biSNPs	0.999864	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig00_overview	SNP	markers biSNPs	5451	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig00_overview	DEL	AUC DELs	0.998788	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig00_overview	DEL	markers DELs	605	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig00_overview	DUP	AUC DUPs	0.990447	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig00_overview	DUP	markers DUPs	148	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
+fig00_overview	HAPLOTYPE	AUC structural haplotypes	0.802051	09_cross_marker_concordance/cross_marker_concordance.tsv auc_within_vs_between
+fig00_overview	HAPLOTYPE	markers structural haplotypes	4	09_cross_marker_concordance/cross_marker_concordance.tsv n_markers
 fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 HAPLOTYPE	0.606657	08_family_effect/family_effect_summary.tsv eta2_obs_median
 fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 DEL	0.561029	08_family_effect/family_effect_summary.tsv eta2_obs_median
 fig08_sv_genotypes_and_kinship	banner 1 / B key	median eta2 DUP	0.582104	08_family_effect/family_effect_summary.tsv eta2_obs_median

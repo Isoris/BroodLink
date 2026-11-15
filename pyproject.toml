@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "broodlink"
-version = "0.1.0"
+version = "0.2.0"
 description = "Adaptive reconstruction of full-sib families, shared-parent links and structural-haplotype barcodes from low-coverage cohorts"
 readme = "README.md"
 requires-python = ">=3.10"

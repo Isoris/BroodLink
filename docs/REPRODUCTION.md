@@ -2,7 +2,7 @@
 
 BroodLink was extracted from analysis scripts that had already produced published numbers
 for one cohort (216 retained individuals of 226 sequenced). This page compares BroodLink
-0.1.0 with those numbers. Each line is marked **reproduced**, **differs** (with the cause)
+with those numbers (first compared at version 0.1.0; the core steps are unchanged in 0.2.0). Each line is marked **reproduced**, **differs** (with the cause)
 or **not run** (with the reason and the command). No threshold was tuned to match.
 
 How it was run: on the original intermediate tables (the likelihood-based relatedness table,
@@ -20,7 +20,7 @@ Seed 1; 20,000 permutations for the nomination; 1,000 for the family effect.
 --haplotypes <karyotypes of the 41 intervals> --inversions <41 intervals.bed>
 --samples <sample order> --config <local config>`
 
-| Quantity | Published | BroodLink 0.1.0 | Status |
+| Quantity | Published | BroodLink | Status |
 |---|---|---|---|
 | Individuals analysed | 216 | 216 | reproduced |
 | Families / individuals in families / unassigned | 51 / 188 / 28 | 51 / 188 / 28, the same sets of individuals | reproduced |
@@ -87,7 +87,7 @@ Reference: the 51 families and the 6 supported links of the full run.
 
 `broodlink run --relatedness <NGSrelate .res> --samples <sample order> --config <local config>`
 
-| Quantity | Expected | BroodLink 0.1.0 | Status |
+| Quantity | Expected | BroodLink | Status |
 |---|---|---|---|
 | Families | the same 51 | 51, identical sets | reproduced |
 | Nominated unit pairs | the same 90 | 90, the same pairs | reproduced |
@@ -95,7 +95,7 @@ Reference: the 51 families and the 6 supported links of the full run.
 
 ## (d) Mask and depth
 
-| Quantity | Published | BroodLink 0.1.0 | Status |
+| Quantity | Published | BroodLink | Status |
 |---|---|---|---|
 | Callable mask | 576,895,264 bp, 59.85% of 963,905,721 bp | | **not run**: needs the soft-masked reference FASTA. `broodlink run ... --mask <soft-masked.fa> --genome <fa.fai>`; the span and share are printed in every table header |
 | Per-sample heterozygosity over the mask | | | **not run**: needs the genotype-likelihood files and the mask |
@@ -106,7 +106,7 @@ rule) is covered by unit tests and by the synthetic run only.
 
 ## (e) The 41 intervals
 
-| Quantity | Published | BroodLink 0.1.0 | Status |
+| Quantity | Published | BroodLink | Status |
 |---|---|---|---|
 | Karyotypes from SNPs: BroodLink's local-PCA genotyping on the stored per-interval SNP dosage, against the published calls (all 216 individuals, forced calls) | | median 98% of individuals identical per interval; at least 95% in 33 intervals, at least 90% in 35; 5 intervals below 80% (49-69%), all five in the "candidate" tier of the original; identical for all individuals in 5 intervals | **differs**. BroodLink fits the three clusters on the unrelated subset and projects the others; the script that made the published full-cohort calls was not found. Fitting on all individuals gives at least 95% in 38 intervals, minimum 66% |
 | Ambiguous genotypes set to missing | none (forced calls) | median 7% of individuals per interval | new rule in BroodLink |
@@ -117,7 +117,7 @@ rule) is covered by unit tests and by the synthetic run only.
 | Scan: published intervals overlapped by a deletion-scan candidate | not published | 8 of 41; 23 further candidates | weak recovery from deletions alone |
 | Scan from SNPs (reimplemented from Methods) | 41 intervals came from the original scan | | **not run** on this cohort (needs the genotype-likelihood files); tested on synthetic data only |
 
-## (f) PCR markers (step 10, after 0.1.0)
+## (f) PCR markers (step 10, new in 0.2.0)
 
 Run on the original deletion catalogue (genotype matrix), the published karyotypes of the 41 intervals, and the
 catalogue VCF for the split-read consensus (`--consensus-vcf`); Primer3 through primer3-py 2.4.0. Two runs: one given
@@ -144,14 +144,14 @@ screening table of 4,771 rows, which is reproduced.
 
 ## Visual check of the figures
 
-The figures of the published study are now drawn by the tool (after 0.1.0). For the full run
+The figures of the published study are now drawn by the tool (since 0.2.0). For the full run
 each ported figure was opened next to the original render and compared panel by panel;
 `DISPLAY_ITEMS.md` has the table (what is the same, what differs and why). This was a reading
 of the figures and of the numbers printed in them, not a pixel comparison.
 
 ## Quantities added with the figure ports
 
-| Quantity | Published | BroodLink (after 0.1.0) | Status |
+| Quantity | Published | BroodLink 0.2.0 | Status |
 |---|---|---|---|
 | Bootstrap intervals of the kinship benchmark (deletions; duplications; 41 intervals) | AUC [0.99961, 0.99997], [0.99516, 0.99856], [0.97395, 0.98590]; recovery [90.6, 99.7], [63.2, 84.0], [17.8, 48.4] | the same values | reproduced |
 | The same functions on the stored GRMs of the original study (five classes, including biSNPs and biSNPs outside SV regions) | summary table of the benchmark | AUC, recovery and both intervals equal to the last printed digit in all five rows | reproduced (library functions on stored matrices, not through the command line) |
