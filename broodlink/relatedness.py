@@ -152,7 +152,10 @@ def try_ngsrelate(beagle_files, n_ind, sample_names, cfg, override=None, freqs=N
     try:
         if freqs is None or len(beagle_files) != 1:
             beagle = os.path.join(wd, "all_sites.beagle.gz"); fq = os.path.join(wd, "allele2_frequencies.txt")
-            thin = 0 if (fast_bin or freqs is not None) else int(c["ngsrelate_sites_per_gb"] or 0)
+            # BroodLink thins before the call, also for ngsRelate-fast: the binary then never holds
+            # every site in memory (a cohort of a few hundred individuals with a million sites
+            # needs several GB otherwise)
+            thin = 0 if freqs is not None else int(c["ngsrelate_sites_per_gb"] or 0)
             n_sites, n_read = write_beagle_frequencies(beagle_files, beagle, fq, thin)
             if freqs is not None:
                 fq = freqs
@@ -167,8 +170,10 @@ def try_ngsrelate(beagle_files, n_ind, sample_names, cfg, override=None, freqs=N
         th = int(threads or c["ngsrelate_threads"] or os.cpu_count() or 1)
         cmd = [exe, "-G", beagle, "-f", fq, "-n", str(n_ind), "-z", zf, "-p", str(th), "-O", out]
         fast = fast_bin
+        # ngsRelate-fast thins by itself (-D) only when BroodLink has not done it (frequencies supplied)
+        dval = 0 if freqs is None else int(c["ngsrelate_fast_sites_per_gb"])
         if fast:
-            cmd += ["-D", str(c["ngsrelate_fast_sites_per_gb"])]
+            cmd += ["-D", str(dval)]
         log(f"relatedness: running {os.path.basename(exe)} on {n_ind} individuals" + (f", {n_sites:,} sites" if n_sites else "") + f", {th} threads (this can take minutes to hours)")
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=7 * 24 * 3600)
         if r.returncode != 0 or not os.path.exists(out) or os.path.getsize(out) == 0:
@@ -176,7 +181,7 @@ def try_ngsrelate(beagle_files, n_ind, sample_names, cfg, override=None, freqs=N
             return None, f"{os.path.basename(exe)} failed (exit {r.returncode}: {tail}); falling back to the GRM"
         R, _ = read_relatedness_file(out, list(sample_names))
         shown = " ".join(os.path.basename(x) if (os.path.sep in x or "/" in x) else x for x in cmd)
-        return R, f"{os.path.basename(exe)} ({how}" + (f"; -D {c['ngsrelate_fast_sites_per_gb']} sites per Gb" if fast else "") + f"): {shown}"
+        return R, f"{os.path.basename(exe)} ({how}" + (f"; -D {dval:,} sites per Gb, thinned by the binary" if fast and dval else "") + f"): {shown}"
     except Exception as exc:
         return None, f"{os.path.basename(exe)} could not be run ({type(exc).__name__}: {exc}); falling back to the GRM"
 

@@ -65,7 +65,7 @@ The basic run needs only two files from whole-genome resequencing: SNP genotype 
 from Manta or DELLY2):
 
 ```bash
-broodlink run --bisnp tests/data/snps.beagle.gz --gt tests/data/sv.vcf.gz --out broodlink_out
+broodlink run --beagle tests/data/snps.beagle.gz --gt tests/data/sv.vcf.gz --out broodlink_out
 ```
 
 From these two files BroodLink works out relatedness and the full-sib families, nominates
@@ -149,7 +149,7 @@ with what each will be used for.
 | Option | What | Used for |
 |---|---|---|
 | `--relatedness FILE_OR_DIR` | pairwise relatedness: NGSrelate `.res` (or a folder of them), KING `.kin` / `.kin0`, or a TSV with `id1, id2, theta` (or `kinship`) and optionally `k0, k1, k2` | families and nomination, used as is |
-| `--bisnp FILE ...` | biallelic SNPs: ANGSD Beagle genotype likelihoods, or VCF with GL / PL | structural-haplotype genotyping and scan; relatedness only when no table is given (see Limits) |
+| `--beagle FILE ...` (same as `--bisnp`) | biallelic SNPs: ANGSD Beagle genotype likelihoods, or VCF with GL / PL | structural-haplotype genotyping and scan; relatedness only when no table is given (see Limits) |
 | `--gt FILE` (repeatable) | deletion / duplication genotype calls from whole-genome resequencing (VCF with GT, such as those obtained from Manta or DELLY2; class read from `SVTYPE`), or a genotype matrix TSV | audit, family effect; relatedness by GRM when it is the densest input |
 | `--snp_indel FILE` | small-variant VCF / gVCF with GT | as `--gt`, one class |
 | `--vcf FILE` (repeatable) | any other VCF with GT | as `--gt` |
@@ -311,10 +311,12 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
   allele frequencies from the likelihoods (or takes `--freqs`), and calls the binary
   (`-G -f -n -z -p -O`). The sites are thinned to a balanced density along each chromosome,
   100,000 per Gb by default: the first site of each 10-kb window that passes the allele
-  frequency filter is kept. With [ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast)
-  (NGSrelate with that thinning built in as option `-D`) the binary does it; with a standard
-  NGSrelate BroodLink does it before the call, by the same rule
-  (`relatedness.ngsrelate_sites_per_gb`, 0 keeps every site; not applied with `--freqs`).
+  frequency filter is kept (`relatedness.ngsrelate_sites_per_gb`, 0 keeps every site).
+  BroodLink does this before the call, so NGSrelate reads about a tenth of the sites of a
+  typical whole-genome SNP set and needs a tenth of the memory and time; this is what makes
+  the step practical on a laptop. [ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast)
+  is NGSrelate with the same rule built in as option `-D`; BroodLink uses that option only
+  when you supply `--freqs` (it then leaves the Beagle file as it is).
   NGSrelate ([ANGSD/NgsRelate](https://github.com/ANGSD/NgsRelate)) is a separate GPL-licensed
   program: `environment.yml` installs it from bioconda (Linux and macOS; on Windows use WSL),
   so after `mamba env create -f environment.yml` the basic command uses it without any

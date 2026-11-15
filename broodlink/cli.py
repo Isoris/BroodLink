@@ -14,7 +14,7 @@ STEP_CMD = {"qc": "qc", "relatedness": "relatedness", "families": "families", "n
 
 def add_inputs(p):
     g = p.add_argument_group("inputs (at least one of --bisnp, --gt, --snp_indel, --vcf, --relatedness)")
-    g.add_argument("--bisnp", nargs="+", metavar="FILE", help="biallelic SNPs from ANGSD: Beagle genotype likelihoods (file, files or folder), or BCF/VCF with GL/PL; low coverage accepted")
+    g.add_argument("--bisnp", "--beagle", dest="bisnp", nargs="+", metavar="FILE", help="biallelic SNPs from ANGSD: Beagle genotype likelihoods (file, files or folder), or BCF/VCF with GL/PL; low coverage accepted")
     g.add_argument("--gt", action="append", metavar="FILE", help="genotype VCF with GT (Manta, DELLY, ...; repeatable; class DEL / DUP / INV / INS read from SVTYPE), or a genotype matrix TSV")
     g.add_argument("--snp_indel", metavar="FILE", help="small-variant VCF or gVCF with GT (e.g. a Clair3 cohort)")
     g.add_argument("--vcf", action="append", metavar="FILE", help="any other variant VCF with GT (repeatable)")

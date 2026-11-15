@@ -461,7 +461,7 @@ def test_bisnp_uses_ngsrelate_fast_when_installed(tmp_path, quick_cfg):
         exe = d / "ngsRelate-fast"
         exe.write_text(f'#!/bin/sh\nexec "{sys.executable}" "{d / "stub.py"}" "$@"\n', encoding="utf-8"); exe.chmod(0o755)
     out = str(tmp_path / "out")
-    main(["run", "--bisnp", os.path.join(DATA, "snps.beagle.gz"), "--gt", os.path.join(DATA, "sv.vcf.gz"), "--ngsrelate", str(exe),
+    main(["run", "--beagle", os.path.join(DATA, "snps.beagle.gz"), "--gt", os.path.join(DATA, "sv.vcf.gz"), "--ngsrelate", str(exe),
           "--no-inversion-scan", "--no-figures", "--quiet", "--config", quick_cfg, "--out", out])
     s = summary(out, "01_relatedness")["summary"]
     assert s["mode"] == "given" and "NGSrelate run by BroodLink" in s["source"], s["source"]
@@ -470,4 +470,4 @@ def test_bisnp_uses_ngsrelate_fast_when_installed(tmp_path, quick_cfg):
     f = summary(out, "02_families")["summary"]
     assert f["n_families"] == 15 and f["has_k2"]
     rep = open(os.path.join(out, "run_report.md"), encoding="utf-8").read()
-    assert "ngsRelate-fast" in rep and "-D 100000" in rep
+    assert "ngsRelate-fast" in rep and "thinned by BroodLink" in rep and "-D 0" in rep
