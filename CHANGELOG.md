@@ -7,8 +7,9 @@ ngsRelate-fast or NGSrelate when one is installed (`ngsRelate-fast`, then `ngsRe
 PATH, or `--ngsrelate PATH`; new options `--freqs`, `--threads`; config
 `relatedness.ngsrelate_binaries`, `ngsrelate_threads`, `ngsrelate_fast_sites_per_gb`). It
 concatenates the Beagle files, thins the sites to a balanced density along each chromosome
-(`relatedness.ngsrelate_sites_per_gb`, 100,000 per Gb by default, 0 = all; not applied with
-`--freqs` or with an ngsRelate-fast binary, which thins itself), writes the allele-frequency
+(`relatedness.ngsrelate_sites_per_gb`, 100,000 per Gb by default, 0 = all: the first site of
+each window that passes the frequency filter; not applied with `--freqs` or with an
+ngsRelate-fast binary, which applies the same rule itself through `-D`), writes the allele-frequency
 file (EM on the likelihoods) and the sample-name file, and calls the binary. Files and the
 command are kept in `01_relatedness/ngsrelate/`. Without a binary the GRM fallback is used.
 

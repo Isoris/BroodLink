@@ -115,23 +115,42 @@ markers called in exactly 100 individuals; the default fractions were corrected 
 
 ## Relatedness through NGSrelate (added in 0.2.0)
 
-Synthetic cohort, Linux, a build of upstream ANGSD/NgsRelate (version 2.3.1 line), 20 threads:
-`broodlink run --bisnp tests/data/snps.beagle.gz --gt tests/data/sv.vcf.gz --ngsrelate <path to
-ngsRelate> --no-inversion-scan`, 20,000 permutations. BroodLink writes the Beagle file, the
-allele frequencies and the sample names, thins the sites when asked, and reads the result.
-Scored against the simulated truth (15 families, 7 links).
+Synthetic cohort, Linux, 20 threads: `broodlink run --bisnp tests/data/snps.beagle.gz --gt
+tests/data/sv.vcf.gz --ngsrelate <binary> --no-inversion-scan`, 20,000 permutations. BroodLink
+writes the Beagle file, the allele frequencies and the sample names, and reads the result.
+Binaries: upstream ANGSD/NgsRelate (commit d660322, version 2.3.1 line), and ngsRelate-fast
+built from the same commit with option `-D`. Scored against the simulated truth (15 families,
+7 links).
 
-| Relatedness source | Sites given to NGSrelate | Families identical to truth | Pair precision / recall | True links kept (of 7) | False links | Supported |
+| Relatedness source | Sites used by NGSrelate | Families identical to truth | Pair precision / recall | True links kept (of 7) | False links | Supported |
 |---|---|---|---|---|---|---|
 | NGSrelate, every site (`ngsrelate_sites_per_gb: 0`) | 6,000 | 15 / 15 | 1.00 / 1.00 | 7 | 0 | 4 |
-| NGSrelate, default thinning (100,000 per Gb) | 3,556 | 15 / 15 | 1.00 / 1.00 | 7 | 0 | 4 |
-| NGSrelate, 25,000 per Gb | 1,360 | 15 / 15 | 1.00 / 1.00 | 7 | 0 | 4 |
+| NGSrelate, sites thinned by BroodLink (default, 100,000 per Gb) | 3,510 | 15 / 15 | 1.00 / 1.00 | 7 | 0 | 4 |
+| ngsRelate-fast, sites thinned by the binary (`-D 100000`) | 3,510 | 15 / 15 | 1.00 / 1.00 | 7 | 0 | not recorded |
 | No binary: GRM of hard-called SNPs (section 1) | 5,451 | 15 / 15 | 1.00 / 1.00 | 5 | 0 | 3 |
 
-Reading the table: with NGSrelate the two links that the GRM misses are nominated, and thinning
-the sites by a factor of four does not change families or links on these data. The synthetic
-genome is small (60 Mb) and its likelihoods are clean, so this says the wiring is right; it is
-not a statement about how few sites a real low-coverage cohort needs. Not run: the binary of
-the ngsRelate-fast fork (its patch does not apply to upstream NgsRelate as published), and
-NGSrelate through BroodLink on the original cohort (its relatedness table was computed outside
-BroodLink and is passed with `--relatedness`).
+An earlier version of the thinning, which did not skip sites failing the frequency filter,
+kept 3,556 sites at 100,000 per Gb and 1,360 at 25,000 per Gb, with the same families and
+links. The bioconda package of NGSrelate (2.3.1), found on the PATH without `--ngsrelate`,
+gave 15 families holding 72 individuals and 7 nominated links (not scored pair by pair).
+
+ngsRelate-fast against upstream NGSrelate on the same Beagle and frequency files (3,160 pairs):
+
+| Comparison | Largest difference in theta | in k2 (J7) | in k1 (J8) | in k0 (J9) | Relationship class equal |
+|---|---|---|---|---|---|
+| upstream, two runs of the same command | below 0.005 | below 0.005 | 0.016 | 0.011 | not computed |
+| ngsRelate-fast `-D 0` against upstream | 0.0017 | 0.0073 | 0.016 | 0.013 | not computed |
+| ngsRelate-fast `-D 100000` against upstream | 0.0215 (r = 0.9989) | 0.0478 (r = 0.9962) | 0.109 (r = 0.9955) | 0.091 (r = 0.9977) | 3,136 of 3,160 pairs; 6 pairs move in or out of the full-sib class |
+
+Two runs of upstream NGSrelate on the same input are not byte-identical (the EM starts are not
+fixed), so `-D 0` cannot be byte-identical to upstream either; its differences from upstream
+are of the size of upstream's own run-to-run differences, and the site counts are equal for
+every pair. With `-D 100000`, 24 pairs change relationship class, 6 of them across the
+full-sib boundary, and the families are unchanged.
+
+Reading these tables: with NGSrelate the two links that the GRM misses are nominated, and
+thinning does not change families or links on these data. The synthetic genome is small
+(60 Mb) and its likelihoods are clean, so this shows that the wiring is right; it is not a
+statement about how few sites a real low-coverage cohort needs. Not run: NGSrelate through
+BroodLink on the original cohort (its published relatedness table was computed with every
+site, outside BroodLink, and is passed with `--relatedness`).

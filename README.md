@@ -307,20 +307,22 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
 - **Low coverage: relatedness comes from NGSrelate.** BroodLink does not estimate theta and
   k0 / k1 / k2 from genotype likelihoods itself. With `--bisnp` and no `--relatedness`, it
   runs NGSrelate when a binary is installed: it looks for `ngsRelate-fast`, then `ngsRelate`,
-  on the PATH, or takes `--ngsrelate PATH`. It concatenates the Beagle files, thins the sites
-  to a balanced density along each chromosome (100,000 per Gb by default,
-  `relatedness.ngsrelate_sites_per_gb`; 0 keeps every site), estimates the allele frequencies
-  from the likelihoods (or takes `--freqs`, which turns the thinning off), and calls the binary
-  (`-G -f -n -z -p -O`). NGSrelate ([ANGSD/NgsRelate](https://github.com/ANGSD/NgsRelate)) is
-  a separate GPL-licensed program: `environment.yml` installs it from bioconda (Linux and
-  macOS; on Windows use WSL), so after `mamba env create -f environment.yml` the basic command
-  uses it without any option. BroodLink (MIT) calls it and does not include its code. Tested with a stand-in
-  binary in the test suite, and with real NGSrelate (a build of upstream and the bioconda package) on
-  the example cohort ([docs/BENCHMARK.md](docs/BENCHMARK.md)): all 15
-  families and all 7 links, none false, with every site, with the default thinning and with
-  25,000 sites per Gb. The thinning follows the idea of the
-  [ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast) fork; that fork's own binary
-  (option `-D`) could not be built from its current patch and was not run.
+  on the PATH, or takes `--ngsrelate PATH`. It concatenates the Beagle files, estimates the
+  allele frequencies from the likelihoods (or takes `--freqs`), and calls the binary
+  (`-G -f -n -z -p -O`). The sites are thinned to a balanced density along each chromosome,
+  100,000 per Gb by default: the first site of each 10-kb window that passes the allele
+  frequency filter is kept. With [ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast)
+  (NGSrelate with that thinning built in as option `-D`) the binary does it; with a standard
+  NGSrelate BroodLink does it before the call, by the same rule
+  (`relatedness.ngsrelate_sites_per_gb`, 0 keeps every site; not applied with `--freqs`).
+  NGSrelate ([ANGSD/NgsRelate](https://github.com/ANGSD/NgsRelate)) is a separate GPL-licensed
+  program: `environment.yml` installs it from bioconda (Linux and macOS; on Windows use WSL),
+  so after `mamba env create -f environment.yml` the basic command uses it without any
+  option. BroodLink (MIT) calls it and does not include its code. Tested with a stand-in
+  binary in the test suite, and with real binaries on the example cohort (upstream NGSrelate,
+  its bioconda package, and ngsRelate-fast; [docs/BENCHMARK.md](docs/BENCHMARK.md)): all 15
+  families and all 7 links, none false, in every case. Not yet run through BroodLink on the
+  original cohort, whose published relatedness table was computed with every site.
   When no binary is found, `--bisnp` alone is hard-called (likelihood > 0.90) into a GRM,
   which underestimates half-sib kinship and has no k2, and the run report says so.
 - **GRM thresholds are not benchmarked.** The original GRM benchmark measured concordance

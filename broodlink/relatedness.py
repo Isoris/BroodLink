@@ -79,7 +79,7 @@ def find_ngsrelate(cfg, override=None):
     return None
 
 
-def write_beagle_frequencies(beagle_files, out_beagle, out_freq, sites_per_gb=0):
+def write_beagle_frequencies(beagle_files, out_beagle, out_freq, sites_per_gb=0, maf_min=0.05):
     """One Beagle file and one allele-frequency file for NGSrelate (-G, -f).
 
     Several Beagle files (one per chromosome) are concatenated under the header of the first.
@@ -88,8 +88,9 @@ def write_beagle_frequencies(beagle_files, out_beagle, out_freq, sites_per_gb=0)
     here from the genotype likelihoods by EM under Hardy-Weinberg.
 
     sites_per_gb > 0 thins the sites to a balanced density along every chromosome before
-    NGSrelate sees them: the first site of each window of 1e9 / sites_per_gb bp is kept (marker
-    names must be <chromosome>_<position>, as ANGSD writes them). This is the downsampling idea
+    NGSrelate sees them: the first site of each window of 1e9 / sites_per_gb bp whose allele
+    frequency passes NGSrelate's minMaf filter (maf_min) is kept (marker names must be
+    <chromosome>_<position>, as ANGSD writes them). The same rule as option -D of ngsRelate-fast. This is the downsampling idea
     of the ngsRelate-fast fork, done here so that a standard NGSrelate binary can be used.
     Returns (sites written, sites read)."""
     import gzip
@@ -109,28 +110,29 @@ def write_beagle_frequencies(beagle_files, out_beagle, out_freq, sites_per_gb=0)
                         break
                     lines = [l for l in lines if l.strip()]
                     n_read += len(lines)
-                    if width:
-                        kept = []
-                        for l in lines:
-                            mk = l[:l.index("\t")]
-                            ch, _sep, ps = mk.rpartition("_")
-                            try:
-                                key = (ch, int(ps) // width)
-                            except ValueError:
-                                key = (mk, 0)                 # not <chromosome>_<position>: keep the site
-                            if key != last:
-                                kept.append(l); last = key
-                        lines = kept
-                    if not lines:
-                        continue
                     rows = [l.rstrip("\n").split("\t") for l in lines]
                     L = np.array([r[3:] for r in rows], dtype=np.float32)
                     L = L.reshape(len(rows), -1, 3)
                     sm = L.sum(2, keepdims=True)
                     p = gl_allele_freq(L / np.where(sm > 0, sm, 1))
+                    if width:
+                        sel = []
+                        for q, r in enumerate(rows):
+                            if p[q] < maf_min or 1 - p[q] < maf_min:
+                                continue                      # NGSrelate would not use the site (its minMaf filter)
+                            ch, _sep, ps = r[0].rpartition("_")
+                            try:
+                                key = (ch, int(ps) // width)
+                            except ValueError:
+                                key = (r[0], q)               # not <chromosome>_<position>: keep the site
+                            if key != last:
+                                sel.append(q); last = key
+                        lines = [lines[q] for q in sel]; p = p[sel]
+                    if not len(lines):
+                        continue
                     ob.write("".join(l if l.endswith("\n") else l + "\n" for l in lines))
                     of.write("".join(f"{x:.6f}\n" for x in p))
-                    n_sites += len(rows)
+                    n_sites += len(lines)
     return n_sites, n_read
 
 

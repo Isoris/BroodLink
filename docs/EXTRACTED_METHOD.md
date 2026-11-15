@@ -65,9 +65,12 @@ Source: `FAM/_project_docs/code/common.py` (toolkit "hatchpg").
   likelihoods under Hardy-Weinberg, allele 2 of the Beagle file) unless `--freqs` is given; the
   original run took the frequencies from ANGSD. With a standard binary BroodLink thins the
   sites itself (first site of each window of 1e9 / `ngsrelate_sites_per_gb` bp per chromosome;
-  new in BroodLink, after the downsampling idea of the fork, whose own patch does not apply to
-  upstream NgsRelate). The wiring is tested with a stand-in binary and was run with a real
-  build of upstream NgsRelate on the synthetic cohort (docs/BENCHMARK.md).
+  among those passing the minMaf filter; new in BroodLink, the same rule as option `-D` of
+  the ngsRelate-fast fork, which was made to build against upstream commit d660322 on
+  2026-11-15). The published relatedness table of the original cohort was computed with every
+  site (about 884,000 per pair), i.e. without this thinning. The wiring is tested with a
+  stand-in binary and was run with upstream NgsRelate, its bioconda package and ngsRelate-fast
+  on the synthetic cohort (docs/BENCHMARK.md).
   Without a binary, `--bisnp` alone uses the GRM of hard-called genotypes and the run says so.
 
 ## 2. GRM-based relatedness and its benchmark
