@@ -2,6 +2,15 @@
 
 ## 0.2.0 (2026-11-15)
 
+Relatedness from genotype likelihoods: with `--bisnp` and no `--relatedness`, BroodLink runs
+ngsRelate-fast or NGSrelate when one is installed (`ngsRelate-fast`, then `ngsRelate`, on the
+PATH, or `--ngsrelate PATH`; new options `--freqs`, `--threads`; config
+`relatedness.ngsrelate_binaries`, `ngsrelate_threads`, `ngsrelate_fast_sites_per_gb`). It
+concatenates the Beagle files, writes the allele-frequency file (EM on the likelihoods) and
+the sample-name file, and calls the binary as the original cohort run did. Files and the
+command are kept in `01_relatedness/ngsrelate/`. Without a binary the GRM fallback is used.
+
+
 PCR markers (step `10_pcr_markers`, `broodlink pcr-markers`): for every structural haplotype
 the deletions inside it are screened, and one flanking primer pair is designed on the sequence
 across the junction of the first suitable deletion.

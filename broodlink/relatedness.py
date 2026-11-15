@@ -64,21 +64,91 @@ def relatedness_from_markers(ms, cfg, label=None):
     return R, used
 
 
-def try_ngsrelate(beagle_files, n_ind, sample_names, cfg):
-    """Run NGSrelate on one beagle file when the binary is installed. Returns (pairs or None, message)."""
-    exe = shutil.which(cfg["relatedness"]["ngsrelate_binary"])
+def find_ngsrelate(cfg, override=None):
+    """Path of an NGSrelate binary, or None. `override` (--ngsrelate) may be a path or a name;
+    otherwise the names of relatedness.ngsrelate_binaries are looked up on the PATH, in order
+    (ngsRelate-fast first: a fork of NGSrelate with the same estimator and per-chromosome
+    downsampling of sites, the binary used for the original cohort)."""
+    names = [override] if override else list(cfg["relatedness"]["ngsrelate_binaries"])
+    for n in names:
+        if n and os.path.isfile(n):
+            return os.path.abspath(n)
+        exe = shutil.which(n) if n else None
+        if exe:
+            return exe
+    return None
+
+
+def write_beagle_frequencies(beagle_files, out_beagle, out_freq):
+    """One Beagle file and one allele-frequency file for NGSrelate (-G, -f).
+
+    Several Beagle files (one per chromosome) are concatenated under the header of the first.
+    The frequency file has one line per site: the frequency of allele 2 of the Beagle file (the
+    minor allele in ANGSD output, i.e. the knownEM column of the ANGSD .mafs file), estimated
+    here from the genotype likelihoods by EM under Hardy-Weinberg. Returns the number of sites."""
+    import gzip
+    from .io import _open
+    n_sites = 0
+    with gzip.open(out_beagle, "wt", encoding="utf-8", newline="\n", compresslevel=3) as ob, open(out_freq, "w", encoding="utf-8", newline="\n") as of:
+        for k, path in enumerate(beagle_files):
+            with _open(path) as fh:
+                header = fh.readline()
+                if k == 0:
+                    ob.write(header if header.endswith("\n") else header + "\n")
+                while True:
+                    lines = fh.readlines(64 * 1024 * 1024)
+                    if not lines:
+                        break
+                    rows = [l.rstrip("\n").split("\t") for l in lines if l.strip()]
+                    L = np.array([r[3:] for r in rows], dtype=np.float32)
+                    L = L.reshape(len(rows), -1, 3)
+                    sm = L.sum(2, keepdims=True)
+                    p = gl_allele_freq(L / np.where(sm > 0, sm, 1))
+                    ob.write("".join(l if l.endswith("\n") else l + "\n" for l in lines if l.strip()))
+                    of.write("".join(f"{x:.6f}\n" for x in p))
+                    n_sites += len(rows)
+    return n_sites
+
+
+def try_ngsrelate(beagle_files, n_ind, sample_names, cfg, override=None, freqs=None, threads=None, workdir=None):
+    """Relatedness (theta, k0, k1, k2) from Beagle genotype likelihoods with NGSrelate, as in the
+    original study, when a binary is installed. The call is the one of the original cohort run:
+    -G beagle -f frequencies -n individuals -z sample names -p threads -O output, plus -D
+    (sites per Gb) when the binary is ngsRelate-fast. Returns (pairs or None, message)."""
+    c = cfg["relatedness"]
+    exe = find_ngsrelate(cfg, override)
     if exe is None:
-        return None, "NGSrelate is not installed (binary '%s' not on PATH)" % cfg["relatedness"]["ngsrelate_binary"]
-    if len(beagle_files) != 1:
-        return None, "NGSrelate needs one beagle file; several were given (concatenate them to use NGSrelate)"
-    out = os.path.join(tempfile.mkdtemp(prefix="broodlink_ngsrelate_"), "relatedness.res")
-    cmd = [exe, "-G", beagle_files[0], "-n", str(n_ind), "-O", out]
+        return None, "NGSrelate is not installed (looked for %s)" % (override or ", ".join(c["ngsrelate_binaries"]))
+    wd = workdir or tempfile.mkdtemp(prefix="broodlink_ngsrelate_")
+    os.makedirs(wd, exist_ok=True)
+    out = os.path.join(wd, "relatedness.res")
     try:
-        subprocess.run(cmd, check=True, capture_output=True, timeout=24 * 3600)
-        R, _ = read_relatedness_file(out, sample_names)
-        return R, "NGSrelate: " + " ".join(os.path.basename(c) if os.path.sep in c else c for c in cmd)
-    except Exception as exc:                                         # pragma: no cover - needs the external tool
-        return None, f"NGSrelate failed ({type(exc).__name__}); falling back to the GRM"
+        if freqs is None or len(beagle_files) != 1:
+            beagle = os.path.join(wd, "all_sites.beagle.gz"); fq = os.path.join(wd, "allele2_frequencies.txt")
+            n_sites = write_beagle_frequencies(beagle_files, beagle, fq)
+            if freqs is not None:
+                fq = freqs
+            how = "frequencies estimated from the likelihoods by BroodLink" if freqs is None else "frequencies supplied"
+        else:
+            beagle, fq, n_sites, how = beagle_files[0], freqs, None, "frequencies supplied"
+        zf = os.path.join(wd, "samples.txt")
+        with open(zf, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("\n".join(map(str, sample_names)) + "\n")
+        th = int(threads or c["ngsrelate_threads"] or os.cpu_count() or 1)
+        cmd = [exe, "-G", beagle, "-f", fq, "-n", str(n_ind), "-z", zf, "-p", str(th), "-O", out]
+        fast = "fast" in os.path.basename(exe).lower()
+        if fast:
+            cmd += ["-D", str(c["ngsrelate_fast_sites_per_gb"])]
+        log(f"relatedness: running {os.path.basename(exe)} on {n_ind} individuals" + (f", {n_sites:,} sites" if n_sites else "") + f", {th} threads (this can take minutes to hours)")
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=7 * 24 * 3600)
+        if r.returncode != 0 or not os.path.exists(out) or os.path.getsize(out) == 0:
+            tail = " | ".join((r.stderr or "").strip().splitlines()[-3:])
+            return None, f"{os.path.basename(exe)} failed (exit {r.returncode}: {tail}); falling back to the GRM"
+        R, _ = read_relatedness_file(out, list(sample_names))
+        shown = " ".join(os.path.basename(x) if (os.path.sep in x or "/" in x) else x for x in cmd)
+        return R, f"{os.path.basename(exe)} ({how}" + (f"; -D {c['ngsrelate_fast_sites_per_gb']} sites per Gb" if fast else "") + f"): {shown}"
+    except Exception as exc:
+        return None, f"{os.path.basename(exe)} could not be run ({type(exc).__name__}: {exc}); falling back to the GRM"
 
 
 def pair_matrices(R, ids=None):

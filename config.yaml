@@ -29,7 +29,12 @@ relatedness:
   theta_first: 0.177
   theta_second: 0.0884
   theta_third: 0.0442
-  ngsrelate_binary: ngsRelate
+  ngsrelate_binaries:
+  - ngsRelate-fast
+  - ngsRelate
+  - ngsrelate
+  ngsrelate_threads: null
+  ngsrelate_fast_sites_per_gb: 100000
   method: auto
   ml:
     max_sites: 50000

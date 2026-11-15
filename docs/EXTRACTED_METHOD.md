@@ -56,10 +56,15 @@ Source: `FAM/_project_docs/code/common.py` (toolkit "hatchpg").
   reproduced here"; that script computes KING-robust kinship and IBS0 from hard calls and was
   used only as a masked-versus-unmasked contrast, never to call families. BroodLink therefore
   calls NGSrelate when it is installed and otherwise falls to the GRM (section 2). It does
-  not contain a likelihood-based k0/k1/k2 estimator. The NGSrelate call (`relatedness.try_ngsrelate`)
-  is made by `broodlink run` when the binary is on the PATH, but that branch was NEVER RUN: the
-  tool is not installed on the development machine. Without the binary, `--bisnp` alone uses
-  the GRM of hard-called genotypes and the run says so.
+  not contain a tested likelihood-based k0/k1/k2 estimator of its own. The call
+  (`relatedness.try_ngsrelate`, made by `broodlink run` for `--bisnp` without `--relatedness`)
+  follows the original cohort run (`ngsRelate-fast/scripts/ngsrelate_fast_run.py` of the
+  author's fork: `-G beagle -f freqs -n N -z samples -p threads -O out`, `-D` sites per Gb for
+  the fork): the binary is looked up as `ngsRelate-fast`, then `ngsRelate` (or `--ngsrelate`),
+  the Beagle files are concatenated, and the frequency file is written by BroodLink (EM on the
+  likelihoods under Hardy-Weinberg, allele 2 of the Beagle file) unless `--freqs` is given; the
+  original run took the frequencies from ANGSD. The wiring is tested with a stand-in binary.
+  Without a binary, `--bisnp` alone uses the GRM of hard-called genotypes and the run says so.
 
 ## 2. GRM-based relatedness and its benchmark
 

@@ -112,3 +112,20 @@ and recovery (95.9%, 74.1%, 29.8%): reproduced. A first run kept 17,266 deletion
 call-rate filter "100 of 216" had been stored as the rounded fraction 0.463, which excluded
 markers called in exactly 100 individuals; the default fractions were corrected to 0.4629 and
 0.6944 and the step was rerun. Bootstrap intervals are not computed by BroodLink.
+
+## Relatedness through NGSrelate (added in 0.2.0)
+
+One run, on the synthetic cohort, Linux: `broodlink run --bisnp tests/data/snps.beagle.gz --gt
+tests/data/sv.vcf.gz --ngsrelate <path to ngsRelate> --no-inversion-scan` with a build of
+upstream ANGSD/NgsRelate (6,000 sites, 80 individuals, 8 s for the NGSrelate step on 20 threads;
+allele frequencies written by BroodLink).
+
+| Relatedness source | Families | Individuals in families | Links nominated (7 simulated) | Pass Gate 1 | Supported |
+|---|---|---|---|---|---|
+| NGSrelate run by BroodLink (theta, k0, k1, k2) | 15 | 72 | 7 | 7 | 4 |
+| GRM of hard-called SNPs (no binary; same inputs, 20,000 permutations) | 15 | 72 | 5 | 5 | 3 |
+
+The family and link counts equal the simulated ones (15 families, 72 individuals, 7 links); the
+identity of each family and link with the truth was not scored for this run. Not run: the
+ngsRelate-fast binary (option `-D`), and NGSrelate through BroodLink on the original cohort
+(its relatedness table was computed outside BroodLink and is passed with `--relatedness`).

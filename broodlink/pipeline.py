@@ -216,9 +216,11 @@ class Run:
             self.R_given, self.rel_info = read_relatedness(a.relatedness, names)
             detail(f"--relatedness: {self.rel_info['format']}, {self.rel_info['n_samples']} samples, {self.rel_info['n_pairs']:,} pairs")
         elif a.bisnp and bg:
-            # the original analysis used the external tool NGSrelate; this branch needs the binary
-            # and was never exercised on the development machine (tool not installed)
-            Rn, msg = relatedness.try_ngsrelate(bg, len(sets[0].samples), sets[0].samples, cfg)
+            # as in the original analysis: theta and k0 / k1 / k2 from the likelihoods with NGSrelate
+            # (ngsRelate-fast first), when a binary is installed; otherwise the GRM below
+            Rn, msg = relatedness.try_ngsrelate(bg, len(sets[0].samples), sets[0].samples, cfg, override=getattr(a, "ngsrelate", None),
+                                                freqs=getattr(a, "freqs", None), threads=getattr(a, "threads", None),
+                                                workdir=os.path.join(self.out, "01_relatedness", "ngsrelate"))
             self.note("--bisnp without --relatedness: " + msg)
             if Rn is not None:
                 ids_ = sorted(set(Rn.id1) | set(Rn.id2))
@@ -309,7 +311,8 @@ class Run:
             self.primary = bis[0] if bis else max(geno, key=lambda m: m.n)
             self.rel_source = f"genomic relationship matrix (VanRaden, kinship = GRM / 2) from {self.primary.name}; no k2 can be estimated"
             if bis:
-                self.note("--bisnp given without --relatedness: BroodLink has no likelihood-based estimator of its own; "
+                self.note("--bisnp given without --relatedness and no NGSrelate binary was run (install ngsRelate-fast or NGSrelate, or give --ngsrelate PATH, "
+                          "to get theta and k0 / k1 / k2 from the likelihoods as in the original study): "
                           "relatedness comes from a GRM of hard-called genotypes (likelihood > %s)" % cfg["genotypes"]["gl_hard_call"])
             if len(geno) == 1:
                 self.single_input = True

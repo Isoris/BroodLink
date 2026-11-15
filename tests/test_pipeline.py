@@ -419,3 +419,55 @@ def test_matches_expected_example_outputs(full_run):
                 assert np.allclose(a[c].astype(float), b[c].astype(float), rtol=1e-5, atol=1e-8, equal_nan=True), (f, c)
             else:
                 assert (a[c].fillna("").astype(str) == b[c].fillna("").astype(str)).all(), (f, c)
+
+
+STUB = r'''
+import gzip, sys
+a = sys.argv[1:]; o = {a[i]: a[i + 1] for i in range(0, len(a) - 1, 2)}
+names = [l.strip() for l in open(o["-z"]) if l.strip()]
+assert int(o["-n"]) == len(names), "-n must equal the number of sample names"
+n_sites = sum(1 for _ in gzip.open(o["-G"], "rt")) - 1
+n_freq = sum(1 for l in open(o["-f"]) if l.strip())
+assert n_sites == n_freq, f"frequency file has {n_freq} lines for {n_sites} sites"
+assert all(0.0 <= float(l) <= 1.0 for l in open(o["-f"]) if l.strip())
+assert "-D" in o and "-p" in o, "ngsRelate-fast is called with -D and -p"
+truth = {}
+for l in list(open(sys.argv[0].replace("stub.py", "truth.tsv")))[1:]:
+    f = l.rstrip("\n").split("\t"); truth[(f[0], f[1])] = f[2:6]
+with open(o["-O"], "w") as fh:
+    fh.write("a\tb\tida\tidb\tnSites\tJ9\tJ8\tJ7\ttheta\n")
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            k = (names[i], names[j]) if (names[i], names[j]) in truth else (names[j], names[i])
+            th, k0, k1, k2 = truth[k]
+            fh.write(f"{i}\t{j}\t{names[i]}\t{names[j]}\t{n_sites}\t{k0}\t{k1}\t{k2}\t{th}\n")
+'''
+
+
+def test_bisnp_uses_ngsrelate_fast_when_installed(tmp_path, quick_cfg):
+    """With --bisnp and no --relatedness, an installed NGSrelate binary gives theta and k2 (as in the
+    original study). The binary is replaced here by a stand-in that checks the call (one Beagle file,
+    one frequency per site, sample names, -D for ngsRelate-fast) and answers with the simulated
+    relatedness: the test covers the wiring, not the estimator."""
+    import sys
+    d = tmp_path / "bin"; d.mkdir()
+    (d / "stub.py").write_text(STUB, encoding="utf-8")
+    T = pd.read_csv(os.path.join(DATA, "relatedness.tsv"), sep="\t", comment="#")
+    T[["id1", "id2", "theta", "k0", "k1", "k2"]].to_csv(d / "truth.tsv", sep="\t", index=False)
+    if os.name == "nt":
+        exe = d / "ngsRelate-fast.cmd"
+        exe.write_text(f'@"{sys.executable}" "{d / "stub.py"}" %*\r\n', encoding="utf-8")
+    else:
+        exe = d / "ngsRelate-fast"
+        exe.write_text(f'#!/bin/sh\nexec "{sys.executable}" "{d / "stub.py"}" "$@"\n', encoding="utf-8"); exe.chmod(0o755)
+    out = str(tmp_path / "out")
+    main(["run", "--bisnp", os.path.join(DATA, "snps.beagle.gz"), "--gt", os.path.join(DATA, "sv.vcf.gz"), "--ngsrelate", str(exe),
+          "--no-inversion-scan", "--no-figures", "--quiet", "--config", quick_cfg, "--out", out])
+    s = summary(out, "01_relatedness")["summary"]
+    assert s["mode"] == "given" and "NGSrelate run by BroodLink" in s["source"], s["source"]
+    R = read(out, "01_relatedness/relatedness_pairs.tsv")
+    assert R.k2.notna().all()
+    f = summary(out, "02_families")["summary"]
+    assert f["n_families"] == 15 and f["has_k2"]
+    rep = open(os.path.join(out, "run_report.md"), encoding="utf-8").read()
+    assert "ngsRelate-fast" in rep and "-D 100000" in rep

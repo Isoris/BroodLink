@@ -25,7 +25,9 @@ DEFAULTS = {
     },
     "relatedness": {
         "theta_duplicate": 0.354, "theta_first": 0.177, "theta_second": 0.0884, "theta_third": 0.0442,
-        "ngsrelate_binary": "ngsRelate",
+        "ngsrelate_binaries": ["ngsRelate-fast", "ngsRelate", "ngsrelate"],   # looked up on the PATH in this order (or --ngsrelate PATH)
+        "ngsrelate_threads": None,                 # None = all cores
+        "ngsrelate_fast_sites_per_gb": 100000,     # -D of ngsRelate-fast (its default; 0 = no downsampling)
         "method": "auto",                          # auto | ml | grm (auto: ml, the likelihood estimator; new in BroodLink)
         "ml": {
             "max_sites": 50000,                    # evenly spaced sites kept for the estimator (run time grows with it)

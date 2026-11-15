@@ -74,9 +74,13 @@ genotype of each shared parent at them (the barcode). Because the example deleti
 carries the sequence across each deletion junction (the `CONSENSUS` field DELLY writes), the
 run also designs one PCR primer pair per polyINV ([PCR markers](#pcr-markers)).
 
-Every other input is optional and adds something: a relatedness table computed from the
-likelihoods (`--relatedness`, e.g. NGSrelate, gives k2 and is more accurate at low
-coverage), known polyINV intervals (`--inversions`), a callable mask, the assembly index,
+Relatedness (theta, k0, k1, k2) is estimated from the likelihoods by
+[ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast) or NGSrelate when one of them is
+installed (see [Limits](#limits)); without them BroodLink falls back to a simpler kinship
+matrix and says so.
+
+Every other input is optional and adds something: a relatedness table you already have
+(`--relatedness`, e.g. an NGSrelate `.res`; BroodLink then does not run NGSrelate), known polyINV intervals (`--inversions`), a callable mask, the assembly index,
 sample metadata and depth for QC, gene models (`--genes`, for the gene-level view of the
 barcode). The full example with all of them:
 
@@ -300,11 +304,21 @@ size below 4 lets more pairs reach "supported". No default was tuned on these re
 - **Nomination has no upper bound on theta by default** ("second degree or closer"), as in
   the original code and Methods. `nomination.theta_max: 0.177` restricts it to the
   second-degree band; the sweep shows the effect.
-- **Low coverage.** BroodLink has no likelihood-based relatedness estimator. For low-coverage
-  data, compute relatedness with a dedicated tool (the original study used NGSrelate) and
-  pass it with `--relatedness`. If NGSrelate is on the PATH, BroodLink calls it for `--bisnp`;
-  that branch was never run. Otherwise `--bisnp` alone is hard-called (likelihood > 0.90) into
-  a GRM, which underestimates half-sib kinship and has no k2.
+- **Low coverage: relatedness comes from NGSrelate.** BroodLink does not estimate theta and
+  k0 / k1 / k2 from genotype likelihoods itself. With `--bisnp` and no `--relatedness`, it
+  runs [ngsRelate-fast](https://github.com/Isoris/ngsRelate-fast) (the binary used for the
+  original cohort) or NGSrelate when one of them is installed: it looks for `ngsRelate-fast`,
+  then `ngsRelate`, on the PATH, or takes `--ngsrelate PATH`. It concatenates the Beagle files,
+  estimates the allele frequencies from the likelihoods (or takes `--freqs`), and calls the
+  binary as the original run did (`-G -f -n -z -p -O`, with `-D` for ngsRelate-fast). These
+  tools are GPL-licensed C++ programs that you build yourself; BroodLink (MIT) calls them and
+  does not include them. The call is tested with a stand-in binary in the test suite, and
+  was run once with a real NGSrelate build (upstream ANGSD/NgsRelate, Linux) on the example
+  cohort: 15 families holding 72 individuals and 7 links nominated, against 5 nominated with
+  the GRM fallback. It has not been run with the ngsRelate-fast binary itself (its `-D` option)
+  and not on the original cohort through BroodLink.
+  When no binary is found, `--bisnp` alone is hard-called (likelihood > 0.90) into a GRM,
+  which underestimates half-sib kinship and has no k2, and the run report says so.
 - **GRM thresholds are not benchmarked.** The original GRM benchmark measured concordance
   (AUC, recovery) and set no family threshold and no minimum marker count. BroodLink applies
   kinship >= 0.177 because an older script of the project did, and reports the marker count
